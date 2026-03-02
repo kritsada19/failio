@@ -1,0 +1,31 @@
+# node
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# next build output
+.next
+out
+
+# env files
+.env
+.env.local
+.env.development
+.env.production
+
+# logs
+logs
+*.log
+
+# git
+.git
+.gitignore
+
+# mac / windows
+.DS_Store
+Thumbs.db
+
+# docker
+docker-compose*.yml
+Dockerfile*
