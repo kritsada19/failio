@@ -3,9 +3,7 @@
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { FaGoogle } from "react-icons/fa";
-import { FaFacebook } from "react-icons/fa";
-import { FaGithub } from "react-icons/fa";
+import { FaGoogle, FaFacebook, FaGithub } from "react-icons/fa";
 
 export default function SignIn() {
   const [email, setEmail] = useState<string>('')
@@ -15,95 +13,119 @@ export default function SignIn() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    try {
-      const result = await signIn('credentials', {
-        redirect: false,
-        email,
-        password,
-        confirmPassword
-      })
+    const result = await signIn('credentials', {
+      redirect: false,
+      email,
+      password,
+      confirmPassword
+    })
 
-      if (result?.error) {
-        console.error(result.error)
-      } else {
-        router.push('/profile')
-      }
-    } catch (error) {
-      console.log('error', error)
+    if (!result?.error) {
+      router.push('/profile')
     }
   }
 
   return (
-    <div className="flex h-screen items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 px-4">
       <form
-        onSubmit={(e) => handleSubmit(e)}
-        className="bg-white p-6 rounded-md shadow-md"
+        onSubmit={handleSubmit}
+        className="w-full max-w-md bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-gray-100"
       >
-        <div className="mb-4">
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full border border-gray-300 px-3 py-2 rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full border border-gray-300 px-3 py-2 rounded"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="confirmPassword">Confirm Password</label>
-          <input
-            id="confirmPassword"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            className="w-full border border-gray-300 px-3 py-2 rounded"
-          />
+        <h1 className="text-2xl font-semibold text-gray-800 text-center mb-6">
+          Login to Your Failio Account
+        </h1>
+
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm text-gray-600">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full mt-1 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition"
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-600">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full mt-1 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-600">Confirm Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className="w-full mt-1 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition"
+              placeholder="••••••••"
+            />
+          </div>
         </div>
 
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded mb-4"
+          className="w-full mt-6 bg-black text-white py-2.5 rounded-lg hover:opacity-90 transition cursor-pointer"
         >
           Sign In
-        </button>{' '}
-        <button
-          type="button"
-          onClick={() => signIn('google', { callbackUrl: '/profile' })}
-          className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 rounded"
-        >
-          <FaGoogle size={20} />
-          Sign in with Google
         </button>
 
-        <button
-          type="button"
-          onClick={() => signIn('facebook', { callbackUrl: '/profile' })}
-          className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 rounded"
-        >
-          <FaFacebook size={20} />
-          Sign in with Facebook
-        </button>
-        <button
-          type="button"
-          onClick={() => signIn('github', { callbackUrl: '/profile' })}
-          className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 rounded"
-        >
-          <FaGithub size={20} />
-          Sign in with Github
-        </button>
+        <div className="flex items-center my-6">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="px-3 text-sm text-gray-400">or</span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={() => signIn('google', { callbackUrl: '/profile' })}
+            className="w-full flex items-center justify-center gap-3 border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50 transition cursor-pointer"
+          >
+            <FaGoogle size={18} />
+            Continue with Google
+          </button>
+
+          <button
+            type="button"
+            onClick={() => signIn('facebook', { callbackUrl: '/profile' })}
+            className="w-full flex items-center justify-center gap-3 border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50 transition cursor-pointer"
+          >
+            <FaFacebook size={18} />
+            Continue with Facebook
+          </button>
+
+          <button
+            type="button"
+            onClick={() => signIn('github', { callbackUrl: '/profile' })}
+            className="w-full flex items-center justify-center gap-3 border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50 transition cursor-pointer"
+          >
+            <FaGithub size={18} />
+            Continue with GitHub
+          </button>
+
+          <div>
+            <p className="text-sm text-gray-600 text-center">
+              Don&apos;t have an account?{" "}
+              <a
+                href="/sign-up"
+                className="text-blue-600 hover:underline transition"
+              >
+                Sign Up
+              </a>
+            </p>
+          </div>
+        </div>
       </form>
     </div>
   )
