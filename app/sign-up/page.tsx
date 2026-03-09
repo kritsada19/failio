@@ -90,7 +90,7 @@ export default function SignIn() {
                     type="submit"
                     className="w-full mt-6 bg-black text-white py-2.5 rounded-lg hover:opacity-90 transition cursor-pointer"
                 >
-                    Sign In
+                    Sign Up
                 </button>
 
                 <div className="flex items-center my-6">

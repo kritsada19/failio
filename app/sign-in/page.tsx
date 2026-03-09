@@ -21,7 +21,7 @@ export default function SignIn() {
     })
 
     if (!result?.error) {
-      router.push('/profile')
+      router.push('/dashboard')
     }
   }
 
@@ -32,7 +32,7 @@ export default function SignIn() {
         className="w-full max-w-md bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-gray-100"
       >
         <h1 className="text-2xl font-semibold text-gray-800 text-center mb-6">
-          Login to Your Failio Account
+          Sign in to Your Failio Account
         </h1>
 
         <div className="space-y-4">

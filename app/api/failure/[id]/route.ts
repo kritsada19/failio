@@ -2,16 +2,39 @@ import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 
-export async function GET({ params }: { params: { id: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const session = await getSession();
+    const { id } = await params;
     if (!session) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const failure = await prisma.failure.findUnique({
       where: {
-        id: Number(params.id),
+        id: Number(id),
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        aiSuggestion: true,
+        createdAt: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        emotions: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -34,10 +57,11 @@ export async function GET({ params }: { params: { id: string } }) {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await getSession();
+    const { id } = await params;
     if (!session) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
@@ -54,7 +78,7 @@ export async function PUT(
 
     const failure = await prisma.failure.findUnique({
       where: {
-        id: Number(params.id),
+        id: Number(id),
       },
     });
 
@@ -83,7 +107,7 @@ export async function PUT(
 
     await prisma.failure.update({
       where: {
-        id: Number(params.id),
+        id: Number(id),
       },
       data: {
         title,
@@ -105,6 +129,66 @@ export async function PUT(
     console.error("Error updating failure:", error);
     return NextResponse.json(
       { message: "Failed to update failure" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const session = await getSession();
+    const { id } = await params;
+    if (!session) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: String(session.user.id),
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    const failure = await prisma.failure.findUnique({
+      where: {
+        id: Number(id),
+      },
+    });
+
+    if (!failure) {
+      return NextResponse.json(
+        { message: "Failure not found" },
+        { status: 404 },
+      );
+    }
+
+    const isAdmin = user.role === "ADMIN";
+    const isOwner = user.id === failure.userId;
+
+    if (!isAdmin && !isOwner) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
+    await prisma.failure.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+
+    return NextResponse.json(
+      { message: "Failure deleted successfully" },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error("Error deleting failure:", error);
+    return NextResponse.json(
+      { message: "Failed to delete failure" },
       { status: 500 },
     );
   }
