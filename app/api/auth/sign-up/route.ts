@@ -1,9 +1,12 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { sendVerificationEmail } from "@/lib/sendEmail";
 
 export async function POST(requset: Request) {
   try {
+    const token = crypto.randomBytes(32).toString("hex");
     const { name, email, password } = await requset.json();
 
     if (!email.includes("@")) {
@@ -40,6 +43,19 @@ export async function POST(requset: Request) {
         password: hashedPassword,
       },
     });
+
+    await prisma.verificationToken.create({
+      data: {
+        email: email.trim().toLowerCase(),
+        token,
+        type: 'EMAIL_VERIFY',
+        expires: new Date(Date.now() + 3600 * 1000),
+      },
+    });
+
+    const verifyLink = `http://localhost:3000/api/auth/verify-email?token=${token}`;
+
+    await sendVerificationEmail(email, verifyLink);
 
     return NextResponse.json(
       { message: "User created successfully" },

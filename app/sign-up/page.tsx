@@ -23,7 +23,7 @@ export default function SignIn() {
         })
 
         if (response.status === 201) {
-            router.push('/sign-in')
+            router.push('/check-email')
         }
     }
 

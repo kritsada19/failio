@@ -28,7 +28,7 @@ interface Pagination {
 function Dashboard() {
   const [page, setPage] = useState<number>(1);
   const [category, setCategory] = useState<number | undefined>(undefined);
-  const { data, loading, error, reFetch } = useFetch<ResponseData
+  const { data, loading, error } = useFetch<ResponseData
   >(`/api/failure?page=${page}&limit=10&categoryId=${category}`);
 
   return (

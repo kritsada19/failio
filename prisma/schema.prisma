@@ -32,6 +32,19 @@ enum Role {
   ADMIN
 }
 
+model VerificationToken {
+  id      String    @id @default(uuid())
+  email   String
+  token   String    @unique
+  type    TokenType @default(EMAIL_VERIFY)
+  expires DateTime
+}
+
+enum TokenType {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String

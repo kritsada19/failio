@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { FaGoogle, FaFacebook, FaGithub } from "react-icons/fa";
+import Link from 'next/link';
 
 export default function SignIn() {
   const [email, setEmail] = useState<string>('')
@@ -113,6 +114,14 @@ export default function SignIn() {
             <FaGithub size={18} />
             Continue with GitHub
           </button>
+
+          <div>
+            <p className="text-sm text-center">
+              <Link href='/forgot-password' className='text-blue-600 hover:underline transition'>
+                Forgot Password?
+              </Link>
+            </p>
+          </div>
 
           <div>
             <p className="text-sm text-gray-600 text-center">

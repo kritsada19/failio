@@ -51,7 +51,7 @@ function Cardlist({ data, loading, error }: CardListProps) {
 
   return (
     <>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-10">
         {data.map((failure) => {
           const date = new Date(failure.createdAt).toLocaleDateString()
 
