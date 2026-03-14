@@ -6,8 +6,16 @@ import { sendVerificationEmail } from "@/lib/sendEmail";
 
 export async function POST(requset: Request) {
   try {
+    // สร้าง token
     const token = crypto.randomBytes(32).toString("hex");
     const { name, email, password } = await requset.json();
+
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        { message: "Name, email, and password are required" },
+        { status: 400 },
+      );
+    }
 
     if (!email.includes("@")) {
       return NextResponse.json(
@@ -44,17 +52,20 @@ export async function POST(requset: Request) {
       },
     });
 
+    // บันทึก token, email ลงใน db
     await prisma.verificationToken.create({
       data: {
         email: email.trim().toLowerCase(),
         token,
-        type: 'EMAIL_VERIFY',
+        type: "EMAIL_VERIFY",
         expires: new Date(Date.now() + 3600 * 1000),
       },
     });
 
+    // สร้าง link แนบ token
     const verifyLink = `http://localhost:3000/api/auth/verify-email?token=${token}`;
 
+    // ส่ง link ให้ email ที่กรอกมาถ้าส่งได้แสดงว่า email นั้นมีจริง
     await sendVerificationEmail(email, verifyLink);
 
     return NextResponse.json(

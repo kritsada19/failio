@@ -7,6 +7,7 @@ if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
+    // เป็น email ที่ใช้ในการส่ง
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },

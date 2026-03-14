@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: "Invalid token" }, { status: 400 });
     }
 
-    const record = await prisma.verificationToken.findUnique({
+    const record = await prisma.verificationToken.findFirst({
       where: { 
         token,
         type: "EMAIL_VERIFY"
@@ -41,8 +41,7 @@ export async function GET(request: NextRequest) {
       }),
       prisma.verificationToken.delete({
         where: { 
-          token,
-          type: 'EMAIL_VERIFY'
+          id: record.id
         },
       }),
     ]);
