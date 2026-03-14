@@ -9,21 +9,25 @@ import Link from 'next/link';
 export default function SignIn() {
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
-  const [confirmPassword, setConfirmPassword] = useState<string>('')
+  const [error, setError] = useState<string>('');
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setError('')
+
     const result = await signIn('credentials', {
       redirect: false,
       email,
       password,
-      confirmPassword
     })
 
-    if (!result?.error) {
-      router.push('/dashboard')
+    if (result?.error) {
+      setError(result.error)
+      return
     }
+
+    router.push('/dashboard')
   }
 
   return (
@@ -60,19 +64,13 @@ export default function SignIn() {
               placeholder="••••••••"
             />
           </div>
-
-          <div>
-            <label className="text-sm text-gray-600">Confirm Password</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full mt-1 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition"
-              placeholder="••••••••"
-            />
-          </div>
         </div>
+
+        {error && (
+          <p className="mt-4 text-sm text-red-500 text-center">
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"

@@ -5,25 +5,68 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { FaGoogle, FaFacebook, FaGithub } from "react-icons/fa";
 import axios from 'axios'
+import Link from 'next/link'
 
-export default function SignIn() {
+export default function SignUp() {
     const [name, setName] = useState<string>('')
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     const [confirmPassword, setConfirmPassword] = useState<string>('')
+    const [error, setError] = useState<string>('')
+    const [loading, setLoading] = useState<boolean>(false)
     const router = useRouter()
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        const response = await axios.post('/api/auth/sign-up', {
-            name: name.trim(),
-            email: email.trim(),
-            password,
-            confirmPassword,
-        })
+        setError('')
 
-        if (response.status === 201) {
-            router.push('/check-email')
+        // กัน submit รัว
+        if (loading) return
+
+        // เช็คก่อนยิง API ฝั่ง client (UX ดีขึ้น)
+        if (password !== confirmPassword) {
+            setError('Passwords do not match')
+            return
+        }
+
+        try {
+            setLoading(true)
+
+            const response = await axios.post('/api/auth/sign-up', {
+                name: name.trim(),
+                email: email.trim(),
+                password,
+                confirmPassword,
+            })
+
+            if (response.status === 201) {
+                router.push('/check-email')
+            }
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                const status = err.response?.status
+                const data = err.response?.data
+                const message =
+                    data && typeof data === 'object' && 'message' in data && typeof (data as { message?: unknown }).message === 'string'
+                        ? (data as { message?: string }).message
+                        : undefined
+
+                if (status === 409) {
+                    setError(message || 'Email already exists.')
+                    return
+                }
+
+                if (status === 400) {
+                    setError(message || 'Invalid input.')
+                    return
+                }
+
+                setError(message || 'Something went wrong. Please try again.')
+            } else {
+                setError('Something went wrong. Please try again.')
+            }
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -49,6 +92,7 @@ export default function SignIn() {
                             placeholder="your name"
                         />
                     </div>
+
                     <div>
                         <label className="text-sm text-gray-600">Email</label>
                         <input
@@ -86,11 +130,18 @@ export default function SignIn() {
                     </div>
                 </div>
 
+                {error && (
+                    <p className="mt-4 text-sm text-red-500 text-center">
+                        {error}
+                    </p>
+                )}
+
                 <button
                     type="submit"
-                    className="w-full mt-6 bg-black text-white py-2.5 rounded-lg hover:opacity-90 transition cursor-pointer"
+                    disabled={loading}
+                    className="w-full mt-6 bg-black text-white py-2.5 rounded-lg hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Sign Up
+                    {loading ? 'Creating account...' : 'Sign Up'}
                 </button>
 
                 <div className="flex items-center my-6">
@@ -102,7 +153,7 @@ export default function SignIn() {
                 <div className="space-y-3">
                     <button
                         type="button"
-                        onClick={() => signIn('google', { callbackUrl: '/profile' })}
+                        onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
                         className="w-full flex items-center justify-center gap-3 border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50 transition cursor-pointer"
                     >
                         <FaGoogle size={18} />
@@ -111,7 +162,7 @@ export default function SignIn() {
 
                     <button
                         type="button"
-                        onClick={() => signIn('facebook', { callbackUrl: '/profile' })}
+                        onClick={() => signIn('facebook', { callbackUrl: '/dashboard' })}
                         className="w-full flex items-center justify-center gap-3 border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50 transition cursor-pointer"
                     >
                         <FaFacebook size={18} />
@@ -120,21 +171,22 @@ export default function SignIn() {
 
                     <button
                         type="button"
-                        onClick={() => signIn('github', { callbackUrl: '/profile' })}
+                        onClick={() => signIn('github', { callbackUrl: '/dashboard' })}
                         className="w-full flex items-center justify-center gap-3 border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50 transition cursor-pointer"
                     >
                         <FaGithub size={18} />
                         Continue with GitHub
                     </button>
+
                     <div>
                         <p className="text-sm text-gray-600 text-center">
                             Already have an account?{" "}
-                            <a
+                            <Link
                                 href="/sign-in"
                                 className="text-blue-600 hover:underline transition"
                             >
                                 Sign In
-                            </a>
+                            </Link>
                         </p>
                     </div>
                 </div>

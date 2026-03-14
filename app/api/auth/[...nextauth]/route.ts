@@ -44,22 +44,13 @@ export const authOptions: NextAuthOptions = {
           label: "Password",
           type: "password",
         },
-        confirmPassword: {
-          label: "Confirm Password",
-          type: "password",
-        },
       },
       async authorize(credentials) {
         if (
           !credentials?.email ||
-          !credentials?.password ||
-          !credentials?.confirmPassword
+          !credentials?.password
         ) {
           return null;
-        }
-
-        if (credentials.password !== credentials.confirmPassword) {
-          throw new Error("Passwords do not match");
         }
 
         const user = await prisma.user.findUnique({
