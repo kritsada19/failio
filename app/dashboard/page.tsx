@@ -8,6 +8,7 @@ import Link from "next/link";
 
 interface ResponseData {
   failures: Failure[];
+  total: number;
   pagination: Pagination;
 }
 
@@ -57,10 +58,10 @@ function Dashboard() {
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                     <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                      Page
+                      Failures
                     </p>
                     <p className="mt-1 text-lg font-bold text-slate-800">
-                      {data?.pagination.page ?? 1}
+                      {data?.total ?? 0}
                     </p>
                   </div>
 
