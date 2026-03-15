@@ -5,7 +5,7 @@ interface FailureData {
   title: string;
   description: string;
   aiStatus: "NOT_STARTED" | "PROCESSING" | "COMPLETED" | "FAILED";
-  aiResult: string | null;
+  aiResult: AiResult | null;
   aiAnalyzedAt: string | null;
   createdAt: Date;
   emotions: {
@@ -16,6 +16,13 @@ interface FailureData {
     id: number;
     name: string;
   };
+}
+
+interface AiResult {
+  summary: string;
+  rootCause: string;
+  suggestions: string[];
+  lesson: string;
 }
 
 function FailureDetail({
@@ -121,8 +128,33 @@ function FailureDetail({
             </div>
 
             {failure.aiResult ? (
-              <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5 text-sm leading-7 whitespace-pre-wrap text-slate-700">
-                {failure.aiResult}
+              <div className="space-y-4 mt-6">
+                <div className="rounded-3xl border border-slate-200 bg-white p-4">
+                  <p className="text-sm text-slate-500">Summary</p>
+                  <p className="mt-2 text-sm text-slate-700 whitespace-pre-wrap">
+                    {failure.aiResult.summary}
+                  </p>
+                </div>
+
+                <div className="rounded-3xl border border-blue-200 bg-blue-50 p-4">
+                  <p className="text-sm font-medium text-blue-700">AI Suggestions</p>
+                  <ul className="mt-2 text-sm text-slate-700 list-disc list-inside space-y-1">
+                    {failure.aiResult.suggestions.map((suggestion, index) => (
+                      <li key={index} className="leading-relaxed whitespace-pre-wrap">{suggestion}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-sm text-slate-500">Root Cause</p>
+                    <p className="mt-2 font-medium text-slate-800">{failure.aiResult.rootCause}</p>
+                  </div>
+                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-sm text-slate-500">Lesson Learned</p>
+                    <p className="mt-2 font-medium text-slate-800">{failure.aiResult.lesson}</p>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-5 py-6">

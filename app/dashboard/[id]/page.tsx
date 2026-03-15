@@ -11,7 +11,7 @@ interface FailureData {
   title: string;
   description: string;
   aiStatus: "NOT_STARTED" | "PROCESSING" | "COMPLETED" | "FAILED";
-  aiResult: string;
+  aiResult: AiResult | null
   aiAnalyzedAt: string;
   createdAt: Date;
   emotions: {
@@ -22,6 +22,13 @@ interface FailureData {
     id: number;
     name: string;
   };
+}
+
+interface AiResult {
+  summary: string;
+  rootCause: string;
+  suggestions: string[];
+  lesson: string;
 }
 
 function DetailFailurePage() {
@@ -43,45 +50,6 @@ function DetailFailurePage() {
   };
 
   if (loading) {
-      return (
-        <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white">
-          <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-            <Link
-              href="/dashboard"
-              className="mb-6 inline-flex text-sm font-medium text-slate-500 transition-colors duration-200 hover:text-orange-600"
-            >
-              ← Back to My Failures
-            </Link>
-
-            <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
-              <p className="text-sm font-medium text-slate-500">Loading...</p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (error) {
-      return (
-        <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white">
-          <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-            <Link
-              href="/dashboard"
-              className="mb-6 inline-flex text-sm font-medium text-slate-500 transition-colors duration-200 hover:text-orange-600"
-            >
-              ← Back to My Failures
-            </Link>
-
-            <div className="rounded-3xl border border-red-100 bg-white px-6 py-16 text-center shadow-sm">
-              <p className="text-sm font-medium text-red-500">{error}</p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (!failure) return null;
-
     return (
       <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white">
         <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -92,13 +60,52 @@ function DetailFailurePage() {
             ← Back to My Failures
           </Link>
 
-          <FailureDetail
-            failure={failure}
-            onAnalyze={handleAnalyze}
-          />
+          <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+            <p className="text-sm font-medium text-slate-500">Loading...</p>
+          </div>
         </div>
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white">
+        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+          <Link
+            href="/dashboard"
+            className="mb-6 inline-flex text-sm font-medium text-slate-500 transition-colors duration-200 hover:text-orange-600"
+          >
+            ← Back to My Failures
+          </Link>
+
+          <div className="rounded-3xl border border-red-100 bg-white px-6 py-16 text-center shadow-sm">
+            <p className="text-sm font-medium text-red-500">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!failure) return null;
+
+  return (
+    <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white">
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+        <Link
+          href="/dashboard"
+          className="mb-6 inline-flex text-sm font-medium text-slate-500 transition-colors duration-200 hover:text-orange-600"
+        >
+          ← Back to My Failures
+        </Link>
+
+        <FailureDetail
+          failure={failure}
+          onAnalyze={handleAnalyze}
+        />
+      </div>
+    </div>
+  );
+}
 
 export default DetailFailurePage;
