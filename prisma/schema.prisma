@@ -65,16 +65,21 @@ model Account {
 }
 
 model Failure {
-  id           Int       @id @default(autoincrement())
-  title        String
-  description  String
-  aiSuggestion String?
-  userId       String
-  emotions     Emotion[]
-  categoryId   Int
-  user         User      @relation(fields: [userId], references: [id])
-  category     Category  @relation(fields: [categoryId], references: [id])
-  createdAt    DateTime  @default(now())
+  id          Int       @id @default(autoincrement())
+  userId      String
+  title       String
+  description String
+  categoryId  Int
+  emotions    Emotion[]
+
+  aiStatus     AiStatus  @default(NOT_STARTED)
+  aiResult     Json?
+  aiAnalyzedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
 }
 
 model Emotion {
@@ -87,4 +92,11 @@ model Category {
   id       Int       @id @default(autoincrement())
   name     String    @unique
   failures Failure[]
+}
+
+enum AiStatus {
+  NOT_STARTED
+  PROCESSING
+  COMPLETED
+  FAILED
 }

@@ -21,7 +21,9 @@ export async function GET(
         id: true,
         title: true,
         description: true,
-        aiSuggestion: true,
+        aiStatus: true,
+        aiResult: true,
+        aiAnalyzedAt: true,
         createdAt: true,
         category: {
           select: {
