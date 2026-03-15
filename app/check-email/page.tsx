@@ -1,26 +1,48 @@
-import React from "react";
+"use client";
+
 import Link from "next/link";
+import { MailCheck } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 function CheckEmail() {
+  const params = useSearchParams();
+  const email = params.get("email");
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="bg-white shadow-lg rounded-xl p-8 max-w-md w-full text-center">
-        <h1 className="text-2xl font-bold text-blue-700 mb-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 px-4">
+      <div className="w-full max-w-md bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-gray-100 text-center">
+        <div className="flex justify-center mb-4">
+          <div className="bg-blue-100 p-4 rounded-full">
+            <MailCheck className="w-8 h-8 text-blue-600" />
+          </div>
+        </div>
+
+        <h1 className="text-2xl font-semibold text-gray-800 mb-3">
           Check Your Email
         </h1>
 
-        <p className="text-gray-600 mb-6">
-          We’ve sent a verification link to your email address.  
-          Please open your email and click <b>Verify Email</b> to activate your account.
+        <p className="text-gray-600 leading-7 mb-2">
+          We’ve sent a verification link to{" "}
+          <span className="font-semibold text-gray-800">
+            {email || "your email address"}
+          </span>
+          .
         </p>
 
-        <div className="text-sm text-gray-500 mb-6">
-          If you don’t see the email, please check your spam folder.
-        </div>
+        <p className="text-gray-600 leading-7 mb-4">
+          Please open your inbox and click{" "}
+          <span className="font-semibold text-gray-800">Verify Email</span>{" "}
+          to activate your Failio account.
+        </p>
+
+        <p className="text-sm text-gray-500 mb-6">
+          If you don’t see the email, please check your spam or promotions
+          folder.
+        </p>
 
         <Link
           href="/sign-in"
-          className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+          className="inline-flex items-center justify-center w-full bg-black text-white py-2.5 rounded-lg hover:opacity-90 transition"
         >
           Go to Sign In
         </Link>

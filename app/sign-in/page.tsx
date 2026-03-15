@@ -1,139 +1,172 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { FaGoogle, FaFacebook, FaGithub } from "react-icons/fa";
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function SignIn() {
-  const [email, setEmail] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
-  const [error, setError] = useState<string>('');
-  const router = useRouter()
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError("");
 
-    const result = await signIn('credentials', {
-      redirect: false,
-      email,
-      password,
-    })
+    try {
+      setLoading(true);
 
-    if (result?.error) {
-      setError(result.error)
-      return
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (result?.error) {
+        setError("Invalid email or password");
+        return;
+      }
+
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    router.push('/dashboard')
-  }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 px-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-gray-100"
-      >
-        <h1 className="text-2xl font-semibold text-gray-800 text-center mb-6">
-          Sign in to Your Failio Account
-        </h1>
-
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm text-gray-600">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full mt-1 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition"
-              placeholder="you@example.com"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full mt-1 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition"
-              placeholder="••••••••"
-            />
-          </div>
-        </div>
-
-        {error && (
-          <p className="mt-4 text-sm text-red-500 text-center">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full mt-6 bg-black text-white py-2.5 rounded-lg hover:opacity-90 transition cursor-pointer"
+    <div className="min-h-screen bg-linear-to-b from-amber-50 via-white to-orange-50 px-4 py-10">
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-md items-center justify-center">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full rounded-3xl border border-amber-100 bg-white/90 p-8 shadow-sm backdrop-blur"
         >
-          Sign In
-        </button>
+          {/* Header */}
+          <div className="mb-6 text-center">
+            <p className="text-sm font-medium text-amber-600">Failio</p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+              Welcome back
+            </h1>
+            <p className="mt-2 text-sm text-slate-600">
+              Sign in to continue turning failures into lessons.
+            </p>
+          </div>
 
-        <div className="flex items-center my-6">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="px-3 text-sm text-gray-400">or</span>
-          <div className="flex-1 h-px bg-gray-200" />
-        </div>
+          {/* Form */}
+          <div className="space-y-5">
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-800">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="you@example.com"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+              />
+            </div>
 
-        <div className="space-y-3">
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-800">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+              />
+            </div>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="mt-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+
+          {/* Forgot Password */}
+          <div className="mt-4 text-right">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-medium text-amber-700 hover:text-amber-800 hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
+          {/* Submit */}
           <button
-            type="button"
-            onClick={() => signIn('google', { callbackUrl: '/profile' })}
-            className="w-full flex items-center justify-center gap-3 border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50 transition cursor-pointer"
+            type="submit"
+            disabled={loading}
+            className="mt-6 w-full rounded-2xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <FaGoogle size={18} />
-            Continue with Google
+            {loading ? "Signing in..." : "Sign In"}
           </button>
 
-          <button
-            type="button"
-            onClick={() => signIn('facebook', { callbackUrl: '/profile' })}
-            className="w-full flex items-center justify-center gap-3 border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50 transition cursor-pointer"
-          >
-            <FaFacebook size={18} />
-            Continue with Facebook
-          </button>
+          {/* Divider */}
+          <div className="my-6 flex items-center">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="px-3 text-sm text-slate-400">or continue with</span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
 
-          <button
-            type="button"
-            onClick={() => signIn('github', { callbackUrl: '/profile' })}
-            className="w-full flex items-center justify-center gap-3 border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50 transition cursor-pointer"
-          >
-            <FaGithub size={18} />
-            Continue with GitHub
-          </button>
+          {/* OAuth Buttons */}
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition hover:border-amber-300 hover:bg-amber-50"
+            >
+              <FaGoogle size={18} />
+              Continue with Google
+            </button>
 
-          <div>
-            <p className="text-sm text-center">
-              <Link href='/forgot-password' className='text-blue-600 hover:underline transition'>
-                Forgot Password?
+            <button
+              type="button"
+              onClick={() => signIn("facebook", { callbackUrl: "/dashboard" })}
+              className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition hover:border-amber-300 hover:bg-amber-50"
+            >
+              <FaFacebook size={18} />
+              Continue with Facebook
+            </button>
+
+            <button
+              type="button"
+              onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+              className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition hover:border-amber-300 hover:bg-amber-50"
+            >
+              <FaGithub size={18} />
+              Continue with GitHub
+            </button>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-slate-600">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/sign-up"
+                className="font-semibold text-amber-700 hover:text-amber-800 hover:underline"
+              >
+                Sign Up
               </Link>
             </p>
           </div>
-
-          <div>
-            <p className="text-sm text-gray-600 text-center">
-              Don&apos;t have an account?{" "}
-              <a
-                href="/sign-up"
-                className="text-blue-600 hover:underline transition"
-              >
-                Sign Up
-              </a>
-            </p>
-          </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
-  )
+  );
 }

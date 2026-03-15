@@ -3,18 +3,47 @@
 import { useState } from "react";
 import axios from "axios";
 import Link from "next/link";
+import { Mail } from "lucide-react";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (loading) return;
+
+    setMessage("");
+    setError("");
+
     try {
-      await axios.post("/api/auth/forgot-password", { email });
-      alert("Please check your email");
-    } catch {
-      alert("Something went wrong. Please try again.");
+      setLoading(true);
+
+      await axios.post("/api/auth/forgot-password", {
+        email: email.trim(),
+      });
+
+      setMessage("Please check your email for the reset link.");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data;
+        const message =
+          data &&
+          typeof data === "object" &&
+          "message" in data &&
+          typeof (data as { message?: unknown }).message === "string"
+            ? (data as { message?: string }).message
+            : undefined;
+
+        setError(message || "Something went wrong. Please try again.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -24,12 +53,18 @@ export default function ForgotPassword() {
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-gray-100"
       >
+        <div className="flex justify-center mb-4">
+          <div className="bg-gray-100 p-4 rounded-full">
+            <Mail className="w-8 h-8 text-gray-700" />
+          </div>
+        </div>
+
         <h1 className="text-2xl font-semibold text-gray-800 text-center mb-2">
           Forgot Password
         </h1>
 
-        <p className="text-sm text-gray-500 text-center mb-6">
-          Enter your email and we&apos;ll send you a reset link.
+        <p className="text-sm text-gray-500 text-center mb-6 leading-6">
+          Enter your email address and we&apos;ll send you a password reset link.
         </p>
 
         <div>
@@ -44,11 +79,24 @@ export default function ForgotPassword() {
           />
         </div>
 
+        {message && (
+          <p className="mt-4 text-sm text-green-600 text-center leading-6">
+            {message}
+          </p>
+        )}
+
+        {error && (
+          <p className="mt-4 text-sm text-red-500 text-center leading-6">
+            {error}
+          </p>
+        )}
+
         <button
           type="submit"
-          className="w-full mt-6 bg-black text-white py-2.5 rounded-lg hover:opacity-90 transition cursor-pointer"
+          disabled={loading}
+          className="w-full mt-6 bg-black text-white py-2.5 rounded-lg hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Send Reset Link
+          {loading ? "Sending..." : "Send Reset Link"}
         </button>
 
         <div className="mt-5 text-center">

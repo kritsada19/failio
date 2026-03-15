@@ -38,75 +38,98 @@ function Cardlist({ data, loading, error }: CardListProps) {
   }
 
   if (loading) {
-    return <p className="text-center py-10">Loading...</p>
+    return (
+      <p className="py-12 text-center text-sm font-medium text-slate-500">
+        Loading...
+      </p>
+    )
   }
 
   if (error) {
-    return <p className="text-center py-10 text-red-500">{error}</p>
+    return (
+      <p className="py-12 text-center text-sm font-medium text-red-500">
+        {error}
+      </p>
+    )
   }
 
   if (data.length === 0) {
-    return <p className="text-center py-10 text-gray-500">No failures yet</p>
+    return (
+      <div className="mx-6 mt-8 rounded-3xl border border-dashed border-slate-300 bg-white/80 px-6 py-14 text-center shadow-sm">
+        <p className="text-lg font-semibold text-slate-700">No failures yet</p>
+        <p className="mt-2 text-sm text-slate-500">
+          Start writing your first reflection and turn failure into progress.
+        </p>
+      </div>
+    )
   }
 
   return (
     <>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-10">
+      <div className="mx-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {data.map((failure) => {
           const date = new Date(failure.createdAt).toLocaleDateString()
 
           return (
             <div
               key={failure.id}
-              className="relative bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition flex flex-col"
+              className="group relative flex flex-col overflow-visible rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-orange-200 hover:shadow-lg"
             >
-              <Link href={`/dashboard/${failure.id}`} className="flex-1 flex flex-col">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-xs bg-gray-100 px-2 py-1 rounded-md">
+              <Link href={`/dashboard/${failure.id}`} className="flex flex-1 flex-col">
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <span className="rounded-full border border-orange-100 bg-orange-50 px-3 py-1 text-[11px] font-semibold text-orange-700">
                     {failure.category.name}
                   </span>
 
-                  <span className="text-xs text-gray-500">{date}</span>
+                  <span className="text-[11px] font-medium text-slate-400">
+                    {date}
+                  </span>
                 </div>
 
-                <h2 className="font-semibold text-lg mb-2 line-clamp-2">
+                <h2 className="mb-3 line-clamp-2 text-lg font-bold leading-snug text-slate-800 transition-colors duration-200 group-hover:text-orange-600">
                   {failure.title}
                 </h2>
 
-                <p className="text-sm text-gray-600 line-clamp-4 flex-1">
+                <p className="line-clamp-2 flex-1 text-sm leading-6 text-slate-600">
                   {failure.description}
                 </p>
 
                 {failure.emotions.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
+                  <div className="mt-4 flex flex-wrap gap-2">
                     {failure.emotions.map((emotion) => (
                       <span
                         key={emotion.id}
-                        className="text-xs bg-gray-100 px-2 py-1 rounded-md"
+                        className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-600"
                       >
                         {emotion.name}
                       </span>
                     ))}
                   </div>
                 )}
+
+                <div className="mt-5 pt-4 border-t border-slate-100">
+                  <span className="text-sm font-semibold text-orange-600 transition-colors duration-200 group-hover:text-orange-700">
+                    Read reflection →
+                  </span>
+                </div>
               </Link>
 
               {/* menu */}
-              <div className="absolute bottom-3 right-3">
+              <div className="absolute bottom-4 right-4">
                 <button
                   onClick={() =>
                     setOpenMenu(openMenu === failure.id ? null : failure.id)
                   }
-                  className="p-1 rounded hover:bg-gray-100"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-all duration-200 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
                 >
-                  <BsThreeDotsVertical size={18} />
+                  <BsThreeDotsVertical size={16} />
                 </button>
 
                 {openMenu === failure.id && (
-                  <div className="absolute right-0 mt-2 w-28 bg-white border rounded-lg shadow-md">
+                  <div className="absolute right-0 mt-2 w-32 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg z-20">
                     <Link
                       href={`/dashboard/edit/${failure.id}`}
-                      className="block px-3 py-2 text-sm hover:bg-gray-100"
+                      className="block px-4 py-3 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-50"
                     >
                       Edit
                     </Link>
@@ -116,7 +139,7 @@ function Cardlist({ data, loading, error }: CardListProps) {
                         setDeleteId(failure.id)
                         setOpenMenu(null)
                       }}
-                      className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-gray-100"
+                      className="w-full px-4 py-3 text-left text-sm font-medium text-red-500 transition-colors duration-200 hover:bg-red-50"
                     >
                       Delete
                     </button>
@@ -130,24 +153,27 @@ function Cardlist({ data, loading, error }: CardListProps) {
 
       {/* modal */}
       {deleteId && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-          <div className="bg-white rounded-xl p-6 w-80 shadow-lg">
-            <h3 className="text-lg font-semibold mb-2">Delete Failure</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Are you sure you want to delete this failure?
-            </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <div className="mb-4">
+              <h3 className="text-xl font-bold text-slate-800">Delete Failure</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Are you sure you want to delete this failure? This action cannot
+                be undone.
+              </p>
+            </div>
 
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteId(null)}
-                className="px-4 py-2 text-sm rounded-md border hover:bg-gray-100"
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-50"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 text-sm rounded-md bg-red-500 text-white hover:bg-red-600"
+                className="rounded-xl bg-red-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-red-600"
               >
                 Delete
               </button>

@@ -26,88 +26,97 @@ function FailureDetail({
   analyzing: boolean;
 }) {
   return (
-    <div className="max-w-3xl mx-auto p-6">
-
-      <div className="bg-white border rounded-xl p-6 shadow-sm space-y-6">
-
-        {/* title */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {failure.title}
-          </h1>
-
-          <p className="text-sm text-gray-400 mt-1">
-            {new Date(failure.createdAt).toLocaleString()}
-          </p>
-        </div>
-
-        {/* category */}
-        <div>
-          <span className="text-xs font-medium px-3 py-1 bg-gray-100 rounded-full">
-            {failure.category.name}
-          </span>
-        </div>
-
-        {/* description */}
-        <div>
-          <h2 className="text-sm font-semibold text-gray-500 mb-2">
-            What happened
-          </h2>
-
-          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-            {failure.description}
-          </p>
-        </div>
-
-        {/* emotions */}
-        <div>
-          <h2 className="text-sm font-semibold text-gray-500 mb-2">
-            Emotions
-          </h2>
-
-          <div className="flex gap-2 flex-wrap">
-            {failure.emotions.map((emotion) => (
-              <span
-                key={emotion.id}
-                className="text-sm px-3 py-1 bg-red-50 text-red-600 rounded-full"
-              >
-                {emotion.name}
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div className="border-b border-slate-100 bg-linear-to-br from-orange-50 via-white to-white px-6 py-8 sm:px-8">
+          {/* title */}
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-full border border-orange-100 bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">
+                {failure.category.name}
               </span>
-            ))}
+
+              <span className="text-xs font-medium text-slate-400">
+                {new Date(failure.createdAt).toLocaleString()}
+              </span>
+            </div>
+
+            <h1 className="text-3xl font-bold leading-tight text-slate-900 sm:text-4xl">
+              {failure.title}
+            </h1>
+
+            <p className="max-w-2xl text-sm leading-6 text-slate-500">
+              Every failure is a reflection point. Review what happened, identify
+              the emotions behind it, and turn the lesson into growth.
+            </p>
           </div>
         </div>
 
-        {/* ai suggestion */}
-        <div className="border-t pt-5">
-
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-500">
-              AI Reflection
+        <div className="space-y-8 px-6 py-8 sm:px-8">
+          {/* description */}
+          <section className="rounded-2xl border border-slate-100 bg-slate-50/60 p-5 sm:p-6">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+              What happened
             </h2>
 
-            <button
-              onClick={onAnalyze}
-              disabled={analyzing}
-              className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:opacity-90 disabled:opacity-50"
-            >
-              {analyzing ? "Analyzing..." : "Analyze with AI"}
-            </button>
-          </div>
-
-          {failure.aiSuggestion ? (
-            <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg text-gray-700 whitespace-pre-wrap">
-              {failure.aiSuggestion}
-            </div>
-          ) : (
-            <p className="text-gray-400 text-sm">
-              AI can help analyze this failure and suggest ways to improve.
+            <p className="whitespace-pre-wrap text-[15px] leading-8 text-slate-700">
+              {failure.description}
             </p>
-          )}
+          </section>
 
+          {/* emotions */}
+          <section>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Emotions
+            </h2>
+
+            <div className="flex flex-wrap gap-2">
+              {failure.emotions.map((emotion) => (
+                <span
+                  key={emotion.id}
+                  className="rounded-full border border-rose-100 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-600"
+                >
+                  {emotion.name}
+                </span>
+              ))}
+            </div>
+          </section>
+
+          {/* ai suggestion */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                  AI Reflection
+                </h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  Let AI help you reframe this failure into actionable lessons.
+                </p>
+              </div>
+
+              <button
+                onClick={onAnalyze}
+                disabled={analyzing}
+                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {analyzing ? "Analyzing..." : "Analyze with AI"}
+              </button>
+            </div>
+
+            {failure.aiSuggestion ? (
+              <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5 text-sm leading-7 text-slate-700 whitespace-pre-wrap">
+                {failure.aiSuggestion}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-5 py-6">
+                <p className="text-sm leading-6 text-slate-500">
+                  AI can help analyze this failure and suggest ways to improve.
+                </p>
+              </div>
+            )}
+          </section>
         </div>
-
       </div>
-
     </div>
   );
 }
