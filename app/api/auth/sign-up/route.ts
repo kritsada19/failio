@@ -32,7 +32,7 @@ export async function POST(requset: Request) {
     }
 
     const existedEmail = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.trim().toLowerCase() },
     });
 
     if (existedEmail) {
@@ -41,6 +41,13 @@ export async function POST(requset: Request) {
         { status: 409 },
       );
     }
+
+    await prisma.verificationToken.deleteMany({
+      where: {
+        email: email.trim().toLowerCase(),
+        type: "EMAIL_VERIFY",
+      },
+    });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 

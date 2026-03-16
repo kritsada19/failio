@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -117,8 +117,8 @@ export async function PUT(
         categoryId: Number(categoryId),
         emotions: Array.isArray(emotions)
           ? {
-              set: emotions.map((id: number) => ({ id })),
-            }
+            set: emotions.map((id: number) => ({ id })),
+          }
           : undefined,
       },
     });

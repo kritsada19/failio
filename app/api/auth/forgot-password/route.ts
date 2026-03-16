@@ -14,8 +14,15 @@ export async function POST(request: Request) {
       );
     }
 
+    await prisma.verificationToken.deleteMany({
+      where: {
+        email: email.trim().toLowerCase(),
+        type: "PASSWORD_RESET",
+      },
+    });
+
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.trim().toLowerCase() },
     });
 
     if (!user) {

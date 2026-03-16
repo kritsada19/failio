@@ -20,7 +20,7 @@ export function useFetch<T>(url: string): FetchState<T> {
             setData(response.data);
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
-                setError(err.message);
+                setError(err.response?.data?.message || err.message);
             } else {
                 setError("Something went wrong");
             }

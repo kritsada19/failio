@@ -40,8 +40,7 @@ function DetailFailurePage() {
 
   const handleAnalyze = async () => {
     try {
-
-      await axios.post(`/api/failure/${id}/ai`);
+      await axios.put(`/api/failure/${id}/analyze`);
 
       await reFetch();
     } catch (err) {

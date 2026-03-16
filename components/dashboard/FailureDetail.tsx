@@ -139,7 +139,7 @@ function FailureDetail({
                 <div className="rounded-3xl border border-blue-200 bg-blue-50 p-4">
                   <p className="text-sm font-medium text-blue-700">AI Suggestions</p>
                   <ul className="mt-2 text-sm text-slate-700 list-disc list-inside space-y-1">
-                    {failure.aiResult.suggestions.map((suggestion, index) => (
+                    {failure.aiResult?.suggestions?.map((suggestion, index) => (
                       <li key={index} className="leading-relaxed whitespace-pre-wrap">{suggestion}</li>
                     ))}
                   </ul>
