@@ -1,0 +1,139 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useFetch } from "@/hooks/useFetch";
+import { useSession } from "next-auth/react";
+import ProfileAvatar from "@/components/ProfileAvatar";
+import { Mail, CalendarDays, User2 } from "lucide-react";
+
+interface UserProfile {
+    id: string;
+    name: string | null;
+    email: string | null;
+    image: string | null;
+    role: string;
+    createdAt: string;
+}
+
+export default function ProfilePage() {
+    const router = useRouter();
+    const { data: session } = useSession();
+    const { data: user, loading, error } = useFetch<UserProfile>("/api/user");
+
+    useEffect(() => {
+        if (error) router.replace("/sign-in");
+    }, [error, router]);
+
+    if (!session?.user) {
+        router.replace("/sign-in");
+    }
+
+    const joinedDate = user?.createdAt
+        ? new Date(user.createdAt).toLocaleDateString("th-TH", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+        : "-";
+
+    if (loading) {
+        return (
+            <main className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-gray-800" />
+            </main>
+        );
+    }
+
+    if (!user) return null;
+
+    return (
+        <main className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 px-4 py-10 sm:py-14">
+            <div className="mx-auto max-w-3xl">
+                {/* Header */}
+                <div className="mb-6">
+                    <p className="text-sm font-medium text-gray-500">Account</p>
+                    <h1 className="text-3xl font-semibold text-gray-900">Your Profile</h1>
+                    <p className="mt-2 text-sm text-gray-500">
+                        Manage your basic account information in Failio.
+                    </p>
+                </div>
+
+                {/* Profile Card */}
+                <div className="overflow-hidden rounded-3xl bg-white/80 backdrop-blur-md shadow-xl border border-gray-100">
+                    {/* Banner */}
+                    <div className="h-28 bg-linear-to-r from-gray-800 via-black to-gray-900" />
+
+                    <div className="px-6 sm:px-8 pb-8">
+                        {/* Avatar */}
+                        <div className="-mt-14 mb-5">
+                            <div className="inline-block rounded-full ring-4 ring-white shadow-md">
+                                <ProfileAvatar name={user.name} size="xl" />
+                            </div>
+                        </div>
+
+                        {/* Main Info */}
+                        <div className="mb-6">
+                            <h2 className="text-2xl font-semibold text-gray-900">
+                                {user.name ?? "Unnamed User"}
+                            </h2>
+                            <p className="mt-1 text-sm text-gray-500 break-all">
+                                {user.email ?? "No email"}
+                            </p>
+                        </div>
+
+                        {/* Info Section */}
+                        <div className="grid gap-4 sm:grid-cols-3">
+                            <InfoCard
+                                icon={<User2 className="w-5 h-5 text-gray-700" />}
+                                label="Name"
+                                value={user.name ?? "-"}
+                            />
+                            <InfoCard
+                                icon={<Mail className="w-5 h-5 text-gray-700" />}
+                                label="Email"
+                                value={user.email ?? "-"}
+                            />
+                            <InfoCard
+                                icon={<CalendarDays className="w-5 h-5 text-gray-700" />}
+                                label="Joined"
+                                value={joinedDate}
+                            />
+                        </div>
+
+                        {/* Optional small note */}
+                        <div className="mt-6 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
+                            <p className="text-sm text-gray-500">
+                                Your profile helps personalize your Failio experience and keeps
+                                your account information organized.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    );
+}
+
+function InfoCard({
+    icon,
+    label,
+    value,
+}: {
+    icon: React.ReactNode;
+    label: string;
+    value: string;
+}) {
+    return (
+        <div className="rounded-2xl border border-gray-100 bg-white px-4 py-4 shadow-sm">
+            <div className="mb-3 flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100">
+                    {icon}
+                </div>
+                <p className="text-sm font-medium text-gray-500">{label}</p>
+            </div>
+
+            <p className="text-sm font-semibold text-gray-900 break-all">{value}</p>
+        </div>
+    );
+}
