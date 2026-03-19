@@ -10,7 +10,7 @@ import GithubProvider from "next-auth/providers/github";
 declare module "next-auth" {
   interface Session {
     user: {
-      id: number | string;
+      id: string;
       name?: string | null;
       email?: string | null;
       role?: string;
@@ -18,13 +18,13 @@ declare module "next-auth" {
   }
 
   interface User {
-    id: number | string;
+    id: string;
     role?: string;
   }
 }
 declare module "next-auth/jwt" {
   interface JWT {
-    id?: number | string;
+    id: string;
     role?: string;
   }
 }

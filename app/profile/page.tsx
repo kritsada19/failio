@@ -20,14 +20,7 @@ export default function ProfilePage() {
     const router = useRouter();
     const { data: session, status } = useSession();
 
-    console.log("status:", status);
-    console.log("session:", session);
-    console.log("session.user:", session?.user);
-    console.log("session.user.id:", session?.user?.id);
-
-    const { data: user, loading, error } = useFetch<UserProfile>(
-        status === "authenticated" ? `/api/user/${session?.user?.id}` : null
-    );
+    const { data: user, loading, error } = useFetch<UserProfile>(`/api/user/${session?.user?.id}`);
 
     useEffect(() => {
         if (status === "unauthenticated") {
