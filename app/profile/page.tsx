@@ -3,10 +3,9 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useFetch } from "@/hooks/useFetch";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import { Mail, CalendarDays, User2, LogOut } from "lucide-react";
-import { signOut } from "next-auth/react";
 
 interface UserProfile {
     id: string;
@@ -19,26 +18,24 @@ interface UserProfile {
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { data: session } = useSession();
-    const { data: user, loading, error } = useFetch<UserProfile>("/api/user");
+    const { data: session, status } = useSession();
+
+    console.log("status:", status);
+    console.log("session:", session);
+    console.log("session.user:", session?.user);
+    console.log("session.user.id:", session?.user?.id);
+
+    const { data: user, loading, error } = useFetch<UserProfile>(
+        status === "authenticated" ? `/api/user/${session?.user?.id}` : null
+    );
 
     useEffect(() => {
-        if (error) router.replace("/sign-in");
-    }, [error, router]);
+        if (status === "unauthenticated") {
+            router.replace("/sign-in");
+        }
+    }, [status, router]);
 
-    if (!session?.user) {
-        router.replace("/sign-in");
-    }
-
-    const joinedDate = user?.createdAt
-        ? new Date(user.createdAt).toLocaleDateString("th-TH", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        })
-        : "-";
-
-    if (loading) {
+    if (status === "loading" || loading) {
         return (
             <main className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center">
                 <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-gray-800" />
@@ -46,7 +43,33 @@ export default function ProfilePage() {
         );
     }
 
-    if (!user) return null;
+    if (error) {
+        return (
+            <main className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center shadow-sm">
+                    <User2 className="mx-auto h-8 w-8 text-red-500 mb-3" />
+                    <h2 className="text-lg font-semibold text-red-800 mb-1">Failed to Load Profile</h2>
+                    <p className="text-sm text-red-600 px-4">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-4 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-xl text-sm transition-colors"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </main>
+        );
+    }
+
+    if (!session?.user || !user) return null;
+
+    const joinedDate = user.createdAt
+        ? new Date(user.createdAt).toLocaleDateString("th-TH", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+        : "-";
 
     return (
         <main className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 px-4 py-10 sm:py-14">
@@ -75,10 +98,10 @@ export default function ProfilePage() {
 
                         {/* Main Info */}
                         <div className="mb-6">
-                            <h2 className="text-2xl font-semibold text-gray-900">
+                            <h2 className="text-2xl font-semibold text-gray-900 truncate">
                                 {user.name ?? "Unnamed User"}
                             </h2>
-                            <p className="mt-1 text-sm text-gray-500 break-all">
+                            <p className="mt-1 text-sm text-gray-500 truncate">
                                 {user.email ?? "No email"}
                             </p>
                         </div>
@@ -145,7 +168,7 @@ function InfoCard({
                 <p className="text-sm font-medium text-gray-500">{label}</p>
             </div>
 
-            <p className="text-sm font-semibold text-gray-900 break-all">{value}</p>
+            <p className="text-sm font-semibold text-gray-900 truncate" title={value}>{value}</p>
         </div>
     );
 }

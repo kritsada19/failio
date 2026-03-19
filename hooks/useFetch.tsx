@@ -9,16 +9,27 @@ interface FetchState<T> {
 }
 
 
-export function useFetch<T>(url: string): FetchState<T> {
+export function useFetch<T>(url: string | null): FetchState<T> {
     const [data, setData] = useState<T | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
     const fetchData = useCallback(async (): Promise<void> => {
+        if (!url) {
+            setLoading(false);
+            setData(null);
+            setError(null);
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+
         try {
             const response = await axios.get<T>(url);
             setData(response.data);
         } catch (err: unknown) {
+            setData(null);
             if (axios.isAxiosError(err)) {
                 setError(err.response?.data?.message || err.message);
             } else {
