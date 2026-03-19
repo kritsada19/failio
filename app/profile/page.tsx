@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useFetch } from "@/hooks/useFetch";
 import { useSession } from "next-auth/react";
 import ProfileAvatar from "@/components/ProfileAvatar";
-import { Mail, CalendarDays, User2 } from "lucide-react";
+import { Mail, CalendarDays, User2, LogOut } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 interface UserProfile {
     id: string;
@@ -107,6 +108,17 @@ export default function ProfilePage() {
                                 Your profile helps personalize your Failio experience and keeps
                                 your account information organized.
                             </p>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={() => signOut({ callbackUrl: "/" })}
+                                className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition-all duration-200 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                            >
+                                <LogOut className="h-4 w-4" />
+                                Sign Out
+                            </button>
                         </div>
                     </div>
                 </div>

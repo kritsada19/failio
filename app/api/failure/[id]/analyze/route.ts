@@ -97,6 +97,29 @@ export async function PUT(
         })
 
     } catch (error) {
+        const { id } = await params;
+
+        const failure = await prisma.failure.findUnique({
+            where: {
+                id: Number(id),
+            },
+        });
+
+        if (!failure) {
+            return NextResponse.json(
+                { message: "Failure not found" },
+                { status: 404 }
+            )
+        }
+
+        await prisma.failure.update({
+            where: {
+                id: failure.id,
+            },
+            data: {
+                aiStatus: "FAILED",
+            }
+        })
         console.log(error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
