@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        if (session.user.role !== "ADMIN") {
+        if (session.user.role === "ADMIN") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -32,11 +32,7 @@ export async function GET(request: NextRequest) {
                 skip,
                 take: limit,
             }),
-            prisma.user.count({
-                where: {
-                    role: "USER"
-                }
-            }),
+            prisma.user.count(),
         ]);
 
         return NextResponse.json({
@@ -47,6 +43,7 @@ export async function GET(request: NextRequest) {
                 totalPages: Math.ceil(total / limit),
             },
         }, { status: 200 });
+
     } catch (error) {
         console.error("Error fetching users:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
