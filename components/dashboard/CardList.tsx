@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useState } from "react"
 import { BsThreeDotsVertical } from "react-icons/bs"
-import axios from "axios"
+import { deleteFailure } from "@/actions/failure"
 
 interface CardListProps {
   data: Failure[]
@@ -28,7 +28,7 @@ function Cardlist({ data, loading, error }: CardListProps) {
     if (!deleteId) return
 
     try {
-      await axios.delete(`/api/failure/${deleteId}`)
+      await deleteFailure(deleteId)
       window.location.reload()
     } catch (err) {
       console.error(err)

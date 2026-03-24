@@ -4,6 +4,7 @@ import "./globals.css";
 import NavBar from "@/components/NavBar";
 
 import { getServerSession } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]/route"; 
 import SessionProvider from "../components/SessionProvider";
 
 const geistSans = Geist({
@@ -29,7 +30,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   return (
     <html lang="en">
       <body

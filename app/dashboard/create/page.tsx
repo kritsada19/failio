@@ -1,58 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFetch } from "@/hooks/useFetch";
-import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { createFailure, type FailureState } from "@/actions/failure";
 
-interface Emotions {
+interface Emotion {
   id: number;
   name: string;
 }
 
-interface Categorys {
+interface Category {
   id: number;
   name: string;
+}
+
+const initialState: FailureState = {
+  success: false,
+  message: "",
+  error: {},
+};
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {pending ? "Creating..." : "Create failure"}
+    </button>
+  );
 }
 
 export default function CreateFailurePage() {
   const router = useRouter();
+  const [state, formAction] = useActionState(createFailure, initialState);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [emotions, setEmotions] = useState<number[]>([]);
-  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (state.success) {
+      router.push("/dashboard");
+    }
+  }, [state.success, router]);
 
-  const { data: emotionList } = useFetch<Emotions[]>("/api/emotion");
-  const { data: categoryList } = useFetch<Categorys[]>("/api/category");
+  const { data: emotionList } = useFetch<Emotion[]>("/api/emotion");
+  const { data: categoryList } = useFetch<Category[]>("/api/category");
+
+  const [selectedEmotions, setSelectedEmotions] = useState<number[]>([]);
 
   const toggleEmotion = (id: number) => {
-    setEmotions((prev) =>
+    setSelectedEmotions((prev) =>
       prev.includes(id) ? prev.filter((e) => e !== id) : [...prev, id]
     );
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      setLoading(true);
-
-      await axios.post("/api/failure", {
-        title,
-        description,
-        categoryId,
-        emotions,
-      });
-
-      router.push("/dashboard");
-    } catch (error) {
-      console.error(error);
-      alert("Create failure failed");
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
@@ -69,9 +72,16 @@ export default function CreateFailurePage() {
           </p>
         </div>
 
+        {/* Global message */}
+        {state.message && !state.success && (
+          <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {state.message}
+          </div>
+        )}
+
         {/* Card */}
         <div className="rounded-3xl border border-amber-100 bg-white/90 p-6 shadow-sm backdrop-blur sm:p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form action={formAction} className="space-y-6">
             {/* Title */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-800">
@@ -79,11 +89,13 @@ export default function CreateFailurePage() {
               </label>
               <input
                 type="text"
+                name="title"
                 placeholder="เช่น พูดในที่ประชุมแล้วลืมประเด็น"
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
               />
+              {state.error?.title && (
+                <p className="mt-2 text-sm text-red-500">{state.error.title[0]}</p>
+              )}
             </div>
 
             {/* Description */}
@@ -92,12 +104,16 @@ export default function CreateFailurePage() {
                 Description
               </label>
               <textarea
+                name="description"
                 placeholder="เล่าว่าเกิดอะไรขึ้น คุณรู้สึกยังไง และคิดว่าพลาดตรงไหน..."
                 className="min-h-40 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                 rows={6}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
               />
+              {state.error?.description && (
+                <p className="mt-2 text-sm text-red-500">
+                  {state.error.description[0]}
+                </p>
+              )}
             </div>
 
             {/* Category */}
@@ -106,9 +122,9 @@ export default function CreateFailurePage() {
                 Category
               </label>
               <select
+                name="categoryId"
+                defaultValue=""
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
               >
                 <option value="">Select category</option>
                 {categoryList?.map((c) => (
@@ -117,6 +133,11 @@ export default function CreateFailurePage() {
                   </option>
                 ))}
               </select>
+              {state.error?.categoryId && (
+                <p className="mt-2 text-sm text-red-500">
+                  {state.error.categoryId[0]}
+                </p>
+              )}
             </div>
 
             {/* Emotions */}
@@ -127,7 +148,7 @@ export default function CreateFailurePage() {
 
               <div className="flex flex-wrap gap-2">
                 {emotionList?.map((emotion) => {
-                  const active = emotions.includes(emotion.id);
+                  const active = selectedEmotions.includes(emotion.id);
 
                   return (
                     <button
@@ -135,8 +156,8 @@ export default function CreateFailurePage() {
                       key={emotion.id}
                       onClick={() => toggleEmotion(emotion.id)}
                       className={`rounded-full px-4 py-2 text-sm font-medium transition ${active
-                          ? "bg-amber-400 text-slate-900 shadow-sm"
-                          : "border border-slate-200 bg-white text-slate-700 hover:border-amber-300 hover:bg-amber-50"
+                        ? "bg-amber-400 text-slate-900 shadow-sm"
+                        : "border border-slate-200 bg-white text-slate-700 hover:border-amber-300 hover:bg-amber-50"
                         }`}
                     >
                       {emotion.name}
@@ -144,6 +165,17 @@ export default function CreateFailurePage() {
                   );
                 })}
               </div>
+
+              {/* hidden inputs สำหรับส่ง array เข้า server action */}
+              {selectedEmotions.map((id) => (
+                <input key={id} type="hidden" name="emotions" value={id} />
+              ))}
+
+              {state.error?.emotions && (
+                <p className="mt-2 text-sm text-red-500">
+                  {state.error.emotions[0]}
+                </p>
+              )}
 
               <p className="mt-2 text-xs text-slate-500">
                 เลือกอารมณ์ที่ตรงกับสิ่งที่คุณรู้สึกตอนเกิดเหตุการณ์
@@ -160,13 +192,7 @@ export default function CreateFailurePage() {
                 Cancel
               </button>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {loading ? "Creating..." : "Create failure"}
-              </button>
+              <SubmitButton />
             </div>
           </form>
         </div>

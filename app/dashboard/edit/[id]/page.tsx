@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useFetch } from "@/hooks/useFetch";
-import axios from "axios";
 import { useRouter, useParams } from "next/navigation";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { updateFailure, type FailureState } from "@/actions/failure";
 
 interface Failures {
   id: number;
@@ -26,9 +28,29 @@ interface Emotions {
   name: string;
 }
 
-interface Categorys {
+interface Categories {
   id: number;
   name: string;
+}
+
+const initialState: FailureState = {
+  success: false,
+  message: "",
+  error: {},
+};
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {pending ? "Updating..." : "Update failure"}
+    </button>
+  );
 }
 
 function EditFailurePage() {
@@ -36,57 +58,37 @@ function EditFailurePage() {
   const params = useParams();
   const id = params.id;
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [emotions, setEmotions] = useState<number[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [state, formAction] = useActionState(updateFailure, initialState);
+
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [categoryId, setCategoryId] = useState<string>("");
+  const [selectedEmotions, setSelectedEmotions] = useState<number[]>([]);
 
   const { data: failure, loading: failureLoading, error: failureError } =
     useFetch<Failures>(`/api/failure/${id}`);
   const { data: emotionList } = useFetch<Emotions[]>("/api/emotion");
-  const { data: categoryList } = useFetch<Categorys[]>("/api/category");
+  const { data: categoryList } = useFetch<Categories[]>("/api/category");
+
+  useEffect(() => {
+    if (state.success) {
+      router.push("/dashboard");
+    }
+  }, [state.success, router]);
 
   useEffect(() => {
     if (failure) {
       setTitle(failure.title);
       setDescription(failure.description);
       setCategoryId(String(failure.category.id));
-      setEmotions(failure.emotions.map((e) => e.id));
+      setSelectedEmotions(failure.emotions.map((e) => e.id));
     }
   }, [failure]);
 
   const toggleEmotion = (id: number) => {
-    setEmotions((prev) =>
+    setSelectedEmotions((prev) =>
       prev.includes(id) ? prev.filter((e) => e !== id) : [...prev, id]
     );
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!title.trim() || !description.trim() || !categoryId) {
-      alert("Please fill all required fields");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      await axios.put(`/api/failure/${id}`, {
-        title,
-        description,
-        categoryId: Number(categoryId),
-        emotions,
-      });
-
-      router.push("/dashboard");
-    } catch (error) {
-      console.error(error);
-      alert("Update failure failed");
-    } finally {
-      setLoading(false);
-    }
   };
 
   if (failureLoading) {
@@ -131,19 +133,29 @@ function EditFailurePage() {
 
         {/* Card */}
         <div className="rounded-3xl border border-amber-100 bg-white/90 p-6 shadow-sm backdrop-blur sm:p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form action={formAction} className="space-y-6">
+
+            <input type="hidden" name="id" value={id} />
+
             {/* Title */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-800">
                 Title
               </label>
               <input
+                name="title"
                 type="text"
                 placeholder="เช่น พูดในที่ประชุมแล้วลืมประเด็น"
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
+
+              {state.error?.title && (
+                <p className="mt-2 text-sm text-red-500">
+                  {state.error.title[0]}
+                </p>
+              )}
             </div>
 
             {/* Description */}
@@ -152,12 +164,19 @@ function EditFailurePage() {
                 Description
               </label>
               <textarea
+                name="description"
                 placeholder="เล่าว่าเกิดอะไรขึ้น คุณรู้สึกยังไง และคิดว่าพลาดตรงไหน..."
                 className="min-h-40 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                 rows={6}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
+
+              {state.error?.description && (
+                <p className="mt-2 text-sm text-red-500">
+                  {state.error.description[0]}
+                </p>
+              )}
             </div>
 
             {/* Category */}
@@ -166,6 +185,7 @@ function EditFailurePage() {
                 Category
               </label>
               <select
+                name="categoryId"
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
@@ -177,6 +197,12 @@ function EditFailurePage() {
                   </option>
                 ))}
               </select>
+
+              {state.error?.categoryId && (
+                <p className="mt-2 text-sm text-red-500">
+                  {state.error.categoryId[0]}
+                </p>
+              )}
             </div>
 
             {/* Emotions */}
@@ -187,7 +213,7 @@ function EditFailurePage() {
 
               <div className="flex flex-wrap gap-2">
                 {emotionList?.map((emotion) => {
-                  const active = emotions.includes(emotion.id);
+                  const active = selectedEmotions.includes(emotion.id);
 
                   return (
                     <button
@@ -195,8 +221,8 @@ function EditFailurePage() {
                       key={emotion.id}
                       onClick={() => toggleEmotion(emotion.id)}
                       className={`rounded-full px-4 py-2 text-sm font-medium transition ${active
-                          ? "bg-amber-400 text-slate-900 shadow-sm"
-                          : "border border-slate-200 bg-white text-slate-700 hover:border-amber-300 hover:bg-amber-50"
+                        ? "bg-amber-400 text-slate-900 shadow-sm"
+                        : "border border-slate-200 bg-white text-slate-700 hover:border-amber-300 hover:bg-amber-50"
                         }`}
                     >
                       {emotion.name}
@@ -204,6 +230,16 @@ function EditFailurePage() {
                   );
                 })}
               </div>
+
+              {selectedEmotions.map((id) => (
+                <input key={id} type="hidden" name="emotions" value={id} />
+              ))}
+
+              {state.error?.emotions && (
+                <p className="mt-2 text-sm text-red-500">
+                  {state.error.emotions[0]}
+                </p>
+              )}
 
               <p className="mt-2 text-xs text-slate-500">
                 เลือกอารมณ์ที่ยังสะท้อนความรู้สึกของเหตุการณ์นี้
@@ -220,13 +256,7 @@ function EditFailurePage() {
                 Cancel
               </button>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {loading ? "Updating..." : "Update failure"}
-              </button>
+              <SubmitButton />
             </div>
           </form>
         </div>

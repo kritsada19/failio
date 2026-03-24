@@ -1,82 +1,49 @@
 "use client";
 
-import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { FaGoogle, FaFacebook, FaGithub } from "react-icons/fa";
-import axios from "axios";
 import Link from "next/link";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { signUpAction, type SignUpState } from "@/actions/auth/sign-up";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+const initialState: SignUpState = {
+    success: false,
+    message: "",
+    email: "",
+    error: {},
+}
+
+function SignUpButton() {
+    const { pending } = useFormStatus();
+    return (
+        <button
+            type="submit"
+            disabled={pending}
+            className="mt-6 w-full rounded-2xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+            {pending ? "Creating account..." : "Sign Up"}
+        </button>
+    );
+}
 
 export default function SignUp() {
-    const [name, setName] = useState<string>("");
-    const [email, setEmail] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
-    const [confirmPassword, setConfirmPassword] = useState<string>("");
-    const [error, setError] = useState<string>("");
-    const [loading, setLoading] = useState<boolean>(false);
-
+    const [state, formAction] = useActionState(signUpAction, initialState);
     const router = useRouter();
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setError("");
-
-        if (loading) return;
-
-        if (password !== confirmPassword) {
-            setError("Passwords do not match");
-            return;
+    useEffect(() => {
+        if (state.success) {
+            router.push(`/check-email?email=${state.email}`);
         }
-
-        try {
-            setLoading(true);
-
-            const response = await axios.post("/api/auth/sign-up", {
-                name: name.trim(),
-                email: email.trim(),
-                password,
-                confirmPassword,
-            });
-
-            if (response.status === 201) {
-                router.push(`/check-email?email=${email.trim()}`);
-            }
-        } catch (err: unknown) {
-            if (axios.isAxiosError(err)) {
-                const status = err.response?.status;
-                const data = err.response?.data;
-                const message =
-                    data &&
-                        typeof data === "object" &&
-                        "message" in data &&
-                        typeof (data as { message?: unknown }).message === "string"
-                        ? (data as { message?: string }).message
-                        : undefined;
-
-                if (status === 409) {
-                    setError(message || "Email already exists.");
-                    return;
-                }
-
-                if (status === 400) {
-                    setError(message || "Invalid input.");
-                    return;
-                }
-
-                setError(message || "Something went wrong. Please try again.");
-            } else {
-                setError("Something went wrong. Please try again.");
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [state.success, state.email, router]);
 
     return (
         <div className="min-h-screen bg-linear-to-b from-amber-50 via-white to-orange-50 px-4 py-10">
             <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-md items-center justify-center">
                 <form
-                    onSubmit={handleSubmit}
+                    action={formAction}
                     className="w-full rounded-3xl border border-amber-100 bg-white/90 p-8 shadow-sm backdrop-blur"
                 >
                     {/* Header */}
@@ -98,12 +65,14 @@ export default function SignUp() {
                             </label>
                             <input
                                 type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                name="name"
                                 required
                                 placeholder="Your name"
                                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                             />
+                            {state.error?.name && (
+                                <p className="text-sm text-red-600">{state.error.name[0]}</p>
+                            )}
                         </div>
 
                         <div>
@@ -112,12 +81,14 @@ export default function SignUp() {
                             </label>
                             <input
                                 type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                name="email"
                                 required
                                 placeholder="you@example.com"
                                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                             />
+                            {state.error?.email && (
+                                <p className="text-sm text-red-600">{state.error.email[0]}</p>
+                            )}
                         </div>
 
                         <div>
@@ -126,12 +97,14 @@ export default function SignUp() {
                             </label>
                             <input
                                 type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                name="password"
                                 required
                                 placeholder="••••••••"
                                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                             />
+                            {state.error?.password && (
+                                <p className="text-sm text-red-600">{state.error.password[0]}</p>
+                            )}
                         </div>
 
                         <div>
@@ -140,30 +113,19 @@ export default function SignUp() {
                             </label>
                             <input
                                 type="password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                name="confirmPassword"
                                 required
                                 placeholder="••••••••"
                                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                             />
+                            {state.error?.confirmPassword && (
+                                <p className="text-sm text-red-600">{state.error.confirmPassword[0]}</p>
+                            )}
                         </div>
                     </div>
 
-                    {/* Error */}
-                    {error && (
-                        <div className="mt-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3">
-                            <p className="text-sm text-red-600">{error}</p>
-                        </div>
-                    )}
-
                     {/* Submit */}
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="mt-6 w-full rounded-2xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        {loading ? "Creating account..." : "Sign Up"}
-                    </button>
+                    <SignUpButton />
 
                     {/* Divider */}
                     <div className="my-6 flex items-center">

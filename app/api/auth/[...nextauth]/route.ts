@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
 import GithubProvider from "next-auth/providers/github";
+import { signInSchema } from "@/lib/validations/auth";
 
 declare module "next-auth" {
   interface Session {
@@ -46,15 +47,16 @@ export const authOptions: NextAuthOptions = {
         },
       },
       async authorize(credentials) {
-        if (
-          !credentials?.email ||
-          !credentials?.password
-        ) {
-          return null;
+        const result = signInSchema.safeParse(credentials);
+
+        if (!result.success) {
+          throw new Error("Invalid email or password");
         }
 
+        const { email, password } = result.data;
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
         });
 
         if (!user) {
@@ -67,11 +69,13 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!user.password) {
-          throw new Error("Invalid email or password");
+          throw new Error(
+            "This account uses social login. Please sign in with Google, Facebook, or GitHub."
+          );
         }
 
         const isValid = await bcrypt.compare(
-          credentials.password,
+          password,
           user.password,
         );
 
