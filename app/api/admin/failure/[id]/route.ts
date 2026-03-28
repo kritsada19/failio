@@ -10,46 +10,46 @@ export async function DELETE(
         const session = await getSession();
         if (!session) {
             return NextResponse.json(
-                { message: "Unauthorized" },
+                { error: "Unauthorized" },
                 { status: 401 }
             )
         }
 
         if (session.user.role !== "ADMIN") {
             return NextResponse.json(
-                { message: "Forbidden" },
-                { status: 403 }
+                { error: "Unauthorized" },
+                { status: 401 }
             )
         }
 
         const { id } = await params;
 
-        const emotion = await prisma.emotion.findUnique({
+        const failure = await prisma.failure.findUnique({
             where: {
                 id: Number(id),
             },
         });
 
-        if (!emotion) {
+        if (!failure) {
             return NextResponse.json(
-                { message: "Emotion not found" },
+                { error: "Failure not found" },
                 { status: 404 }
             )
         }
 
-        await prisma.emotion.delete({
+        await prisma.failure.delete({
             where: {
-                id: emotion.id,
+                id: failure.id,
             },
         });
 
         return NextResponse.json({
-            message: "Emotion deleted successfully",
+            message: "Failure deleted successfully",
             status: 200,
         })
 
     } catch (error) {
         console.log(error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

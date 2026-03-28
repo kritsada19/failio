@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
       prisma.failure.count({
         where: {
           categoryId: category,
+          userId: String(session.user.id),
         },
       }),
     ]);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FaGoogle, FaFacebook, FaGithub } from "react-icons/fa";
 import Link from "next/link";
@@ -32,7 +32,13 @@ export default function SignIn() {
         return;
       }
 
-      router.push("/dashboard");
+      const session = await getSession();
+
+      if (session?.user?.role === "ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       console.error(err);
       setError("Something went wrong. Please try again.");
