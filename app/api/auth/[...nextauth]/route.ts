@@ -7,6 +7,7 @@ import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
 import GithubProvider from "next-auth/providers/github";
 import { signInSchema } from "@/lib/validations/auth";
+import { tokenSchema } from "@/lib/validations/auth";
 
 declare module "next-auth" {
   interface Session {
@@ -157,6 +158,8 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = user.role;
       }
+
+      tokenSchema.parse(token);
       return token;
     },
 

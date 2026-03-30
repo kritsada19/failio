@@ -78,7 +78,7 @@ function Cardlist({ data, loading, error }: CardListProps) {
               <Link href={`/dashboard/${failure.id}`} className="flex flex-1 flex-col">
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <span className="rounded-full border border-orange-100 bg-orange-50 px-3 py-1 text-[11px] font-semibold text-orange-700">
-                    {failure.category.name}
+                    {failure.category?.name || "Uncategorized"}
                   </span>
 
                   <span className="text-[11px] font-medium text-slate-400">
@@ -98,10 +98,10 @@ function Cardlist({ data, loading, error }: CardListProps) {
                   <div className="mt-4 flex flex-wrap gap-2">
                     {failure.emotions.map((emotion) => (
                       <span
-                        key={emotion.id}
+                        key={emotion?.id}
                         className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-600"
                       >
-                        {emotion.name}
+                        {emotion?.name}
                       </span>
                     ))}
                   </div>
