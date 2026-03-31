@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useState } from "react"
 import { BsThreeDotsVertical } from "react-icons/bs"
+import { FiZap, FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi"
 import { deleteFailure } from "@/actions/failure"
 
 interface CardListProps {
@@ -16,6 +17,7 @@ interface Failure {
   title: string
   description: string
   createdAt: string
+  aiStatus: "NOT_STARTED" | "PROCESSING" | "COMPLETED" | "FAILED"
   category: { id: number; name: string }
   emotions: { id: number; name: string }[]
 }
@@ -23,6 +25,19 @@ interface Failure {
 function Cardlist({ data, loading, error }: CardListProps) {
   const [openMenu, setOpenMenu] = useState<number | null>(null)
   const [deleteId, setDeleteId] = useState<number | null>(null)
+
+  const getAiStatusIcon = (status: Failure["aiStatus"]) => {
+    switch (status) {
+      case "COMPLETED":
+        return <FiCheckCircle className="text-emerald-500" size={14} title="Analyzed" />
+      case "PROCESSING":
+        return <FiClock className="text-amber-500 animate-pulse" size={14} title="Analyzing..." />
+      case "FAILED":
+        return <FiAlertCircle className="text-red-500" size={14} title="Analysis Failed" />
+      default:
+        return <FiZap className="text-slate-300" size={14} title="Not Analyzed" />
+    }
+  }
 
   const handleDelete = async () => {
     if (!deleteId) return
@@ -77,9 +92,12 @@ function Cardlist({ data, loading, error }: CardListProps) {
             >
               <Link href={`/dashboard/${failure.id}`} className="flex flex-1 flex-col">
                 <div className="mb-4 flex items-start justify-between gap-3">
-                  <span className="rounded-full border border-orange-100 bg-orange-50 px-3 py-1 text-[11px] font-semibold text-orange-700">
-                    {failure.category?.name || "Uncategorized"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full border border-orange-100 bg-orange-50 px-3 py-1 text-[11px] font-semibold text-orange-700">
+                      {failure.category?.name || "Uncategorized"}
+                    </span>
+                    {getAiStatusIcon(failure.aiStatus)}
+                  </div>
 
                   <span className="text-[11px] font-medium text-slate-400">
                     {date}

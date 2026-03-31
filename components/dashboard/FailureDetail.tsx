@@ -57,7 +57,7 @@ function FailureDetail({
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-3">
               <span className="rounded-full border border-orange-100 bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">
-                {failure.category.name}
+                {failure.category?.name}
               </span>
 
               <span className="text-xs font-medium text-slate-400">
@@ -97,10 +97,10 @@ function FailureDetail({
             <div className="flex flex-wrap gap-2">
               {failure.emotions.map((emotion) => (
                 <span
-                  key={emotion.id}
+                  key={emotion?.id}
                   className="rounded-full border border-rose-100 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-600"
                 >
-                  {emotion.name}
+                  {emotion?.name}
                 </span>
               ))}
             </div>

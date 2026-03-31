@@ -11,25 +11,41 @@ export async function GET(request: NextRequest) {
 
     const page = Number(request.nextUrl.searchParams.get("page")) || 1;
     const limit = Number(request.nextUrl.searchParams.get("limit")) || 10;
-    const categoryId =
-      Number(request.nextUrl.searchParams.get("categoryId")) || undefined;
+    const categoryId = Number(request.nextUrl.searchParams.get("categoryId")) || undefined;
+    const search = request.nextUrl.searchParams.get("search") || "";
 
     const skip = (page - 1) * limit;
-    const category = categoryId ? categoryId : {};
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {
+      userId: String(session.user.id),
+    };
+
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
 
     const [failures, total] = await prisma.$transaction([
       prisma.failure.findMany({
-        where: {
-          categoryId: category,
-          userId: String(session.user.id),
-        },
+        where,
         skip,
         take: limit,
+        orderBy: {
+          createdAt: 'desc',
+        },
         select: {
           id: true,
           title: true,
           description: true,
           createdAt: true,
+          aiStatus: true,
           category: {
             select: {
               id: true,
@@ -45,10 +61,7 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.failure.count({
-        where: {
-          categoryId: category,
-          userId: String(session.user.id),
-        },
+        where,
       }),
     ]);
 

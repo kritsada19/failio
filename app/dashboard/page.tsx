@@ -1,10 +1,11 @@
 "use client"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFetch } from "@/hooks/useFetch";
 import CardList from "@/components/dashboard/CardList";
 import Pagination from "@/components/paginationAndFilter/Pagination";
 import Filter from "@/components/paginationAndFilter/Filter";
 import Link from "next/link";
+import { FiSearch } from "react-icons/fi";
 
 interface ResponseData {
   failures: Failure[];
@@ -17,6 +18,7 @@ interface Failure {
   title: string;
   description: string;
   createdAt: string;
+  aiStatus: "NOT_STARTED" | "PROCESSING" | "COMPLETED" | "FAILED";
   category: { id: number; name: string }
   emotions: { id: number; name: string }[];
 }
@@ -29,8 +31,19 @@ interface Pagination {
 function Dashboard() {
   const [page, setPage] = useState<number>(1);
   const [category, setCategory] = useState<number | undefined>(undefined);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   const { data, loading, error } = useFetch<ResponseData
-  >(`/api/failure?page=${page}&limit=10&categoryId=${category}`);
+  >(`/api/failure?page=${page}&limit=10&categoryId=${category || ""}&search=${debouncedSearch}`);
 
   return (
     <>
@@ -78,26 +91,38 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Filter */}
+          {/* Search & Filter */}
           <div className="mb-2 rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-sm sm:px-6">
-            <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div className="flex-1">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                  Find your reflections
+                </h2>
+                <div className="relative">
+                  <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by title or description..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm outline-none transition-all focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100"
+                  />
+                </div>
+              </div>
+
+              <div className="w-full md:w-auto">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">
                   Filter by category
                 </h2>
-                <p className="text-sm text-slate-400">
-                  Narrow down your reflections to focus on specific patterns.
-                </p>
+                <Filter
+                  category={category}
+                  onChange={(value) => {
+                    setPage(1)
+                    setCategory(value)
+                  }}
+                />
               </div>
             </div>
-
-            <Filter
-              category={category}
-              onChange={(value) => {
-                setPage(1)
-                setCategory(value)
-              }}
-            />
           </div>
 
           {/* Content */}
