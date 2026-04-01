@@ -89,7 +89,7 @@ export async function signUpAction(
         });
 
         // สร้าง link แนบ token
-        const verifyLink = `http://localhost:3000/api/auth/verify-email?token=${token}`;
+        const verifyLink = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${token}`;
 
         // ส่ง link ให้ email ที่กรอกมาถ้าส่งได้แสดงว่า email นั้นมีจริง
         await sendVerificationEmail(email, verifyLink);
