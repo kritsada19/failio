@@ -20,7 +20,6 @@ COPY . .
 # But sensitive ones can be fake or empty if they are ONLY used at runtime
 ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN npx prisma migrate deploy
 RUN npx prisma generate
 RUN npm run build
 
@@ -58,4 +57,4 @@ ENV PORT 3000
 # set hostname to localhost
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
