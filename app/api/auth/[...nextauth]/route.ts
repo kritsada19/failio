@@ -6,11 +6,13 @@ import prisma from "@/lib/prisma";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
 import GithubProvider from "next-auth/providers/github";
+import { signInSchema } from "@/lib/validations/auth";
+import { tokenSchema } from "@/lib/validations/auth";
 
 declare module "next-auth" {
   interface Session {
     user: {
-      id: number | string;
+      id: string;
       name?: string | null;
       email?: string | null;
       role?: string;
@@ -18,13 +20,13 @@ declare module "next-auth" {
   }
 
   interface User {
-    id: number | string;
+    id: string;
     role?: string;
   }
 }
 declare module "next-auth/jwt" {
   interface JWT {
-    id?: number | string;
+    id: string;
     role?: string;
   }
 }
@@ -44,38 +46,37 @@ export const authOptions: NextAuthOptions = {
           label: "Password",
           type: "password",
         },
-        confirmPassword: {
-          label: "Confirm Password",
-          type: "password",
-        },
       },
       async authorize(credentials) {
-        if (
-          !credentials?.email ||
-          !credentials?.password ||
-          !credentials?.confirmPassword
-        ) {
-          return null;
+        const result = signInSchema.safeParse(credentials);
+
+        if (!result.success) {
+          throw new Error("Invalid email or password");
         }
 
-        if (credentials.password !== credentials.confirmPassword) {
-          throw new Error("Passwords do not match");
-        }
+        const { email, password } = result.data;
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
         });
 
         if (!user) {
           throw new Error("Invalid email or password");
         }
 
+        // ถ้าไม่ได้ยืนยันอีเมล
+        if (!user.emailVerified) {
+          throw new Error("Please verify your email first");
+        }
+
         if (!user.password) {
-          throw new Error("Invalid email or password");
+          throw new Error(
+            "This account uses social login. Please sign in with Google, Facebook, or GitHub."
+          );
         }
 
         const isValid = await bcrypt.compare(
-          credentials.password,
+          password,
           user.password,
         );
 
@@ -94,6 +95,7 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      allowDangerousEmailAccountLinking: true,
 
       // แปลงข้อมูลจาก Google เป็น user object
       profile(profile) {
@@ -110,6 +112,7 @@ export const authOptions: NextAuthOptions = {
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID as string,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET as string,
+      allowDangerousEmailAccountLinking: true,
 
       profile(profile) {
         return {
@@ -123,6 +126,7 @@ export const authOptions: NextAuthOptions = {
     GithubProvider({
       clientId: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      allowDangerousEmailAccountLinking: true,
 
       profile(profile) {
         return {
@@ -139,6 +143,7 @@ export const authOptions: NextAuthOptions = {
   // ใช้ token แทน
   session: {
     strategy: "jwt",
+    maxAge: 60 * 60, // 1 ชั่วโมง
   },
 
   callbacks: {
@@ -153,6 +158,8 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = user.role;
       }
+
+      tokenSchema.parse(token);
       return token;
     },
 
