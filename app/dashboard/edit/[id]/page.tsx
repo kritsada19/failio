@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { updateFailure, type FailureState } from "@/actions/failure";
+import { toast } from "sonner";
 
 interface Failures {
   id: number;
@@ -71,10 +72,18 @@ function EditFailurePage() {
   const { data: categoryList } = useFetch<Categories[]>("/api/category");
 
   useEffect(() => {
+    if (!state.message) return;
+
     if (state.success) {
-      router.push("/dashboard");
+      toast.success(state.message);
+
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 800);
+    } else {
+      toast.error(state.message);
     }
-  }, [state.success, router]);
+  }, [state, router]);
 
   useEffect(() => {
     if (failure) {

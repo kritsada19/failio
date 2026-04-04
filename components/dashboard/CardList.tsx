@@ -5,6 +5,7 @@ import { useState } from "react"
 import { BsThreeDotsVertical } from "react-icons/bs"
 import { FiZap, FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi"
 import { deleteFailure } from "@/actions/failure"
+import { toast } from "sonner"
 
 interface CardListProps {
   data: Failure[]
@@ -43,8 +44,15 @@ function Cardlist({ data, loading, error }: CardListProps) {
     if (!deleteId) return
 
     try {
-      await deleteFailure(deleteId)
-      window.location.reload()
+      const response = await deleteFailure(deleteId)
+      if (response.success) {
+        toast.success(response.message)
+        setTimeout(() => {
+          window.location.reload()
+        }, 800)
+      } else {
+        toast.error(response.message)
+      }
     } catch (err) {
       console.error(err)
     } finally {

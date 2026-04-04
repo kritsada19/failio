@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { createFailure, type FailureState } from "@/actions/failure";
+import { toast } from "sonner";
 
 interface Emotion {
   id: number;
@@ -42,10 +43,18 @@ export default function CreateFailurePage() {
   const [state, formAction] = useActionState(createFailure, initialState);
 
   useEffect(() => {
+    if (!state.message) return;
+
     if (state.success) {
-      router.push("/dashboard");
+      toast.success(state.message);
+
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 800);
+    } else {
+      toast.error(state.message);
     }
-  }, [state.success, router]);
+  }, [state, router]);
 
   const { data: emotionList } = useFetch<Emotion[]>("/api/emotion");
   const { data: categoryList } = useFetch<Category[]>("/api/category");
