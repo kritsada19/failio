@@ -4,18 +4,18 @@ import Image from "next/image";
 export default function Home() {
   const features = [
     {
-      title: "บันทึกความล้มเหลว",
-      desc: "จดสิ่งที่พลาดในแต่ละวัน พร้อมรายละเอียด สาเหตุ และบทเรียนที่ได้",
+      title: "Log Your Failures",
+      desc: "Record daily mistakes with details, causes, and lessons learned.",
       icon: "📝",
     },
     {
       title: "AI Suggestion",
-      desc: "ให้ AI ช่วยวิเคราะห์ความผิดพลาดและเสนอแนวทางปรับปรุงที่นำไปใช้ได้จริง",
+      desc: "Let AI analyze failures and suggest practical improvement steps.",
       icon: "🤖",
     },
     {
-      title: "เติบโตจากทุกครั้งที่พลาด",
-      desc: "เปลี่ยนความล้มเหลวให้กลายเป็นระบบพัฒนาตัวเองแบบต่อเนื่อง",
+      title: "Grow From Mistakes",
+      desc: "Turn every failure into a continuous self-improvement system.",
       icon: "📈",
     },
   ];
@@ -44,22 +44,21 @@ export default function Home() {
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-100 px-4 py-2 text-sm font-medium text-orange-700">
                 <span>✨</span>
-                เปลี่ยนความล้มเหลวให้เป็นการเรียนรู้
+                Turn failure into learning
               </div>
 
               <h1 className="max-w-2xl text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
-                บันทึกทุก<span className="text-orange-700">ความผิดพลาด</span>
-                <span className="block text-slate-700">แล้วเติบโตจากมัน</span>
+                Record Every <span className="text-orange-700">Mistake</span>
+                <span className="block text-slate-700">and Grow From It</span>
               </h1>
 
               <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
-                Failio คือเว็บสำหรับบันทึกความล้มเหลว วิเคราะห์สาเหตุ และใช้ AI ช่วยแนะนำแนวทางแก้ไข
-                เพื่อให้ทุกครั้งที่พลาด กลายเป็นบทเรียนที่พัฒนาคุณได้จริง
+                Failio is a platform to record failures, analyze causes, and use AI suggestions to ensure every mistake becomes a growth milestone.
               </p>
 
               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                 <Link href='/dashboard' className="rounded-2xl bg-slate-900 px-6 py-3 text-base font-semibold text-white shadow-lg transition hover:bg-slate-800">
-                  เริ่มบันทึกเลย
+                  Start Logging Now
                 </Link>
               </div>
             </div>
@@ -70,8 +69,8 @@ export default function Home() {
               <div className="relative rounded-4xl border border-slate-200 bg-white/90 p-5 shadow-2xl backdrop-blur-xl">
                 <div className="mb-4 flex items-center justify-between rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3">
                   <div>
-                    <p className="text-sm text-slate-500">ตัวอย่างการบันทึก</p>
-                    <p className="font-semibold text-slate-800">อ่านหนังสือไม่ทันก่อนสอบ</p>
+                    <p className="text-sm text-slate-500">Example Entry</p>
+                    <p className="font-semibold text-slate-800">Failed to finish reading before exam</p>
                   </div>
                   <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
                     Demo
@@ -80,27 +79,27 @@ export default function Home() {
 
                 <div className="space-y-4">
                   <div className="rounded-3xl border border-slate-200 bg-white p-4">
-                    <p className="text-sm text-slate-500">เกิดอะไรขึ้น?</p>
+                    <p className="text-sm text-slate-500">What happened?</p>
                     <p className="mt-2 text-sm text-slate-700">
-                      ผัดวันประกันพรุ่งและประเมินเนื้อหาที่ต้องอ่านน้อยเกินไป ทำให้เตรียมตัวไม่ทันและกดดันมากขึ้น
+                      Procrastinated and underestimated the material, leading to last-minute pressure and stress.
                     </p>
                   </div>
 
                   <div className="rounded-3xl border border-orange-200 bg-orange-50 p-4">
                     <p className="text-sm font-medium text-orange-700">AI Suggestion</p>
                     <p className="mt-2 text-sm text-slate-700">
-                      แบ่งเนื้อหาเป็นงานย่อยรายวัน ตั้ง deadline ล่วงหน้ากว่าจริง และเช็กความคืบหน้าทุกคืน
+                      Break content into small daily tasks, set earlier internal deadlines, and review progress nightly.
                     </p>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-sm text-slate-500">สาเหตุหลัก</p>
-                      <p className="mt-2 font-medium text-slate-800">วางแผนเวลาไม่ดี</p>
+                      <p className="text-sm text-slate-500">Root Cause</p>
+                      <p className="mt-2 font-medium text-slate-800">Poor time management</p>
                     </div>
                     <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-sm text-slate-500">บทเรียนที่ได้</p>
-                      <p className="mt-2 font-medium text-slate-800">เริ่มเร็ว ทบทวนทุกวัน</p>
+                      <p className="text-sm text-slate-500">Lesson Learned</p>
+                      <p className="mt-2 font-medium text-slate-800">Start early, review daily</p>
                     </div>
                   </div>
                 </div>
@@ -115,10 +114,10 @@ export default function Home() {
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-600">Features</p>
           <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            เครื่องมือที่ช่วยให้ความล้มเหลวมีความหมาย
+            Tools that make failure meaningful
           </h2>
           <p className="mt-4 text-slate-600">
-            ไม่ใช่แค่จดว่าเกิดอะไรขึ้น แต่ช่วยให้คุณเข้าใจสาเหตุและเปลี่ยนมันเป็นการพัฒนาจริง
+            Not just recording what happened, but helping you understand the cause and turn it into real growth.
           </p>
         </div>
 
@@ -145,17 +144,17 @@ export default function Home() {
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-600">Start now</p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                อย่าปล่อยให้ความล้มเหลวหายไป
-                <span className="block">เปลี่ยนมันให้เป็นบทเรียน</span>
+                Don&apos;t let failures go to waste.
+                <span className="block">Turn them into lessons.</span>
               </h2>
               <p className="mt-4 max-w-xl text-slate-600">
-                Failio ช่วยให้คุณเก็บทุกบทเรียนไว้ในที่เดียว และค่อย ๆ พัฒนาตัวเองแบบมีหลักฐาน ไม่ใช่แค่ความรู้สึก
+                Failio helps you store every lesson in one place and develop yourself based on evidence, not just feelings.
               </p>
             </div>
 
             <div className="flex flex-col gap-4 sm:flex-row lg:justify-end">
               <Link href='/sign-up' className="rounded-2xl bg-slate-900 px-6 py-3 text-base font-semibold text-white transition hover:bg-slate-800">
-                สมัครใช้งาน
+                Sign Up
               </Link>
             </div>
           </div>
