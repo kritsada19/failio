@@ -6,6 +6,7 @@ import Pagination from "@/components/paginationAndFilter/Pagination";
 import Filter from "@/components/paginationAndFilter/Filter";
 import Link from "next/link";
 import { FiSearch } from "react-icons/fi";
+import { useTranslations } from 'next-intl';
 
 interface ResponseData {
   failures: Failure[];
@@ -33,6 +34,7 @@ function Dashboard() {
   const [category, setCategory] = useState<number | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  const t = useTranslations('Dashboard');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -55,23 +57,22 @@ function Dashboard() {
               <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-2xl">
                   <span className="inline-flex rounded-full border border-orange-100 bg-orange-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-700">
-                    My Failures
+                    {t('myFailures')}
                   </span>
 
                   <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                    Reflect on setbacks. Build your next win.
+                    {t('title')}
                   </h1>
 
                   <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
-                    Review your personal failure logs, filter by category, and
-                    turn every difficult moment into a lesson worth keeping.
+                    {t('description')}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                     <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                      Failures
+                      {t('failuresCount')}
                     </p>
                     <p className="mt-1 text-lg font-bold text-slate-800">
                       {data?.total ?? 0}
@@ -80,7 +81,7 @@ function Dashboard() {
 
                   <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                     <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                      Total Pages
+                      {t('totalPages')}
                     </p>
                     <p className="mt-1 text-lg font-bold text-slate-800">
                       {data?.pagination.totalPages ?? "-"}
@@ -96,13 +97,13 @@ function Dashboard() {
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="flex-1">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                  Find your reflections
+                  {t('findReflections')}
                 </h2>
                 <div className="relative">
                   <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
-                    placeholder="Search by title or description..."
+                    placeholder={t('searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm outline-none transition-all focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100"
@@ -112,7 +113,7 @@ function Dashboard() {
 
               <div className="w-full md:w-auto">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">
-                  Filter by category
+                  {t('filterCategory')}
                 </h2>
                 <Filter
                   category={category}

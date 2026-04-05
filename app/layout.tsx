@@ -26,22 +26,30 @@ export const metadata: Metadata = {
   },
 };
 
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const session = await getServerSession(authOptions);
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SessionProvider session={session}>
-          <NavBar />
-          {children}
-          <Toaster richColors position="top-right" />
-        </SessionProvider>
+        <NextIntlClientProvider messages={messages}>
+          <SessionProvider session={session}>
+            <NavBar />
+            {children}
+            <Toaster richColors position="top-right" />
+          </SessionProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -2,30 +2,59 @@ import { getToken } from 'next-auth/jwt'
 import { NextResponse, NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
-  const user = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  })
+  const response = NextResponse.next();
+
+  // ----- i18n logic -----
+  // Setup cookie if it is missing
+  if (!request.cookies.has('NEXT_LOCALE')) {
+    const acceptLanguage = request.headers.get('accept-language');
+    const locale = acceptLanguage?.includes('th') ? 'th' : 'en';
+    response.cookies.set('NEXT_LOCALE', locale);
+  }
 
   // Get the pathname of the request
   const { pathname } = request.nextUrl
-
-  if (!user) {
-    return NextResponse.redirect(new URL('/sign-in', request.url));
+  
+  // Exclude static paths and API for auth checks
+  if (pathname.startsWith('/_next') || pathname.startsWith('/api') || pathname.includes('.')) {
+    return response;
   }
 
-  // If the pathname starts with /protected an d the user is not an admin, redirect to the home page
-  if (pathname.startsWith('/admin')) {
-    if (user.role === 'ADMIN') {
-      return NextResponse.next()
+  // Only check auth for specific paths
+  const isProtectedPath = pathname.startsWith('/dashboard') || pathname.startsWith('/profile') || pathname.startsWith('/admin');
+
+  if (isProtectedPath) {
+    const user = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+    })
+
+    if (!user) {
+      const redirectRes = NextResponse.redirect(new URL('/sign-in', request.url));
+      // Carry over locale cookie
+      if (!request.cookies.has('NEXT_LOCALE')) {
+        redirectRes.cookies.set('NEXT_LOCALE', response.cookies.get('NEXT_LOCALE')!.value);
+      }
+      return redirectRes;
     }
-    return NextResponse.redirect(new URL('/', request.url))
+
+    // If the pathname starts with /admin and the user is not an admin, redirect to the home page
+    if (pathname.startsWith('/admin')) {
+      if (user.role === 'ADMIN') {
+        return response;
+      }
+      const redirectHome = NextResponse.redirect(new URL('/', request.url));
+      if (!request.cookies.has('NEXT_LOCALE')) {
+        redirectHome.cookies.set('NEXT_LOCALE', response.cookies.get('NEXT_LOCALE')!.value);
+      }
+      return redirectHome;
+    }
   }
 
   // Continue with the request if the user is an admin or the route is not protected
-  return NextResponse.next()
+  return response;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/profile/:path*", "/admin/:path*"],
+  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
 };

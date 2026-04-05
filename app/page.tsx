@@ -1,21 +1,23 @@
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from 'next-intl';
 
 export default function Home() {
+  const t = useTranslations('Home');
   const features = [
     {
-      title: "Log Failures",
-      desc: "Record daily mistakes with details, causes, and lessons learned.",
+      title: t('feature1Title'),
+      desc: t('feature1Desc'),
       icon: "📝",
     },
     {
-      title: "AI Suggestion",
-      desc: "Let AI analyze your mistakes and suggest actionable improvements.",
+      title: t('feature2Title'),
+      desc: t('feature2Desc'),
       icon: "🤖",
     },
     {
-      title: "Grow from Mistakes",
-      desc: "Turn failure into a continuous self-improvement system.",
+      title: t('feature3Title'),
+      desc: t('feature3Desc'),
       icon: "📈",
     },
   ];
@@ -44,22 +46,21 @@ export default function Home() {
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-100 px-4 py-2 text-sm font-medium text-orange-700">
                 <span>✨</span>
-                Turn Failure into Learning
+                {t('heroTag')}
               </div>
 
               <h1 className="max-w-2xl text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
-                Record Every <span className="text-orange-700">Mistake</span>
-                <span className="block text-slate-700">and Grow From It</span>
+                {t('heroTitle1')} <span className="text-orange-700">{t('heroTitleHighlight')}</span>
+                <span className="block text-slate-700">{t('heroTitle2')}</span>
               </h1>
 
               <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
-                Failio is a platform to record failures, analyze causes, and use AI for improvement suggestions, 
-                ensuring every mistake becomes a valuable lesson for growth.
+                {t('heroDesc')}
               </p>
 
               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                 <Link href='/dashboard' className="rounded-2xl bg-slate-900 px-6 py-3 text-base font-semibold text-white shadow-lg transition hover:bg-slate-800">
-                  Start Logging Now
+                  {t('startLoggingBtn')}
                 </Link>
               </div>
             </div>
@@ -70,37 +71,37 @@ export default function Home() {
               <div className="relative rounded-4xl border border-slate-200 bg-white/90 p-5 shadow-2xl backdrop-blur-xl">
                 <div className="mb-4 flex items-center justify-between rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3">
                   <div>
-                    <p className="text-sm text-slate-500">Sample Log</p>
-                    <p className="font-semibold text-slate-800">Didn&apos;t finish reading before exam</p>
+                    <p className="text-sm text-slate-500">{t('sampleLog')}</p>
+                    <p className="font-semibold text-slate-800">{t('sampleTitle')}</p>
                   </div>
                   <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
-                    Demo
+                    {t('demoBadge')}
                   </span>
                 </div>
 
                 <div className="space-y-4">
                   <div className="rounded-3xl border border-slate-200 bg-white p-4">
-                    <p className="text-sm text-slate-500">What happened?</p>
+                    <p className="text-sm text-slate-500">{t('whatHappened')}</p>
                     <p className="mt-2 text-sm text-slate-700">
-                      Procrastinated and underestimated the material, leading to poor preparation and high pressure.
+                      {t('whatHappenedDesc')}
                     </p>
                   </div>
 
                   <div className="rounded-3xl border border-orange-200 bg-orange-50 p-4">
-                    <p className="text-sm font-medium text-orange-700">AI Suggestion</p>
+                    <p className="text-sm font-medium text-orange-700">{t('aiSuggestion')}</p>
                     <p className="mt-2 text-sm text-slate-700">
-                      Break down content into daily tasks, set earlier deadlines, and check progress every night.
+                      {t('aiSuggestionDesc')}
                     </p>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-sm text-slate-500">Root Cause</p>
-                      <p className="mt-2 font-medium text-slate-800">Poor time management</p>
+                      <p className="text-sm text-slate-500">{t('rootCause')}</p>
+                      <p className="mt-2 font-medium text-slate-800">{t('rootCauseDesc')}</p>
                     </div>
                     <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-sm text-slate-500">Lessons Learned</p>
-                      <p className="mt-2 font-medium text-slate-800">Start early, review daily</p>
+                      <p className="text-sm text-slate-500">{t('lessonsLearned')}</p>
+                      <p className="mt-2 font-medium text-slate-800">{t('lessonsLearnedDesc')}</p>
                     </div>
                   </div>
                 </div>
@@ -113,12 +114,12 @@ export default function Home() {
       {/* Features */}
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-600">Features</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-600">{t('featuresTag')}</p>
           <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            Tools to make failure meaningful
+            {t('featuresTitle')}
           </h2>
           <p className="mt-4 text-slate-600">
-            Don&apos;t just record what happened—understand the cause and turn it into real growth.
+            {t('featuresDesc')}
           </p>
         </div>
 
@@ -143,19 +144,19 @@ export default function Home() {
         <div className="rounded-[2.5rem] border border-orange-200 bg-linear-to-r from-orange-50 to-white p-8 shadow-xl sm:p-12">
           <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-600">Start now</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-600">{t('ctaTag')}</p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                Don&apos;t let failure fade away.
-                <span className="block">Turn it into a lesson.</span>
+                {t('ctaTitle')}
+                <span className="block">{t('ctaTitle2')}</span>
               </h2>
               <p className="mt-4 max-w-xl text-slate-600">
-                Failio helps you store every lesson in one place and grow based on evidence, not just feelings.
+                {t('ctaDesc')}
               </p>
             </div>
 
             <div className="flex flex-col gap-4 sm:flex-row lg:justify-end">
               <Link href='/sign-up' className="rounded-2xl bg-slate-900 px-6 py-3 text-base font-semibold text-white transition hover:bg-slate-800">
-                Sign Up
+                {t('startLoggingBtn')}
               </Link>
             </div>
           </div>

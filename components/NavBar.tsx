@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { useTranslations } from 'next-intl';
 
 function NavBar() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const t = useTranslations('Navigation');
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -21,7 +23,7 @@ function NavBar() {
         className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
         onClick={() => setIsOpen(false)}
       >
-        Home
+        {t('home')}
       </Link>
 
       {isAdmin ? (
@@ -30,7 +32,7 @@ function NavBar() {
           className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
           onClick={() => setIsOpen(false)}
         >
-          Dashboard
+          {t('dashboard')}
         </Link>
       ) : (
         <>
@@ -39,14 +41,14 @@ function NavBar() {
             className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
             onClick={() => setIsOpen(false)}
           >
-            My Failures
+            {t('myFailures')}
           </Link>
           <Link
             href="/dashboard/analytics"
             className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
             onClick={() => setIsOpen(false)}
           >
-            Growth Insights
+            {t('growthInsights')}
           </Link>
         </>
       )}
@@ -58,28 +60,28 @@ function NavBar() {
             className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
             onClick={() => setIsOpen(false)}
           >
-            Users
+            {t('users')}
           </Link>
           <Link
             href="/admin/failures"
             className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
             onClick={() => setIsOpen(false)}
           >
-            Failures
+            {t('failures')}
           </Link>
           <Link
             href="/admin/categories"
             className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
             onClick={() => setIsOpen(false)}
           >
-            Categories
+            {t('categories')}
           </Link>
           <Link
             href="/admin/emotions"
             className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
             onClick={() => setIsOpen(false)}
           >
-            Emotions
+            {t('emotions')}
           </Link>
         </>
       )}
@@ -114,7 +116,7 @@ function NavBar() {
                 href="/profile"
                 className="inline-flex items-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
               >
-                Profile
+                {t('profile')}
               </Link>
             ) : (
               <div className="flex items-center gap-3">
@@ -122,14 +124,14 @@ function NavBar() {
                   href="/sign-in"
                   className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
                 >
-                  Sign In
+                  {t('signIn')}
                 </Link>
 
                 <Link
                   href="/sign-up"
                   className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-orange-600"
                 >
-                  Sign Up
+                  {t('signUp')}
                 </Link>
               </div>
             )}
@@ -162,7 +164,7 @@ function NavBar() {
         <div className="flex flex-col gap-2 p-6">
           <div className="mb-4 flex flex-col gap-2">
             <span className="px-4 text-xs font-semibold tracking-wider text-slate-400 uppercase">
-              Navigation
+              {t('navigation')}
             </span>
             {renderNavLinks("block rounded-xl px-4 py-3 text-base font-medium text-slate-600 hover:bg-slate-50 hover:text-orange-600")}
           </div>
@@ -174,7 +176,7 @@ function NavBar() {
                 className="flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-base font-medium text-white shadow-sm transition-all active:scale-95"
                 onClick={() => setIsOpen(false)}
               >
-                Profile Settings
+                {t('profileSettings')}
               </Link>
             ) : (
               <>
@@ -183,14 +185,14 @@ function NavBar() {
                   className="flex items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-base font-medium text-slate-600 transition-all hover:bg-slate-50"
                   onClick={() => setIsOpen(false)}
                 >
-                  Sign In
+                  {t('signIn')}
                 </Link>
                 <Link
                   href="/sign-up"
                   className="flex items-center justify-center rounded-xl bg-orange-500 px-4 py-3 text-base font-semibold text-white shadow-sm transition-all hover:bg-orange-600 active:scale-95"
                   onClick={() => setIsOpen(false)}
                 >
-                  Get Started
+                  {t('getStarted')}
                 </Link>
               </>
             )}
