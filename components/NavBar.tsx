@@ -2,17 +2,27 @@
 
 import Image from "next/image";
 import Link from "next/link";
+// ...
 import { useSession } from "next-auth/react";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 function NavBar() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations('Navigation');
+  const locale = useLocale();
+  const router = useRouter();
 
   const toggleMenu = () => setIsOpen(!isOpen);
+
+  const toggleLanguage = () => {
+    const nextLocale = locale === 'en' ? 'th' : 'en';
+    document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000`;
+    router.refresh();
+  };
 
   const isAdmin = session?.user.role === "ADMIN";
 
@@ -109,7 +119,7 @@ function NavBar() {
         </div>
 
         {/* Auth / Profile & Mobile Toggle */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="hidden items-center sm:flex">
             {session ? (
               <Link
@@ -136,6 +146,15 @@ function NavBar() {
               </div>
             )}
           </div>
+
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center justify-center h-9 w-14 gap-1.5 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-600 shadow-sm transition-all hover:bg-slate-50 hover:text-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 active:scale-95"
+            aria-label="Toggle language"
+            title={locale === 'en' ? 'Switch to Thai' : 'Switch to English'}
+          >
+            <span className="uppercase">{locale}</span>
+          </button>
 
           {/* Mobile Menu Toggle */}
           <button

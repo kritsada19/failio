@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
 
+// สร้าง plugin ที่ชี้ไปยังไฟล์ ./i18n/request.ts
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const nextConfig: NextConfig = {
@@ -27,4 +28,5 @@ const nextConfig: NextConfig = {
   },
 };
 
+// เพิ่มความสามารถของ next-intl ให้กับ next.config.ts
 export default withNextIntl(nextConfig);

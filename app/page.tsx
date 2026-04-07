@@ -3,7 +3,11 @@ import Image from "next/image";
 import { useTranslations } from 'next-intl';
 
 export default function Home() {
+
+  // useTranslations() คือ hook ของ next-intl ที่ใช้สำหรับดึงข้อความจากไฟล์ JSON
+  // 'Home' คือชื่อของ key ในไฟล์ JSON
   const t = useTranslations('Home');
+
   const features = [
     {
       title: t('feature1Title'),

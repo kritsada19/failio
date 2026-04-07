@@ -35,6 +35,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession(authOptions);
+
+  // ดึง locale และ messages จาก next-intl ที่ได้จาก request.ts
   const locale = await getLocale();
   const messages = await getMessages();
 
@@ -43,6 +45,8 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* NextIntlClientProvider คือ component ของ next-intl ที่ใช้ส่ง messages ไปยัง client component */}
+        {/* ทำให้เรียกใช้ hook useTranslations() ใน client component ได้ */}
         <NextIntlClientProvider messages={messages}>
           <SessionProvider session={session}>
             <NavBar />

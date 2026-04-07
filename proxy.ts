@@ -9,6 +9,8 @@ export async function proxy(request: NextRequest) {
   if (!request.cookies.has('NEXT_LOCALE')) {
     const acceptLanguage = request.headers.get('accept-language');
     const locale = acceptLanguage?.includes('th') ? 'th' : 'en';
+
+    // set cookie แล้วไปต่อ
     response.cookies.set('NEXT_LOCALE', locale);
   }
 
@@ -33,6 +35,8 @@ export async function proxy(request: NextRequest) {
       const redirectRes = NextResponse.redirect(new URL('/sign-in', request.url));
       // Carry over locale cookie
       if (!request.cookies.has('NEXT_LOCALE')) {
+
+        // set cookie ก่อนส่งไปหน้า sign-in
         redirectRes.cookies.set('NEXT_LOCALE', response.cookies.get('NEXT_LOCALE')!.value);
       }
       return redirectRes;
