@@ -6,6 +6,7 @@ import { useFetch } from "@/hooks/useFetch";
 import { useSession, signOut } from "next-auth/react";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import { Mail, CalendarDays, User2, LogOut } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 interface UserProfile {
     id: string;
@@ -19,6 +20,7 @@ interface UserProfile {
 export default function ProfilePage() {
     const router = useRouter();
     const { data: session, status } = useSession();
+    const t = useTranslations('Profile');
 
     const { data: user, loading, error } = useFetch<UserProfile>(`/api/me`);
 
@@ -41,13 +43,13 @@ export default function ProfilePage() {
             <main className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center">
                 <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center shadow-sm">
                     <User2 className="mx-auto h-8 w-8 text-red-500 mb-3" />
-                    <h2 className="text-lg font-semibold text-red-800 mb-1">Failed to Load Profile</h2>
+                    <h2 className="text-lg font-semibold text-red-800 mb-1">{t('failedLoad')}</h2>
                     <p className="text-sm text-red-600 px-4">{error}</p>
                     <button
                         onClick={() => window.location.reload()}
                         className="mt-4 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-xl text-sm transition-colors"
                     >
-                        Try Again
+                        {t('tryAgain')}
                     </button>
                 </div>
             </main>
@@ -69,10 +71,10 @@ export default function ProfilePage() {
             <div className="mx-auto max-w-3xl">
                 {/* Header */}
                 <div className="mb-6">
-                    <p className="text-sm font-medium text-gray-500">Account</p>
-                    <h1 className="text-3xl font-semibold text-gray-900">Your Profile</h1>
+                    <p className="text-sm font-medium text-gray-500">{t('accountTag')}</p>
+                    <h1 className="text-3xl font-semibold text-gray-900">{t('title')}</h1>
                     <p className="mt-2 text-sm text-gray-500">
-                        Manage your basic account information in Failio.
+                        {t('desc')}
                     </p>
                 </div>
 
@@ -92,10 +94,10 @@ export default function ProfilePage() {
                         {/* Main Info */}
                         <div className="mb-6">
                             <h2 className="text-2xl font-semibold text-gray-900 truncate">
-                                {user.name ?? "Unnamed User"}
+                                {user.name ?? t('unnamedUser')}
                             </h2>
                             <p className="mt-1 text-sm text-gray-500 truncate">
-                                {user.email ?? "No email"}
+                                {user.email ?? t('noEmail')}
                             </p>
                         </div>
 
@@ -103,17 +105,17 @@ export default function ProfilePage() {
                         <div className="grid gap-4 sm:grid-cols-3">
                             <InfoCard
                                 icon={<User2 className="w-5 h-5 text-gray-700" />}
-                                label="Name"
+                                label={t('nameLabel')}
                                 value={user.name ?? "-"}
                             />
                             <InfoCard
                                 icon={<Mail className="w-5 h-5 text-gray-700" />}
-                                label="Email"
+                                label={t('emailLabel')}
                                 value={user.email ?? "-"}
                             />
                             <InfoCard
                                 icon={<CalendarDays className="w-5 h-5 text-gray-700" />}
-                                label="Joined"
+                                label={t('joinedLabel')}
                                 value={joinedDate}
                             />
                         </div>
@@ -121,8 +123,7 @@ export default function ProfilePage() {
                         {/* Optional small note */}
                         <div className="mt-6 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
                             <p className="text-sm text-gray-500">
-                                Your profile helps personalize your Failio experience and keeps
-                                your account information organized.
+                                {t('profileNote')}
                             </p>
                         </div>
 
@@ -133,7 +134,7 @@ export default function ProfilePage() {
                                 className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition-all duration-200 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                             >
                                 <LogOut className="h-4 w-4" />
-                                Sign Out
+                                {t('signOutBtn')}
                             </button>
                         </div>
                     </div>
@@ -155,7 +156,7 @@ function InfoCard({
     return (
         <div className="rounded-2xl border border-gray-100 bg-white px-4 py-4 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100">
+                <div className="h-9 w-9 flex items-center justify-center rounded-full bg-gray-100">
                     {icon}
                 </div>
                 <p className="text-sm font-medium text-gray-500">{label}</p>

@@ -8,6 +8,7 @@ import {
   Zap,
   Activity
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface AnalyticsData {
   totalFailures: number;
@@ -17,6 +18,8 @@ interface AnalyticsData {
 }
 
 export default function GrowthCharts({ data, loading }: { data: AnalyticsData | null, loading: boolean }) {
+  const t = useTranslations('Analytics');
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -38,10 +41,10 @@ export default function GrowthCharts({ data, loading }: { data: AnalyticsData | 
             <div className="p-3 rounded-2xl bg-amber-100 text-amber-600">
               <Activity size={20} />
             </div>
-            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Total Failures</span>
+            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">{t('totalFailures')}</span>
           </div>
           <p className="text-3xl font-black text-slate-800">{data.totalFailures}</p>
-          <p className="mt-1 text-xs text-slate-500 font-medium">Logged in the last 30 days</p>
+          <p className="mt-1 text-xs text-slate-500 font-medium">{t('totalFailuresNote')}</p>
         </div>
 
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -49,10 +52,10 @@ export default function GrowthCharts({ data, loading }: { data: AnalyticsData | 
             <div className="p-3 rounded-2xl bg-emerald-100 text-emerald-600">
               <Zap size={20} />
             </div>
-            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Wisdom Gained</span>
+            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">{t('wisdomGained')}</span>
           </div>
           <p className="text-3xl font-black text-slate-800">{data.totalAnalyzed}</p>
-          <p className="mt-1 text-xs text-slate-500 font-medium">Failures analyzed by AI</p>
+          <p className="mt-1 text-xs text-slate-500 font-medium">{t('wisdomNote')}</p>
         </div>
 
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:col-span-2 lg:col-span-1">
@@ -60,12 +63,12 @@ export default function GrowthCharts({ data, loading }: { data: AnalyticsData | 
             <div className="p-3 rounded-2xl bg-blue-100 text-blue-600">
               <Target size={20} />
             </div>
-            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Success Rate</span>
+            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">{t('successRate')}</span>
           </div>
           <p className="text-3xl font-black text-slate-800">
             {data.totalFailures > 0 ? Math.round((data.totalAnalyzed / data.totalFailures) * 100) : 0}%
           </p>
-          <p className="mt-1 text-xs text-slate-500 font-medium">Analysis completion rate</p>
+          <p className="mt-1 text-xs text-slate-500 font-medium">{t('successRateNote')}</p>
         </div>
       </div>
 
@@ -77,14 +80,14 @@ export default function GrowthCharts({ data, loading }: { data: AnalyticsData | 
               <Layers size={24} />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-slate-800">Recurring Themes</h3>
-              <p className="text-sm text-slate-500 font-medium">Where setbacks happen most</p>
+              <h3 className="text-xl font-bold text-slate-800">{t('recurringThemes')}</h3>
+              <p className="text-sm text-slate-500 font-medium">{t('recurringThemesDesc')}</p>
             </div>
           </div>
 
           {data.topCategories.length === 0 ? (
             <div className="h-48 flex items-center justify-center text-slate-300 text-sm italic">
-              No categories classified yet
+              {t('noCategories')}
             </div>
           ) : (
             <div className="space-y-5">
@@ -116,14 +119,14 @@ export default function GrowthCharts({ data, loading }: { data: AnalyticsData | 
               <Smile size={24} />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-slate-800">Emotional Landscape</h3>
-              <p className="text-sm text-slate-500 font-medium">Your feelings towards failure</p>
+              <h3 className="text-xl font-bold text-slate-800">{t('emotionalLandscape')}</h3>
+              <p className="text-sm text-slate-500 font-medium">{t('emotionalLandscapeDesc')}</p>
             </div>
           </div>
 
           {data.emotions.length === 0 ? (
             <div className="h-32 flex items-center justify-center text-slate-300 text-sm italic">
-               No emotional data recorded
+               {t('noEmotions')}
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">

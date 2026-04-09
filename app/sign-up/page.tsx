@@ -8,6 +8,7 @@ import { useFormStatus } from "react-dom";
 import { signUpAction, type SignUpState } from "@/actions/auth/sign-up";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from 'next-intl';
 
 const initialState: SignUpState = {
     success: false,
@@ -18,13 +19,14 @@ const initialState: SignUpState = {
 
 function SignUpButton() {
     const { pending } = useFormStatus();
+    const t = useTranslations('Auth');
     return (
         <button
             type="submit"
             disabled={pending}
             className="mt-6 w-full rounded-2xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
-            {pending ? "Creating account..." : "Sign Up"}
+            {pending ? t('creatingAccount') : t('signUpBtn')}
         </button>
     );
 }
@@ -32,6 +34,7 @@ function SignUpButton() {
 export default function SignUp() {
     const [state, formAction] = useActionState(signUpAction, initialState);
     const router = useRouter();
+    const t = useTranslations('Auth');
 
     useEffect(() => {
         if (state.success) {
@@ -50,10 +53,10 @@ export default function SignUp() {
                     <div className="mb-6 text-center">
                         <p className="text-sm font-medium text-amber-600">Failio</p>
                         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-                            Create your account
+                            {t('signUpTitle')}
                         </h1>
                         <p className="mt-2 text-sm text-slate-600">
-                            Start recording failures and turn them into growth.
+                            {t('signUpDesc')}
                         </p>
                     </div>
 
@@ -61,13 +64,13 @@ export default function SignUp() {
                     <div className="space-y-5">
                         <div>
                             <label className="mb-2 block text-sm font-semibold text-slate-800">
-                                Name
+                                {t('nameLabel')}
                             </label>
                             <input
                                 type="text"
                                 name="name"
                                 required
-                                placeholder="Your name"
+                                placeholder={t('namePlaceholder')}
                                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                             />
                             {state.error?.name && (
@@ -77,13 +80,13 @@ export default function SignUp() {
 
                         <div>
                             <label className="mb-2 block text-sm font-semibold text-slate-800">
-                                Email
+                                {t('emailLabel')}
                             </label>
                             <input
                                 type="email"
                                 name="email"
                                 required
-                                placeholder="you@example.com"
+                                placeholder={t('emailPlaceholder')}
                                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                             />
                             {state.error?.email && (
@@ -93,13 +96,13 @@ export default function SignUp() {
 
                         <div>
                             <label className="mb-2 block text-sm font-semibold text-slate-800">
-                                Password
+                                {t('passwordLabel')}
                             </label>
                             <input
                                 type="password"
                                 name="password"
                                 required
-                                placeholder="••••••••"
+                                placeholder={t('passwordPlaceholder')}
                                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                             />
                             {state.error?.password && (
@@ -109,13 +112,13 @@ export default function SignUp() {
 
                         <div>
                             <label className="mb-2 block text-sm font-semibold text-slate-800">
-                                Confirm Password
+                                {t('confirmPasswordLabel')}
                             </label>
                             <input
                                 type="password"
                                 name="confirmPassword"
                                 required
-                                placeholder="••••••••"
+                                placeholder={t('passwordPlaceholder')}
                                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                             />
                             {state.error?.confirmPassword && (
@@ -130,7 +133,7 @@ export default function SignUp() {
                     {/* Divider */}
                     <div className="my-6 flex items-center">
                         <div className="h-px flex-1 bg-slate-200" />
-                        <span className="px-3 text-sm text-slate-400">or continue with</span>
+                        <span className="px-3 text-sm text-slate-400">{t('orContinueWith')}</span>
                         <div className="h-px flex-1 bg-slate-200" />
                     </div>
 
@@ -142,7 +145,7 @@ export default function SignUp() {
                             className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition hover:border-amber-300 hover:bg-amber-50"
                         >
                             <FaGoogle size={18} />
-                            Continue with Google
+                            {t('continueWithGoogle')}
                         </button>
 
                         <button
@@ -151,7 +154,7 @@ export default function SignUp() {
                             className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition hover:border-amber-300 hover:bg-amber-50"
                         >
                             <FaFacebook size={18} />
-                            Continue with Facebook
+                            {t('continueWithFacebook')}
                         </button>
 
                         <button
@@ -160,19 +163,19 @@ export default function SignUp() {
                             className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition hover:border-amber-300 hover:bg-amber-50"
                         >
                             <FaGithub size={18} />
-                            Continue with GitHub
+                            {t('continueWithGithub')}
                         </button>
                     </div>
 
                     {/* Footer */}
                     <div className="mt-6 text-center">
                         <p className="text-sm text-slate-600">
-                            Already have an account?{" "}
+                            {t('alreadyHaveAccount')}{" "}
                             <Link
                                 href="/sign-in"
                                 className="font-semibold text-amber-700 hover:text-amber-800 hover:underline"
                             >
-                                Sign In
+                                {t('signInLink')}
                             </Link>
                         </p>
                     </div>

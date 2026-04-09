@@ -5,12 +5,14 @@ import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FaGoogle, FaFacebook, FaGithub } from "react-icons/fa";
 import Link from "next/link";
+import { useTranslations } from 'next-intl';
 
 export default function SignIn() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const t = useTranslations('Auth');
 
   const router = useRouter();
 
@@ -58,10 +60,10 @@ export default function SignIn() {
           <div className="mb-6 text-center">
             <p className="text-sm font-medium text-amber-600">Failio</p>
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-              Welcome back
+              {t('signInTitle')}
             </h1>
             <p className="mt-2 text-sm text-slate-600">
-              Sign in to continue turning failures into lessons.
+              {t('signInDesc')}
             </p>
           </div>
 
@@ -69,28 +71,28 @@ export default function SignIn() {
           <div className="space-y-5">
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-800">
-                Email
+                {t('emailLabel')}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="you@example.com"
+                placeholder={t('emailPlaceholder')}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
               />
             </div>
 
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-800">
-                Password
+                {t('passwordLabel')}
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="••••••••"
+                placeholder={t('passwordPlaceholder')}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
               />
             </div>
@@ -109,7 +111,7 @@ export default function SignIn() {
               href="/forgot-password"
               className="text-sm font-medium text-amber-700 hover:text-amber-800 hover:underline"
             >
-              Forgot password?
+              {t('forgotPassword')}
             </Link>
           </div>
 
@@ -119,13 +121,13 @@ export default function SignIn() {
             disabled={loading}
             className="mt-6 w-full rounded-2xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? t('signingIn') : t('signInBtn')}
           </button>
 
           {/* Divider */}
           <div className="my-6 flex items-center">
             <div className="h-px flex-1 bg-slate-200" />
-            <span className="px-3 text-sm text-slate-400">or continue with</span>
+            <span className="px-3 text-sm text-slate-400">{t('orContinueWith')}</span>
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
@@ -137,7 +139,7 @@ export default function SignIn() {
               className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition hover:border-amber-300 hover:bg-amber-50"
             >
               <FaGoogle size={18} />
-              Continue with Google
+              {t('continueWithGoogle')}
             </button>
 
             <button
@@ -146,7 +148,7 @@ export default function SignIn() {
               className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition hover:border-amber-300 hover:bg-amber-50"
             >
               <FaFacebook size={18} />
-              Continue with Facebook
+              {t('continueWithFacebook')}
             </button>
 
             <button
@@ -155,19 +157,19 @@ export default function SignIn() {
               className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition hover:border-amber-300 hover:bg-amber-50"
             >
               <FaGithub size={18} />
-              Continue with GitHub
+              {t('continueWithGithub')}
             </button>
           </div>
 
           {/* Footer */}
           <div className="mt-6 text-center">
             <p className="text-sm text-slate-600">
-              Don&apos;t have an account?{" "}
+              {t('noAccount')}{" "}
               <Link
                 href="/sign-up"
                 className="font-semibold text-amber-700 hover:text-amber-800 hover:underline"
               >
-                Sign Up
+                {t('signUpLink')}
               </Link>
             </p>
           </div>

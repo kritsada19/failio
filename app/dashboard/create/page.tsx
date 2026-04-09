@@ -7,6 +7,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { createFailure, type FailureState } from "@/actions/failure";
 import { toast } from "sonner";
+import { useTranslations } from 'next-intl';
 
 interface Emotion {
   id: number;
@@ -26,6 +27,7 @@ const initialState: FailureState = {
 
 function SubmitButton() {
   const { pending } = useFormStatus();
+  const t = useTranslations('CreateFailure');
 
   return (
     <button
@@ -33,7 +35,7 @@ function SubmitButton() {
       disabled={pending}
       className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {pending ? "Creating..." : "Create failure"}
+      {pending ? t('creating') : t('createBtn')}
     </button>
   );
 }
@@ -41,6 +43,7 @@ function SubmitButton() {
 export default function CreateFailurePage() {
   const router = useRouter();
   const [state, formAction] = useActionState(createFailure, initialState);
+  const t = useTranslations('CreateFailure');
 
   useEffect(() => {
     if (!state.message) return;
@@ -74,10 +77,10 @@ export default function CreateFailurePage() {
         <div className="mb-6">
           <p className="text-sm font-medium text-amber-600">Failio</p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
-            Create a new failure
+            {t('title')}
           </h1>
           <p className="mt-2 text-sm text-slate-600">
-            บันทึกความผิดพลาดของวันนี้ แล้วเปลี่ยนมันให้เป็นบทเรียน
+            {t('subtitle')}
           </p>
         </div>
 
@@ -94,12 +97,12 @@ export default function CreateFailurePage() {
             {/* Title */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-800">
-                Title
+                {t('titleLabel')}
               </label>
               <input
                 type="text"
                 name="title"
-                placeholder="เช่น พูดในที่ประชุมแล้วลืมประเด็น"
+                placeholder={t('titlePlaceholder')}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
               />
               {state.error?.title && (
@@ -110,11 +113,11 @@ export default function CreateFailurePage() {
             {/* Description */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-800">
-                Description
+                {t('descLabel')}
               </label>
               <textarea
                 name="description"
-                placeholder="เล่าว่าเกิดอะไรขึ้น คุณรู้สึกยังไง และคิดว่าพลาดตรงไหน..."
+                placeholder={t('descPlaceholder')}
                 className="min-h-40 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                 rows={6}
               />
@@ -128,14 +131,14 @@ export default function CreateFailurePage() {
             {/* Category */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-800">
-                Category
+                {t('categoryLabel')}
               </label>
               <select
                 name="categoryId"
                 defaultValue=""
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
               >
-                <option value="">Select category</option>
+                <option value="">{t('selectCategory')}</option>
                 {categoryList?.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -152,7 +155,7 @@ export default function CreateFailurePage() {
             {/* Emotions */}
             <div>
               <label className="mb-3 block text-sm font-semibold text-slate-800">
-                Emotions
+                {t('emotionsLabel')}
               </label>
 
               <div className="flex flex-wrap gap-2">
@@ -187,7 +190,7 @@ export default function CreateFailurePage() {
               )}
 
               <p className="mt-2 text-xs text-slate-500">
-                เลือกอารมณ์ที่ตรงกับสิ่งที่คุณรู้สึกตอนเกิดเหตุการณ์
+                {t('emotionsHint')}
               </p>
             </div>
 
@@ -198,7 +201,7 @@ export default function CreateFailurePage() {
                 onClick={() => router.push("/dashboard")}
                 className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
               >
-                Cancel
+                {t('cancelBtn')}
               </button>
 
               <SubmitButton />

@@ -4,6 +4,7 @@ import React from 'react';
 import { useFetch } from '@/hooks/useFetch';
 import GrowthCharts from '@/components/dashboard/GrowthCharts';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 interface AnalyticsData {
   totalFailures: number;
@@ -15,6 +16,7 @@ interface AnalyticsData {
 
 export default function AnalyticsDashboardPage() {
   const { data, loading, error } = useFetch<AnalyticsData>('/api/me/analytics');
+  const t = useTranslations('Analytics');
 
   return (
     <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white">
@@ -26,17 +28,17 @@ export default function AnalyticsDashboardPage() {
               href="/dashboard"
               className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-orange-500 transition-colors uppercase tracking-widest group"
             >
-              ← Back to My Failures
+              ← {t('backBtn')}
             </Link>
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-600 text-xs font-bold uppercase tracking-wider mb-2">
-                ✨ Growth Path
+                ✨ {t('tag')}
               </div>
               <h1 className="text-4xl font-black tracking-tight text-slate-900">
-                Personal <span className="text-orange-500">Growth Dashboard.</span>
+                {t('title')}<span className="text-orange-500">{t('titleHighlight')}</span>
               </h1>
               <p className="text-lg text-slate-600 font-medium max-w-2xl">
-                 Visualize your journey from failure to wisdom. Track patterns, emotions, and lessons learned.
+                 {t('desc')}
               </p>
             </div>
           </div>
@@ -53,13 +55,13 @@ export default function AnalyticsDashboardPage() {
         {/* Action Call for Growth */}
         {!loading && data && data.totalFailures > 0 && (
           <div className="mt-12 rounded-[2.5rem] border border-orange-200 bg-linear-to-r from-orange-50 to-white p-10 text-center shadow-sm">
-            <h4 className="text-2xl font-bold text-slate-800 italic">&quot;Every failure is a step closer to success.&quot;</h4>
+            <h4 className="text-2xl font-bold text-slate-800 italic">{t('growthQuote')}</h4>
             <div className="mt-6 flex justify-center">
               <Link 
                 href="/dashboard/create" 
                 className="rounded-2xl bg-slate-900 px-8 py-3 text-sm font-bold text-white shadow-lg transition-all hover:scale-105 hover:bg-slate-800"
               >
-                Log a new reflection
+                {t('logNewBtn')}
               </Link>
             </div>
           </div>
