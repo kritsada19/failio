@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
-import { Toaster } from "sonner";
+import AppToaster from "@/components/AppToaster";
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
@@ -51,7 +51,7 @@ export default async function RootLayout({
           <SessionProvider session={session}>
             <NavBar />
             {children}
-            <Toaster richColors position="top-right" />
+            <AppToaster />
           </SessionProvider>
         </NextIntlClientProvider>
       </body>
