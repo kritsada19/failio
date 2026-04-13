@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
-import { Toaster } from "sonner";
+import AppToaster from "@/components/AppToaster";
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import SessionProvider from "../components/SessionProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,7 +42,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -49,9 +50,11 @@ export default async function RootLayout({
         {/* ทำให้เรียกใช้ hook useTranslations() ใน client component ได้ */}
         <NextIntlClientProvider messages={messages}>
           <SessionProvider session={session}>
-            <NavBar />
-            {children}
-            <Toaster richColors position="top-right" />
+            <ThemeProvider>
+              <NavBar />
+              {children}
+              <AppToaster />
+            </ThemeProvider>
           </SessionProvider>
         </NextIntlClientProvider>
       </body>

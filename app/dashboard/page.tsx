@@ -49,41 +49,41 @@ function Dashboard() {
 
   return (
     <>
-      <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white">
+      <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-500">
         <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-            <div className="bg-linear-to-br from-orange-50 via-white to-white px-6 py-8 sm:px-8">
+          <div className="mb-8 overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            <div className="bg-linear-to-br from-orange-50 via-white to-white dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 px-6 py-8 sm:px-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-2xl">
-                  <span className="inline-flex rounded-full border border-orange-100 bg-orange-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-700">
+                  <span className="inline-flex rounded-full border border-orange-100 dark:border-orange-900/30 bg-orange-50 dark:bg-orange-900/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-400">
                     {t('myFailures')}
                   </span>
 
-                  <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                  <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
                     {t('title')}
                   </h1>
 
-                  <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
+                   <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-slate-400 sm:text-base">
                     {t('description')}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                  <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-3 shadow-sm">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
                       {t('failuresCount')}
                     </p>
-                    <p className="mt-1 text-lg font-bold text-slate-800">
+                    <p className="mt-1 text-lg font-bold text-slate-800 dark:text-slate-100">
                       {data?.total ?? 0}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                  <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-3 shadow-sm">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
                       {t('totalPages')}
                     </p>
-                    <p className="mt-1 text-lg font-bold text-slate-800">
+                    <p className="mt-1 text-lg font-bold text-slate-800 dark:text-slate-100">
                       {data?.pagination.totalPages ?? "-"}
                     </p>
                   </div>
@@ -93,26 +93,26 @@ function Dashboard() {
           </div>
 
           {/* Search & Filter */}
-          <div className="mb-2 rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-sm sm:px-6">
+          <div className="mb-2 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 px-4 py-4 shadow-sm sm:px-6">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="flex-1">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
                   {t('findReflections')}
                 </h2>
                 <div className="relative">
-                  <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                   <input
                     type="text"
                     placeholder={t('searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm outline-none transition-all focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100"
+                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 py-2.5 pl-10 pr-4 text-sm outline-none transition-all focus:border-orange-300 focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-orange-100 dark:focus:ring-orange-900/20"
                   />
                 </div>
               </div>
 
               <div className="w-full md:w-auto">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
                   {t('filterCategory')}
                 </h2>
                 <Filter
@@ -149,7 +149,7 @@ function Dashboard() {
         <div className="fixed bottom-6 right-6 z-40">
           <Link
             href='/dashboard/create'
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-300 text-3xl font-semibold text-slate-800 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-amber-400 hover:text-slate-900"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-300 dark:bg-amber-400 text-3xl font-semibold text-slate-800 dark:text-slate-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-amber-400 dark:hover:bg-amber-500 hover:text-slate-900"
           >
             +
           </Link>

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 interface Category {
   id: number;
@@ -27,6 +28,7 @@ interface Category {
 }
 
 export default function CategoryManagement() {
+  const t = useTranslations('Admin');
   const { data: categories, loading, error, reFetch } = useFetch<Category[]>('/api/admin/category');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,9 +78,9 @@ export default function CategoryManagement() {
     } catch (err: unknown) {
       console.error(err);
       if (axios.isAxiosError(err)) {
-        setSubmitError(err.response?.data?.message || 'Something went wrong');
+        setSubmitError(err.response?.data?.message || t('categoriesDeleteFailed'));
       } else {
-        setSubmitError('Something went wrong');
+        setSubmitError(t('categoriesDeleteFailed'));
       }
     } finally {
       setIsSubmitting(false);
@@ -86,14 +88,14 @@ export default function CategoryManagement() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this category? This might affect existing failures.')) return;
+    if (!confirm(t('categoriesConfirmDelete'))) return;
 
     try {
       await axios.delete(`/api/admin/category/${id}`);
       reFetch();
     } catch (err) {
       console.error(err);
-      alert('Failed to delete category');
+      alert(t('categoriesDeleteFailed'));
     }
   };
 
@@ -113,18 +115,18 @@ export default function CategoryManagement() {
               className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-emerald-500 transition-colors uppercase tracking-widest group"
             >
               <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-              Portal Core
+              {t('portalCore')}
             </Link>
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
                 <Database size={14} />
-                Metadata Management
+                {t('categoriesBadge')}
               </div>
               <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-                Categories <span className="text-emerald-500">Library.</span>
+                {t('categoriesTitle').split(' ')[0]} <span className="text-emerald-500">{t('categoriesTitle').split(' ')[1] || 'Library.'}</span>
               </h1>
               <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">
-                Create and organize themes for recorded failures.
+                {t('categoriesSubtitle')}
               </p>
             </div>
           </div>
@@ -133,7 +135,7 @@ export default function CategoryManagement() {
             className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/20 active:scale-95 transition-all"
           >
             <Plus size={20} />
-            Create Category
+            {t('categoriesCreate')}
           </button>
         </div>
 
@@ -145,7 +147,7 @@ export default function CategoryManagement() {
                 <Box size={24} />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Categories</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('categoriesTotal')}</p>
                 <p className="text-2xl font-black text-slate-900 dark:text-white">{categories?.length || 0}</p>
               </div>
             </div>
@@ -156,8 +158,8 @@ export default function CategoryManagement() {
                 <TrendingUp size={24} />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Usage Distribution</p>
-                <p className="text-2xl font-black text-slate-900 dark:text-white">Active</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('categoriesDistribution')}</p>
+                <p className="text-2xl font-black text-slate-900 dark:text-white">{t('categoriesDistributionActive')}</p>
               </div>
             </div>
           </div>
@@ -170,18 +172,18 @@ export default function CategoryManagement() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input
                 type="text"
-                placeholder="Search categories..."
+                placeholder={t('categoriesSearchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-slate-100 dark:bg-slate-900/50 border-none rounded-2xl py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
               />
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-400 uppercase">Sort by:</span>
+              <span className="text-xs font-bold text-slate-400 uppercase">{t('sortBy')}</span>
               <select className="bg-transparent border-none text-xs font-black uppercase text-slate-600 dark:text-slate-300 outline-none cursor-pointer">
-                <option>Newest First</option>
-                <option>Usage Frequency</option>
-                <option>Alphabetical</option>
+                <option>{t('sortNewest')}</option>
+                <option>{t('sortUsageFrequency')}</option>
+                <option>{t('sortAlphabetical')}</option>
               </select>
             </div>
           </div>
@@ -190,27 +192,27 @@ export default function CategoryManagement() {
             {loading ? (
               <div className="p-20 flex flex-col items-center justify-center gap-4 text-center">
                 <Loader2 size={40} className="animate-spin text-emerald-500" />
-                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest font-mono">Syncing Database...</p>
+                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest font-mono">{t('categoriesSyncing')}</p>
               </div>
             ) : error ? (
               <div className="p-20 flex flex-col items-center justify-center gap-4 text-center">
                 <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600">
                   <AlertCircle size={24} />
                 </div>
-                <p className="text-slate-900 dark:text-white font-bold">Failed to load categories</p>
-                <button onClick={() => reFetch()} className="text-emerald-500 font-bold hover:underline">Try Again</button>
+                <p className="text-slate-900 dark:text-white font-bold">{t('categoriesError')}</p>
+                <button onClick={() => reFetch()} className="text-emerald-500 font-bold hover:underline">{t('retry')}</button>
               </div>
             ) : filteredCategories.length === 0 ? (
               <div className="p-20 text-center">
-                <p className="text-slate-400 font-medium text-lg italic">No categories matching your search.</p>
+                <p className="text-slate-400 font-medium text-lg italic">{t('categoriesNoResults')}</p>
               </div>
             ) : (
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 dark:bg-slate-900/50">
-                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Category Name</th>
-                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Failure Count</th>
-                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('categoriesTableName')}</th>
+                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('categoriesTableCount')}</th>
+                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right">{t('failuresTableActions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -227,7 +229,7 @@ export default function CategoryManagement() {
                         </div>
                       </td>
                       <td className="px-8 py-5 text-sm font-medium text-slate-500 font-mono">
-                        {cat._count?.failures || 0} reports
+                        {t('categoriesReports', { count: cat._count?.failures || 0 })}
                       </td>
                       <td className="px-8 py-5">
                         <div className="flex items-center justify-end gap-2 translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
@@ -261,7 +263,7 @@ export default function CategoryManagement() {
           <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-8 pb-0 flex items-center justify-between">
               <h3 className="text-2xl font-black text-slate-900 dark:text-white">
-                {editingCategory ? 'Update' : 'New'} <span className="text-emerald-500">Category.</span>
+                {editingCategory ? t('categoriesModalUpdate') : t('categoriesModalNew')} <span className="text-emerald-500">{t('categoriesModalTitle')}</span>
               </h3>
               <button onClick={handleCloseModal} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors">
                 <X size={20} />
@@ -270,7 +272,7 @@ export default function CategoryManagement() {
 
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
               <div className="space-y-4">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Category Label</label>
+                <label className="text-xs font-black uppercase tracking-widest text-slate-400">{t('categoriesModalLabel')}</label>
                 <div className="relative">
                   <Box className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/50" size={20} />
                   <input
@@ -279,7 +281,7 @@ export default function CategoryManagement() {
                     required
                     value={categoryName}
                     onChange={(e) => setCategoryName(e.target.value)}
-                    placeholder="e.g. Technical Debt"
+                    placeholder={t('categoriesModalPlaceholder')}
                     className="w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-100 dark:border-slate-800 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
                   />
                 </div>
@@ -297,7 +299,7 @@ export default function CategoryManagement() {
                   onClick={handleCloseModal}
                   className="flex-1 py-4 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
@@ -305,7 +307,7 @@ export default function CategoryManagement() {
                   className="flex-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-600/20 active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
                   {isSubmitting && <Loader2 size={18} className="animate-spin" />}
-                  {isSubmitting ? 'Syncing...' : editingCategory ? 'Save Changes' : 'Launch Category'}
+                  {isSubmitting ? t('categoriesModalSyncing') : editingCategory ? t('categoriesModalSaveChanges') : t('categoriesModalLaunch')}
                 </button>
               </div>
             </form>

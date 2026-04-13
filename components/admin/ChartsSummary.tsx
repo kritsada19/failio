@@ -8,6 +8,7 @@ import {
   Layers,
   Smile,
 } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface User {
   id: string;
@@ -28,6 +29,8 @@ interface StatItem {
 }
 
 export default function ChartsSummary() {
+  const t = useTranslations('Admin');
+  const locale = useLocale();
   const { data: userData, loading: userLoading } = useFetch<UserResponse>('/api/admin/user?new=true&limit=100');
   const { data: categories, loading: categoriesLoading } = useFetch<StatItem[]>('/api/admin/category?top=true&limit=5');
   const { data: emotions, loading: emotionsLoading } = useFetch<StatItem[]>('/api/admin/emotion?top=true&limit=5');
@@ -80,9 +83,9 @@ export default function ChartsSummary() {
 
         <div className="space-y-1 mb-8">
           <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            New Users <span className="text-sm font-medium text-slate-500 font-mono">(Last 7 Days)</span>
+            {t('newUsers')} <span className="text-sm font-medium text-slate-500 font-mono">{t('last7Days')}</span>
           </h3>
-          <p className="text-sm text-slate-500 font-medium">Growth interaction tracking</p>
+          <p className="text-sm text-slate-500 font-medium">{t('growthTracking')}</p>
         </div>
 
         <div className="h-40 flex items-end gap-2">
@@ -114,7 +117,7 @@ export default function ChartsSummary() {
 
                 {/* label */}
                 <div className="text-[10px] font-mono text-slate-400 dark:text-slate-600 uppercase">
-                  {new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' }).charAt(0)}
+                  {new Date(d.date).toLocaleDateString(locale === 'th' ? 'th-TH' : 'en-US', { weekday: 'short' }).charAt(0)}
                 </div>
               </div>
             );
@@ -132,9 +135,9 @@ export default function ChartsSummary() {
 
         <div className="space-y-1 mb-8">
           <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            Top Categories
+            {t('topCategories')}
           </h3>
-          <p className="text-sm text-slate-500 font-medium">Most frequent failure types</p>
+          <p className="text-sm text-slate-500 font-medium">{t('topCategoriesDesc')}</p>
         </div>
 
         <div className="space-y-4">
@@ -169,9 +172,9 @@ export default function ChartsSummary() {
 
         <div className="space-y-1 mb-8">
           <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            Emotional Range
+            {t('emotionalRange')}
           </h3>
-          <p className="text-sm text-slate-500 font-medium">Top picked failure feelings</p>
+          <p className="text-sm text-slate-500 font-medium">{t('emotionalRangeDesc')}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -189,7 +192,7 @@ export default function ChartsSummary() {
           ))}
           {emotions && emotions.length < 4 && Array.from({ length: 4 - emotions.length }).map((_, i) => (
             <div key={i} className="p-4 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 flex items-center justify-center">
-              <span className="text-slate-300 dark:text-slate-700 font-mono text-xs">EMPTY</span>
+              <span className="text-slate-300 dark:text-slate-700 font-mono text-xs">{t('empty')}</span>
             </div>
           ))}
         </div>

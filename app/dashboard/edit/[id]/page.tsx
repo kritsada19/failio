@@ -47,7 +47,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+      className="rounded-2xl bg-slate-900 dark:bg-slate-100 px-5 py-3 text-sm font-semibold text-white dark:text-slate-900 shadow-sm transition hover:bg-slate-800 dark:hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? "Updating..." : "Update failure"}
     </button>
@@ -102,9 +102,9 @@ function EditFailurePage() {
 
   if (failureLoading) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-amber-50 via-white to-orange-50 px-4 py-8">
+      <div className="min-h-screen bg-linear-to-b from-amber-50 via-white to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 px-4 py-8 transition-colors duration-500">
         <div className="mx-auto max-w-3xl">
-          <div className="rounded-3xl border border-amber-100 bg-white/90 p-6 shadow-sm">
+          <div className="rounded-3xl border border-amber-100 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-6 shadow-sm">
             <p className="text-slate-600">Loading failure...</p>
           </div>
         </div>
@@ -114,9 +114,9 @@ function EditFailurePage() {
 
   if (failureError) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-amber-50 via-white to-orange-50 px-4 py-8">
+      <div className="min-h-screen bg-linear-to-b from-amber-50 via-white to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 px-4 py-8 transition-colors duration-500">
         <div className="mx-auto max-w-3xl">
-          <div className="rounded-3xl border border-red-100 bg-white/90 p-6 shadow-sm">
+          <div className="rounded-3xl border border-red-100 dark:border-red-900/50 bg-white/90 dark:bg-slate-900/90 p-6 shadow-sm">
             <p className="text-red-500">{failureError}</p>
           </div>
         </div>
@@ -127,35 +127,35 @@ function EditFailurePage() {
   if (!failure) return null;
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-amber-50 via-white to-orange-50 px-4 py-8">
+    <div className="min-h-screen bg-linear-to-b from-amber-50 via-white to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 px-4 py-8 transition-colors duration-500">
       <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="mb-6">
-          <p className="text-sm font-medium text-amber-600">Failio</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
+          <p className="text-sm font-medium text-amber-600 dark:text-amber-500">Failio</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Edit your failure
           </h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
             ปรับแก้รายละเอียด เพื่อให้บทเรียนของคุณชัดเจนขึ้น
           </p>
         </div>
 
         {/* Card */}
-        <div className="rounded-3xl border border-amber-100 bg-white/90 p-6 shadow-sm backdrop-blur sm:p-8">
+        <div className="rounded-3xl border border-amber-100 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-6 shadow-sm backdrop-blur sm:p-8">
           <form action={formAction} className="space-y-6">
 
             <input type="hidden" name="id" value={id} />
 
             {/* Title */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-800">
+              <label className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-200">
                 Title
               </label>
               <input
                 name="title"
                 type="text"
                 placeholder="เช่น พูดในที่ประชุมแล้วลืมประเด็น"
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 text-slate-800 dark:text-slate-100 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100 dark:focus:ring-amber-900/20"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -169,13 +169,13 @@ function EditFailurePage() {
 
             {/* Description */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-800">
+              <label className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-200">
                 Description
               </label>
               <textarea
                 name="description"
                 placeholder="เล่าว่าเกิดอะไรขึ้น คุณรู้สึกยังไง และคิดว่าพลาดตรงไหน..."
-                className="min-h-40 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                className="min-h-40 w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 text-slate-800 dark:text-slate-100 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100 dark:focus:ring-amber-900/20"
                 rows={6}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -190,12 +190,12 @@ function EditFailurePage() {
 
             {/* Category */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-800">
+              <label className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-200">
                 Category
               </label>
               <select
                 name="categoryId"
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 text-slate-800 dark:text-slate-100 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100 dark:focus:ring-amber-900/20"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
               >
@@ -230,8 +230,8 @@ function EditFailurePage() {
                       key={emotion.id}
                       onClick={() => toggleEmotion(emotion.id)}
                       className={`rounded-full px-4 py-2 text-sm font-medium transition ${active
-                        ? "bg-amber-400 text-slate-900 shadow-sm"
-                        : "border border-slate-200 bg-white text-slate-700 hover:border-amber-300 hover:bg-amber-50"
+                        ? "bg-amber-400 dark:bg-amber-500 text-slate-900 shadow-sm"
+                        : "border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-amber-300 dark:hover:border-amber-800 hover:bg-amber-50 dark:hover:bg-amber-900/10"
                         }`}
                     >
                       {emotion.name}
@@ -260,7 +260,7 @@ function EditFailurePage() {
               <button
                 type="button"
                 onClick={() => router.push("/dashboard")}
-                className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="rounded-2xl border border-slate-200 dark:border-slate-700 px-5 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 Cancel
               </button>

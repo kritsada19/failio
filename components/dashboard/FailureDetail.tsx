@@ -51,25 +51,25 @@ function FailureDetail({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 bg-linear-to-br from-orange-50 via-white to-white px-6 py-8 sm:px-8">
+      <div className="overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-300">
+        <div className="border-b border-slate-100 dark:border-slate-800 bg-linear-to-br from-orange-50 via-white to-white dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 px-6 py-8 sm:px-8">
           {/* title */}
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="rounded-full border border-orange-100 bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">
+              <span className="rounded-full border border-orange-100 dark:border-orange-900/50 bg-orange-50 dark:bg-orange-900/20 px-3 py-1 text-xs font-semibold text-orange-700 dark:text-orange-400">
                 {failure.category?.name}
               </span>
 
-              <span className="text-xs font-medium text-slate-400">
+              <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
                 {new Date(failure.createdAt).toLocaleString()}
               </span>
             </div>
 
-            <h1 className="text-3xl font-bold leading-tight text-slate-900 sm:text-4xl">
+            <h1 className="text-3xl font-bold leading-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
               {failure.title}
             </h1>
 
-            <p className="max-w-2xl text-sm leading-6 text-slate-500">
+            <p className="max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
               Every failure is a reflection point. Review what happened, identify
               the emotions behind it, and turn the lesson into growth.
             </p>
@@ -78,19 +78,19 @@ function FailureDetail({
 
         <div className="space-y-8 px-6 py-8 sm:px-8">
           {/* description */}
-          <section className="rounded-2xl border border-slate-100 bg-slate-50/60 p-5 sm:p-6">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <section className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/60 p-5 sm:p-6 transition-all duration-300">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
               What happened
             </h2>
 
-            <p className="whitespace-pre-wrap text-[15px] leading-8 text-slate-700">
+            <p className="whitespace-pre-wrap text-[15px] leading-8 text-slate-700 dark:text-slate-300">
               {failure.description}
             </p>
           </section>
 
           {/* emotions */}
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Emotions
             </h2>
 
@@ -98,7 +98,7 @@ function FailureDetail({
               {failure.emotions.map((emotion) => (
                 <span
                   key={emotion?.id}
-                  className="rounded-full border border-rose-100 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-600"
+                  className="rounded-full border border-rose-100 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-900/20 px-3 py-1.5 text-sm font-medium text-rose-600 dark:text-rose-400"
                 >
                   {emotion?.name}
                 </span>
@@ -107,13 +107,13 @@ function FailureDetail({
           </section>
 
           {/* ai reflection */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm sm:p-6 transition-all duration-300">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                   AI Reflection
                 </h2>
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
                   Let AI help you reframe this failure into actionable lessons.
                 </p>
               </div>
@@ -121,7 +121,7 @@ function FailureDetail({
               <button
                 onClick={onAnalyze}
                 disabled={isProcessing}
-                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-100 px-4 py-2.5 text-sm font-medium text-white dark:text-slate-900 shadow-sm transition-all duration-300 hover:scale-105 hover:bg-slate-800 dark:hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {getButtonText()}
               </button>
@@ -129,16 +129,16 @@ function FailureDetail({
 
             {failure.aiResult ? (
               <div className="space-y-4 mt-6">
-                <div className="rounded-3xl border border-slate-200 bg-white p-4">
-                  <p className="text-sm text-slate-500">Summary</p>
-                  <p className="mt-2 text-sm text-slate-700 whitespace-pre-wrap">
+                <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-sm">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Summary</p>
+                  <p className="mt-2 text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-7">
                     {failure.aiResult.summary}
                   </p>
                 </div>
 
-                <div className="rounded-3xl border border-blue-200 bg-blue-50 p-4">
-                  <p className="text-sm font-medium text-blue-700">AI Suggestions</p>
-                  <ul className="mt-2 text-sm text-slate-700 list-disc list-inside space-y-1">
+                <div className="rounded-3xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/10 p-4 shadow-sm">
+                  <p className="text-sm font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2">✨ AI Suggestions</p>
+                  <ul className="mt-2 text-sm text-slate-700 dark:text-slate-300 list-disc list-inside space-y-1">
                     {failure.aiResult?.suggestions?.map((suggestion, index) => (
                       <li key={index} className="leading-relaxed whitespace-pre-wrap">{suggestion}</li>
                     ))}
@@ -146,19 +146,19 @@ function FailureDetail({
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="text-sm text-slate-500">Root Cause</p>
-                    <p className="mt-2 font-medium text-slate-800">{failure.aiResult.rootCause}</p>
+                  <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-sm">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Root Cause</p>
+                    <p className="mt-2 font-bold text-slate-800 dark:text-slate-100">{failure.aiResult.rootCause}</p>
                   </div>
-                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="text-sm text-slate-500">Lesson Learned</p>
-                    <p className="mt-2 font-medium text-slate-800">{failure.aiResult.lesson}</p>
+                  <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-sm">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Lesson Learned</p>
+                    <p className="mt-2 font-bold text-slate-800 dark:text-slate-100">{failure.aiResult.lesson}</p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-5 py-6">
-                <p className="text-sm leading-6 text-slate-500">
+              <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-5 py-6 text-center">
+                <p className="text-sm leading-6 text-slate-500 dark:text-slate-400 italic">
                   {failure.aiStatus === "PROCESSING"
                     ? "AI is currently analyzing this failure..."
                     : failure.aiStatus === "FAILED"

@@ -28,6 +28,7 @@ import axios from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface Account {
   provider: string;
@@ -61,12 +62,6 @@ interface UserDetail {
   };
 }
 
-const AI_STATUS_CONFIG = {
-  NOT_STARTED: { label: 'Not Started', color: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400', icon: MoreVertical },
-  PROCESSING: { label: 'Processing', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', icon: Cpu },
-  COMPLETED: { label: 'Completed', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', icon: CheckCircle2 },
-  FAILED: { label: 'Failed', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', icon: XCircle },
-};
 
 const PROVIDER_COLORS: Record<string, string> = {
   google: 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800',
@@ -100,6 +95,16 @@ function StatCard({ label, value, icon: Icon, accent = 'blue' }: {
 }
 
 export default function UserDetailPage() {
+  const t = useTranslations('Admin');
+  const locale = useLocale();
+
+  const AI_STATUS_CONFIG = {
+    NOT_STARTED: { label: t('aiStatusNotStarted'), color: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400', icon: MoreVertical },
+    PROCESSING: { label: t('aiStatusProcessing'), color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', icon: Cpu },
+    COMPLETED: { label: t('aiStatusCompleted'), color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', icon: CheckCircle2 },
+    FAILED: { label: t('aiStatusFailed'), color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', icon: XCircle },
+  };
+
   const params = useParams();
   const router = useRouter();
   const userId = params.id as string;
@@ -114,21 +119,22 @@ export default function UserDetailPage() {
   const handleUpdateRole = async () => {
     if (!user) return;
     const newRole = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
-    if (!confirm(`Change role to ${newRole}?`)) return;
+    const roleLabel = newRole === 'ADMIN' ? t('roleAdmin') : t('roleUser');
+    if (!confirm(t('confirmChangeRole', { role: roleLabel }))) return;
     setUpdatingRole(true);
     try {
       await axios.patch(`/api/admin/user/${userId}`, { role: newRole });
       reFetch();
     } catch (err) {
       console.error(err);
-      alert('Failed to update role');
+      alert(t('usersUpdateRoleFailed'));
     } finally {
       setUpdatingRole(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm('Permanently delete this user? This cannot be undone.')) return;
+    if (!confirm(t('confirmDeleteUser'))) return;
     setDeleting(true);
     try {
       await axios.delete(`/api/admin/user/${userId}`);
@@ -136,9 +142,9 @@ export default function UserDetailPage() {
     } catch (err: unknown) {
       setDeleting(false);
       if (axios.isAxiosError(err)) {
-        alert(err.response?.data?.error || 'Failed to delete user');
+        alert(err.response?.data?.error || t('usersDeleteFailed'));
       } else {
-        alert('Failed to delete user');
+        alert(t('usersDeleteFailed'));
       }
     }
   };
@@ -162,11 +168,11 @@ export default function UserDetailPage() {
         <div className="flex items-center gap-2 text-sm text-slate-400">
           <Link href="/admin/users" className="flex items-center gap-1.5 hover:text-blue-500 transition-colors font-medium">
             <ArrowLeft size={15} />
-            User Base
+            {t('usersIdentity')}
           </Link>
           <ChevronRight size={14} className="opacity-40" />
           <span className="text-slate-600 dark:text-slate-300 font-bold truncate max-w-[200px]">
-            {loading ? '...' : (user?.name || user?.email || 'User Detail')}
+            {loading ? '...' : (user?.name || user?.email || t('usersViewDetails'))}
           </span>
         </div>
 
@@ -174,7 +180,7 @@ export default function UserDetailPage() {
         {loading && (
           <div className="flex flex-col items-center justify-center py-40 gap-6">
             <div className="w-16 h-16 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin" />
-            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Loading identity record...</p>
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{t('userDetailLoading')}</p>
           </div>
         )}
 
@@ -185,11 +191,11 @@ export default function UserDetailPage() {
               <AlertCircle size={32} />
             </div>
             <div>
-              <p className="text-xl font-bold text-slate-900 dark:text-white">Failed to load user</p>
+              <p className="text-xl font-bold text-slate-900 dark:text-white">{t('userDetailError')}</p>
               <p className="text-sm text-slate-400 mt-1">{error}</p>
             </div>
             <button onClick={() => reFetch()} className="px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-all active:scale-95">
-              Retry
+              {t('userDetailRetry')}
             </button>
           </div>
         )}
@@ -245,7 +251,7 @@ export default function UserDetailPage() {
                       ) : (
                         <Users size={13} />
                       )}
-                      {updatingRole ? 'Updating...' : (user.role === 'ADMIN' ? 'Demote to User' : 'Promote to Admin')}
+                      {updatingRole ? t('userDetailUpdating') : (user.role === 'ADMIN' ? t('userDetailDemote') : t('userDetailPromote'))}
                     </button>
 
                     <button
@@ -254,7 +260,7 @@ export default function UserDetailPage() {
                       className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-tight bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800 transition-all active:scale-95 disabled:opacity-60"
                     >
                       {deleting ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
-                      {deleting ? 'Deleting...' : 'Delete User'}
+                      {deleting ? t('userDetailDeleting') : t('userDetailDelete')}
                     </button>
                   </div>
                 </div>
@@ -262,14 +268,14 @@ export default function UserDetailPage() {
                 {/* Name / Role badge */}
                 <div className="flex flex-wrap items-center gap-3 mb-4">
                   <h1 className="text-3xl font-black text-slate-900 dark:text-white">
-                    {user.name || 'Anonymous User'}
+                    {user.name || t('usersAnonymous')}
                   </h1>
                   <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${user.role === 'ADMIN'
                     ? 'bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
                     : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
                     }`}>
                     {user.role === 'ADMIN' ? <ShieldAlert size={10} /> : <Users size={10} />}
-                    {user.role}
+                    {user.role === 'ADMIN' ? t('roleAdmin') : t('roleUser')}
                   </span>
                 </div>
 
@@ -282,19 +288,19 @@ export default function UserDetailPage() {
                   <div className="flex items-center gap-2.5 text-slate-500 dark:text-slate-400">
                     <CheckCircle2 size={14} className={user.emailVerified ? 'text-emerald-500' : 'text-slate-300'} />
                     <span className="font-medium">
-                      {user.emailVerified ? 'Email Verified' : 'Not Verified'}
+                      {user.emailVerified ? t('userDetailEmailVerified') : t('userDetailEmailNotVerified')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5 text-slate-500 dark:text-slate-400">
                     <Calendar size={14} className="text-slate-400 shrink-0" />
                     <span className="font-medium">
-                      Joined {new Date(user.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {t('userDetailJoined')} {new Date(user.createdAt).toLocaleDateString(locale === 'th' ? 'th-TH' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5 text-slate-500 dark:text-slate-400">
                     <Clock size={14} className="text-slate-400 shrink-0" />
                     <span className="font-medium">
-                      Updated {new Date(user.updatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {t('userDetailUpdated')} {new Date(user.updatedAt).toLocaleDateString(locale === 'th' ? 'th-TH' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </span>
                   </div>
                 </div>
@@ -303,7 +309,7 @@ export default function UserDetailPage() {
                 {user.accounts.length > 0 && (
                   <div className="flex items-center gap-2 mt-5 pt-5 border-t border-slate-100 dark:border-slate-800">
                     <KeyRound size={13} className="text-slate-400" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Auth via</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">{t('userDetailAuthVia')}</span>
                     {user.accounts.map((acc, i) => (
                       <span key={i} className={`px-2.5 py-1 rounded-xl text-[10px] font-black tracking-wide border capitalize ${PROVIDER_COLORS[acc.provider] || PROVIDER_COLORS.credentials}`}>
                         {acc.provider}
@@ -316,10 +322,10 @@ export default function UserDetailPage() {
 
             {/* Stats Row */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard label="Total Failures" value={user._count.failures} icon={FileText} accent="blue" />
-              <StatCard label="AI Completed" value={aiStats?.completed ?? 0} icon={CheckCircle2} accent="emerald" />
-              <StatCard label="AI Processing" value={aiStats?.processing ?? 0} icon={Activity} accent="amber" />
-              <StatCard label="Auth Providers" value={user._count.accounts} icon={KeyRound} accent="purple" />
+              <StatCard label={t('userDetailStatTotalFailures')} value={user._count.failures} icon={FileText} accent="blue" />
+              <StatCard label={t('userDetailStatAICompleted')} value={aiStats?.completed ?? 0} icon={CheckCircle2} accent="emerald" />
+              <StatCard label={t('userDetailStatAIProcessing')} value={aiStats?.processing ?? 0} icon={Activity} accent="amber" />
+              <StatCard label={t('userDetailStatAuthProviders')} value={user._count.accounts} icon={KeyRound} accent="purple" />
             </div>
 
             {/* Failure History */}
@@ -330,12 +336,12 @@ export default function UserDetailPage() {
                     <FileText size={18} />
                   </div>
                   <div>
-                    <h2 className="text-base font-black text-slate-900 dark:text-white">Recent Failures</h2>
-                    <p className="text-xs text-slate-400 font-medium">Last {user.failures.length} entries</p>
+                    <h2 className="text-base font-black text-slate-900 dark:text-white">{t('userDetailRecentFailures')}</h2>
+                    <p className="text-xs text-slate-400 font-medium">{t('userDetailLastEntries', { count: user.failures.length })}</p>
                   </div>
                 </div>
                 <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-black">
-                  {user._count.failures} total
+                  {t('userDetailTotalEntries', { count: user._count.failures })}
                 </span>
               </div>
 
@@ -344,7 +350,7 @@ export default function UserDetailPage() {
                   <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                     <FileText size={24} className="text-slate-300 dark:text-slate-600" />
                   </div>
-                  <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">No failures recorded</p>
+                  <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">{t('userDetailNoFailures')}</p>
                 </div>
               ) : (
                 <div className="divide-y divide-slate-50 dark:divide-slate-800/80">
@@ -387,7 +393,7 @@ export default function UserDetailPage() {
                           </div>
                           <div className="text-right shrink-0">
                             <p className="text-[10px] font-bold text-slate-400 font-mono uppercase">
-                              {new Date(failure.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                              {new Date(failure.createdAt).toLocaleDateString(locale === 'th' ? 'th-TH' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                             </p>
                             <p className="text-[10px] font-medium text-slate-300 dark:text-slate-600 font-mono">
                               #{failure.id}
@@ -403,7 +409,7 @@ export default function UserDetailPage() {
 
             {/* User ID / Raw Info */}
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">System ID</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('usersSystemId')}</p>
               <p className="font-mono text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 px-4 py-3 rounded-2xl break-all">
                 {user.id}
               </p>

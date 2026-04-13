@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Users, ClipboardList, Zap } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface KPIStatsProps {
   totalUsers: number;
@@ -11,36 +12,37 @@ interface KPIStatsProps {
 }
 
 export default function KPIStats({ totalUsers, totalFailures, failuresToday, isLoading }: KPIStatsProps) {
+  const t = useTranslations('Admin');
   const stats = [
     {
-      label: 'TOTAL USERS',
+      label: t('totalUsers'),
       value: totalUsers,
       icon: Users,
       color: 'from-blue-500/10 to-transparent',
       borderColor: 'border-blue-100/50 dark:border-blue-900/20',
       iconBg: 'bg-blue-50 dark:bg-blue-900/20',
       iconColor: 'text-blue-500',
-      description: 'Active accounts grow'
+      description: t('totalUsersDesc')
     },
     {
-      label: 'FAILURES LOGGED',
+      label: t('failuresLogged'),
       value: totalFailures,
       icon: ClipboardList,
       color: 'from-orange-500/10 to-transparent',
       borderColor: 'border-orange-100/50 dark:border-orange-900/20',
       iconBg: 'bg-orange-50 dark:bg-orange-900/20',
       iconColor: 'text-orange-500',
-      description: 'Total analysis records'
+      description: t('failuresLoggedDesc')
     },
     {
-      label: 'TODAY\'S ACTIVITY',
+      label: t('todaysActivity'),
       value: failuresToday,
       icon: Zap,
       color: 'from-purple-500/10 to-transparent',
       borderColor: 'border-purple-100/50 dark:border-purple-900/20',
       iconBg: 'bg-purple-50 dark:bg-purple-900/20',
       iconColor: 'text-purple-500',
-      description: 'New insights today'
+      description: t('todaysActivityDesc')
     }
   ];
 
