@@ -1,4 +1,8 @@
 "use client";
+import { useState } from "react";
+
+import { Loader2 } from "lucide-react";
+
 
 interface FailureData {
   id: number;
@@ -30,16 +34,26 @@ function FailureDetail({
   onAnalyze,
 }: {
   failure: FailureData;
-  onAnalyze: () => void;
+  onAnalyze: () => Promise<void> | void;
 }) {
-  const isProcessing = failure.aiStatus === "PROCESSING";
+  const [isLocalAnalyzing, setIsLocalAnalyzing] = useState(false);
+  const isProcessing = failure.aiStatus === "PROCESSING" || isLocalAnalyzing;
+
+  const handleAnalyzeClick = async () => {
+    setIsLocalAnalyzing(true);
+    try {
+      await onAnalyze();
+    } finally {
+      setIsLocalAnalyzing(false);
+    }
+  };
 
   const getButtonText = () => {
+    if (isProcessing) return "Analyzing...";
+
     switch (failure.aiStatus) {
       case "NOT_STARTED":
         return "Analyze with AI";
-      case "PROCESSING":
-        return "Analyzing...";
       case "COMPLETED":
         return "Re-analyze";
       case "FAILED":
@@ -119,7 +133,7 @@ function FailureDetail({
               </div>
 
               <button
-                onClick={onAnalyze}
+                onClick={handleAnalyzeClick}
                 disabled={isProcessing}
                 className="inline-flex items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-100 px-4 py-2.5 text-sm font-medium text-white dark:text-slate-900 shadow-sm transition-all duration-300 hover:scale-105 hover:bg-slate-800 dark:hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -127,7 +141,45 @@ function FailureDetail({
               </button>
             </div>
 
-            {failure.aiResult ? (
+            {isProcessing ? (
+              <div className="space-y-4 mt-6">
+                {/* Skeleton Summary */}
+                <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                    <div className="h-3 w-24 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    <div className="h-3 w-full animate-pulse rounded-full bg-slate-50 dark:bg-slate-900" />
+                    <div className="h-3 w-[85%] animate-pulse rounded-full bg-slate-50 dark:bg-slate-900" />
+                  </div>
+                </div>
+
+                {/* Skeleton Suggestions */}
+                <div className="rounded-3xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/10 p-4 shadow-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="animate-bounce text-sm">✨</span>
+                    <div className="h-3 w-32 animate-pulse rounded-full bg-blue-200 dark:bg-blue-800/50" />
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    <div className="h-3 w-full animate-pulse rounded-full bg-blue-100/50 dark:bg-blue-900/20" />
+                    <div className="h-3 w-[90%] animate-pulse rounded-full bg-blue-100/50 dark:bg-blue-900/20" />
+                  </div>
+                </div>
+
+                {/* Skeleton Grid */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-sm">
+                    <div className="h-2.5 w-20 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+                    <div className="mt-3 h-4 w-full animate-pulse rounded-full bg-slate-100 dark:bg-slate-900" />
+                  </div>
+                  <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-sm">
+                    <div className="h-2.5 w-24 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+                    <div className="mt-3 h-4 w-full animate-pulse rounded-full bg-slate-100 dark:bg-slate-900" />
+                  </div>
+                </div>
+              </div>
+            ) : failure.aiResult ? (
               <div className="space-y-4 mt-6">
                 <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-sm">
                   <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Summary</p>
@@ -159,14 +211,13 @@ function FailureDetail({
             ) : (
               <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-5 py-6 text-center">
                 <p className="text-sm leading-6 text-slate-500 dark:text-slate-400 italic">
-                  {failure.aiStatus === "PROCESSING"
-                    ? "AI is currently analyzing this failure..."
-                    : failure.aiStatus === "FAILED"
-                      ? "AI analysis failed. Please try again."
-                      : "AI can help analyze this failure and suggest ways to improve."}
+                  {failure.aiStatus === "FAILED"
+                    ? "AI analysis failed. Please try again."
+                    : "AI can help analyze this failure and suggest ways to improve."}
                 </p>
               </div>
             )}
+
           </section>
         </div>
       </div>

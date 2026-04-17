@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function PUT(
     request: NextRequest,
@@ -69,23 +70,49 @@ export async function PUT(
             }
         })
 
-        const mockAiResult = {
-            summary: "ผู้ใช้เผชิญกับความผิดพลาดจากการวางแผนที่ไม่ดีและการเริ่มต้นช้า",
-            rootCause: "การผัดวันประกันพรุ่งและไม่มีการแบ่งงานเป็นขั้นตอน",
-            suggestions: [
-                "เริ่มงานล่วงหน้า",
-                "แบ่งงานเป็น task ย่อย",
-                "ตั้ง deadline ย่อยสำหรับแต่ละส่วน",
-            ],
-            lesson: "การวางแผนและเริ่มต้นเร็วช่วยลดความเครียดและลดโอกาสเกิดข้อผิดพลาดซ้ำ",
-        };
+        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY!);
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.5-flash",
+            generationConfig: {
+                responseMimeType: "application/json",
+            }
+        });
+
+        const prompt = `
+            คุณคือผู้เชี่ยวชาญด้านจิตวิทยาและการพัฒนาตนเอง
+            วิเคราะห์ความล้มเหลวต่อไปนี้:
+            หัวข้อ: "${failure.title}"
+            รายละเอียด: "${failure.description}"
+            
+            ช่วยสรุปผลในรูปแบบ JSON ที่มี key ดังนี้
+            - summary: สรุปความล้มเหลว (String)
+            - rootCause: สาเหตุของความล้มเหลว (String)
+            - suggestions: ข้อเสนอแนะในการแก้ไข (Array of String)
+            - lesson: บทเรียนที่ได้จากความล้มเหลว (String)
+
+            ตอบเป็นภาษาตาม หัวข้อ และ รายละเอียด
+        `
+
+        const result = await model.generateContent(prompt);
+        const aiResponse = JSON.parse(result.response.text());
+
+        // const mockAiResult = {
+        //     summary: "ผู้ใช้เผชิญกับความผิดพลาดจากการวางแผนที่ไม่ดีและการเริ่มต้นช้า",
+        //     rootCause: "การผัดวันประกันพรุ่งและไม่มีการแบ่งงานเป็นขั้นตอน",
+        //     suggestions: [
+        //         "เริ่มงานล่วงหน้า",
+        //         "แบ่งงานเป็น task ย่อย",
+        //         "ตั้ง deadline ย่อยสำหรับแต่ละส่วน",
+        //     ],
+        //     lesson: "การวางแผนและเริ่มต้นเร็วช่วยลดความเครียดและลดโอกาสเกิดข้อผิดพลาดซ้ำ",
+        // };
 
         await prisma.failure.update({
             where: {
                 id: failure.id,
             },
             data: {
-                aiResult: mockAiResult,
+                aiResult: aiResponse,
                 aiStatus: "COMPLETED",
                 aiAnalyzedAt: new Date(),
             }

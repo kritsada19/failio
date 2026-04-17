@@ -19,7 +19,7 @@ export default function AppToaster() {
 
     return (
         <Toaster
-            position="top-right"
+            position="bottom-left"
             theme={resolvedTheme as "light" | "dark"}
             richColors
             closeButton
