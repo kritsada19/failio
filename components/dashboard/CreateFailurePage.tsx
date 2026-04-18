@@ -1,0 +1,218 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { createFailure, type FailureState } from "@/actions/failure";
+import { toast } from "sonner";
+import { useTranslations } from 'next-intl';
+
+interface Emotion {
+    id: number;
+    name: string;
+}
+
+interface Category {
+    id: number;
+    name: string;
+}
+
+const initialState: FailureState = {
+    success: false,
+    message: "",
+    error: {},
+};
+
+function SubmitButton() {
+    const { pending } = useFormStatus();
+    const t = useTranslations('CreateFailure');
+
+    return (
+        <button
+            type="submit"
+            disabled={pending}
+            className="rounded-2xl bg-slate-900 dark:bg-slate-100 px-5 py-3 text-sm font-semibold text-white dark:text-slate-900 shadow-sm transition hover:bg-slate-800 dark:hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+        >
+            {pending ? t('creating') : t('createBtn')}
+        </button>
+    );
+}
+
+export default function CreateFailurePage(
+    { categoryList, emotionList }: {
+        categoryList: Category[];
+        emotionList: Emotion[];
+    }
+) {
+    const router = useRouter();
+    const [state, formAction] = useActionState(createFailure, initialState);
+    const t = useTranslations('CreateFailure');
+
+    useEffect(() => {
+        if (!state.message) return;
+
+        if (state.success) {
+            toast.success(state.message);
+
+            setTimeout(() => {
+                router.push("/dashboard");
+            }, 800);
+        } else {
+            toast.error(state.message);
+        }
+    }, [state, router]);
+
+    // const { data: emotionList } = useFetch<Emotion[]>("/api/emotion");
+    // const { data: categoryList } = useFetch<Category[]>("/api/category");
+
+    const [selectedEmotions, setSelectedEmotions] = useState<number[]>([]);
+
+    const toggleEmotion = (id: number) => {
+        setSelectedEmotions((prev) =>
+            prev.includes(id) ? prev.filter((e) => e !== id) : [...prev, id]
+        );
+    };
+
+    return (
+        <div className="min-h-screen bg-linear-to-b from-amber-50 via-white to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 px-4 py-8 transition-colors duration-500">
+            <div className="mx-auto max-w-3xl">
+                {/* Header */}
+                <div className="mb-6">
+                    <p className="text-sm font-medium text-amber-600 dark:text-amber-500">Failio</p>
+                    <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                        {t('title')}
+                    </h1>
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                        {t('subtitle')}
+                    </p>
+                </div>
+
+                {/* Global message */}
+                {state.message && !state.success && (
+                    <div className="mb-4 rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+                        {state.message}
+                    </div>
+                )}
+
+                {/* Card */}
+                <div className="rounded-3xl border border-amber-100 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-6 shadow-sm backdrop-blur sm:p-8">
+                    <form action={formAction} className="space-y-6">
+                        {/* Title */}
+                        <div>
+                            <label className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                {t('titleLabel')}
+                            </label>
+                            <input
+                                type="text"
+                                name="title"
+                                placeholder={t('titlePlaceholder')}
+                                className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 text-slate-800 dark:text-slate-100 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100 dark:focus:ring-amber-900/20"
+                            />
+                            {state.error?.title && (
+                                <p className="mt-2 text-sm text-red-500">{state.error.title[0]}</p>
+                            )}
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                            <label className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                {t('descLabel')}
+                            </label>
+                            <textarea
+                                name="description"
+                                placeholder={t('descPlaceholder')}
+                                className="min-h-40 w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 text-slate-800 dark:text-slate-100 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100 dark:focus:ring-amber-900/20"
+                                rows={6}
+                            />
+                            {state.error?.description && (
+                                <p className="mt-2 text-sm text-red-500">
+                                    {state.error.description[0]}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Category */}
+                        <div>
+                            <label className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                {t('categoryLabel')}
+                            </label>
+                            <select
+                                name="categoryId"
+                                defaultValue=""
+                                className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 text-slate-800 dark:text-slate-100 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100 dark:focus:ring-amber-900/20"
+                            >
+                                <option value="">{t('selectCategory')}</option>
+                                {categoryList?.map((c) => (
+                                    <option key={c.id} value={c.id}>
+                                        {c.name}
+                                    </option>
+                                ))}
+                            </select>
+                            {state.error?.categoryId && (
+                                <p className="mt-2 text-sm text-red-500">
+                                    {state.error.categoryId[0]}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Emotions */}
+                        <div>
+                            <label className="mb-3 block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                {t('emotionsLabel')}
+                            </label>
+
+                            <div className="flex flex-wrap gap-2">
+                                {emotionList?.map((emotion) => {
+                                    const active = selectedEmotions.includes(emotion.id);
+
+                                    return (
+                                        <button
+                                            type="button"
+                                            key={emotion.id}
+                                            onClick={() => toggleEmotion(emotion.id)}
+                                            className={`rounded-full px-4 py-2 text-sm font-medium transition ${active
+                                                ? "bg-amber-400 dark:bg-amber-500 text-slate-900 shadow-sm"
+                                                : "border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-amber-300 dark:hover:border-amber-800 hover:bg-amber-50 dark:hover:bg-amber-900/10"
+                                                }`}
+                                        >
+                                            {emotion.name}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* hidden inputs สำหรับส่ง array เข้า server action */}
+                            {selectedEmotions.map((id) => (
+                                <input key={id} type="hidden" name="emotions" value={id} />
+                            ))}
+
+                            {state.error?.emotions && (
+                                <p className="mt-2 text-sm text-red-500">
+                                    {state.error.emotions[0]}
+                                </p>
+                            )}
+
+                            <p className="mt-2 text-xs text-slate-500">
+                                {t('emotionsHint')}
+                            </p>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+                            <button
+                                type="button"
+                                onClick={() => router.push("/dashboard")}
+                                className="rounded-2xl border border-slate-200 dark:border-slate-700 px-5 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800"
+                            >
+                                {t('cancelBtn')}
+                            </button>
+
+                            <SubmitButton />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+}
