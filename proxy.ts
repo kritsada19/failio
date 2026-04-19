@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import { getToken } from 'next-auth/jwt'
 import { NextResponse, NextRequest } from 'next/server'
 
@@ -28,7 +29,7 @@ export async function proxy(request: NextRequest) {
   if (isProtectedPath) {
     const user = await getToken({
       req: request,
-      secret: process.env.NEXTAUTH_SECRET,
+      secret: env.NEXTAUTH_SECRET,
     })
 
     if (!user) {

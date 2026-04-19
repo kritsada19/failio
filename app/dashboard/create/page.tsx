@@ -1,13 +1,14 @@
+import { env } from "@/env";
 import CreateFailurePage from "@/components/dashboard/CreateFailurePage";
 
 export default async function Page() {
 
-  const categoryList = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/category`, {
+  const categoryList = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/category`, {
     next: {
       revalidate: 60
     },
   }).then((res) => res.json());
-  const emotionList = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/emotion`, {
+  const emotionList = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/emotion`, {
     next: {
       revalidate: 60
     },

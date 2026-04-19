@@ -1,16 +1,17 @@
+import { env } from "@/env";
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: env.EMAIL_USER,
+    pass: env.EMAIL_PASS,
   },
 });
 
 export async function sendResetEmail(email: string, link: string) {
   await transporter.sendMail({
-    from: `"Failio" <${process.env.EMAIL_USER}>`,
+    from: `"Failio" <${env.EMAIL_USER}>`,
     to: email,
     subject: "Reset your password",
     html: `

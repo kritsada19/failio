@@ -1,3 +1,4 @@
+import { env } from "@/env";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
@@ -71,7 +72,7 @@ export async function PUT(
             }
         })
 
-        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY!);
+        const genAI = new GoogleGenerativeAI(env.GOOGLE_GENERATIVE_AI_API_KEY);
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-flash",
             generationConfig: {

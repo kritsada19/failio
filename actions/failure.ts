@@ -31,8 +31,8 @@ export async function createFailure(
         const validatedFields = createFailureSchema.safeParse({
             title: formData.get("title"),
             description: formData.get("description"),
-            categoryId: formData.get("categoryId"),
-            emotions: formData.getAll("emotions"),
+            categoryId: Number(formData.get("categoryId")),
+            emotions: formData.getAll("emotions").map((id) => Number(id)),
         });
 
         if (!validatedFields.success) {
@@ -50,10 +50,10 @@ export async function createFailure(
                 title,
                 description,
                 userId: String(session.user.id),
-                categoryId: Number(categoryId),
+                categoryId,
                 emotions: Array.isArray(emotions)
                     ? {
-                        connect: emotions.map((id: string) => ({ id: Number(id) })),
+                        connect: emotions.map((id) => ({ id })),
                     }
                     : undefined,
             },
@@ -92,7 +92,7 @@ export async function updateFailure(
             title: formData.get("title"),
             description: formData.get("description"),
             categoryId: formData.get("categoryId"),
-            emotions: formData.getAll("emotions"),
+            emotions: formData.getAll("emotions").map((id) => Number(id)),
         });
 
         if (!validatedFields.success) {
@@ -148,10 +148,10 @@ export async function updateFailure(
             data: {
                 title,
                 description,
-                categoryId: Number(categoryId),
+                categoryId,
                 emotions: Array.isArray(emotions)
                     ? {
-                        set: emotions.map((id: string) => ({ id: Number(id) })),
+                        set: emotions.map((id) => ({ id })),
                     }
                     : undefined,
             },
