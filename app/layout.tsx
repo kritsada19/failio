@@ -25,6 +25,24 @@ export const metadata: Metadata = {
   icons: {
     icon: "/logo.png",
   },
+  openGraph: {
+    title: "Failio",
+    description: "Failio is an AI-powered reflection app that helps you analyze failures and transform them into actionable growth.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Failio - AI Failure Analysis",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Failio",
+    description: "Transform failures into lessons using AI.",
+    images: ["/og-image.png"],
+  },
 };
 
 import { NextIntlClientProvider } from 'next-intl';
