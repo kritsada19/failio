@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
 import AppToaster from "@/components/AppToaster";
+import { env } from "@/env";
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
@@ -22,6 +23,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Failio",
   description: "Failio is an AI-powered reflection app that helps you analyze failures and transform them into actionable growth.",
+  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
   icons: {
     icon: "/logo.png",
   },

@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const env = createEnv({
     server: {
-        DATABASE_URL: z.string().url(),
+        DATABASE_URL: z.string(),
         NEXTAUTH_SECRET: z.string().min(32),
         NEXTAUTH_URL: z.string().url(),
 
@@ -20,6 +20,9 @@ export const env = createEnv({
         EMAIL_PASS: z.string().min(1),
 
         GOOGLE_GENERATIVE_AI_API_KEY: z.string().min(1),
+
+        STRIPE_SECRET_KEY: z.string().min(1),
+        STRIPE_WEBHOOK_SECRET: z.string().min(1),
     },
     client: {
         NEXT_PUBLIC_APP_URL: z.string().url(),
@@ -38,5 +41,7 @@ export const env = createEnv({
         EMAIL_PASS: process.env.EMAIL_PASS,
         GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
         NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+        STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+        STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     },
 });

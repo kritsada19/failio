@@ -74,6 +74,13 @@ function NavBar() {
           >
             {t('growthInsights')}
           </Link>
+          <Link
+            href="/subscription"
+            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"}
+            onClick={() => setIsOpen(false)}
+          >
+            {t('subscription')}
+          </Link>
         </>
       )}
 

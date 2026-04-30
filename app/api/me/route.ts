@@ -22,6 +22,9 @@ export async function GET() {
                 role: true,
                 createdAt: true,
                 updatedAt: true,
+                plan: true,
+                stripeStatus: true,
+                stripeCurrentPeriodEnd: true,
             },
         });
 

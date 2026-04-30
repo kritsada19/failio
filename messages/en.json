@@ -13,7 +13,8 @@
     "signUp": "Sign Up",
     "profileSettings": "Profile Settings",
     "getStarted": "Get Started",
-    "navigation": "Navigation"
+    "navigation": "Navigation",
+    "subscription": "Subscription"
   },
   "Dashboard": {
     "myFailures": "My Failures",
@@ -95,7 +96,12 @@
     "profileNote": "Your profile helps personalize your Failio experience and keeps your account information organized.",
     "signOutBtn": "Sign Out",
     "failedLoad": "Failed to Load Profile",
-    "tryAgain": "Try Again"
+    "tryAgain": "Try Again",
+    "planLabel": "Plan",
+    "expiresLabel": "Expires on",
+    "planFree": "Free",
+    "planPro": "Pro",
+    "subscriptionSection": "Subscription Plan"
   },
   "CreateFailure": {
     "title": "Create a new failure",
@@ -327,5 +333,30 @@
     "sortAZ": "A-Z",
     "sortAlphabetical": "Alphabetical",
     "pageOf": "Page {page} of {total}"
+  },
+  "Subscription": {
+    "title": "Pricing Plans",
+    "subtitle": "Choose the plan that's right for you and start transforming your failures into wisdom.",
+    "freeTitle": "Free",
+    "freePrice": "0",
+    "proTitle": "Pro",
+    "proPrice": "199",
+    "perMonth": "/ month",
+    "currency": "THB",
+    "freeFeature1": "Limited failure logs",
+    "freeFeature2": "Basic AI analysis",
+    "proFeature1": "Unlimited failure logs",
+    "proFeature2": "Advanced AI analysis",
+    "proFeature3": "Detailed growth insights",
+    "proFeature4": "Priority support",
+    "currentPlan": "Current Plan",
+    "choosePlan": "Choose Plan",
+    "upgradeNow": "Upgrade Now",
+    "cancelSubscription": "Cancel Subscription",
+    "cancelModalTitle": "Cancel Subscription?",
+    "cancelModalDesc": "Are you sure you want to cancel your subscription? Your Pro access will end immediately, and you will not be charged again.",
+    "cancelConfirm": "Yes, cancel it",
+    "cancelKeep": "No, keep it",
+    "canceling": "Canceling..."
   }
 }

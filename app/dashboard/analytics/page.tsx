@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { useFetch } from '@/hooks/useFetch';
 import GrowthCharts from '@/components/dashboard/GrowthCharts';
 import Link from 'next/link';
@@ -38,7 +37,7 @@ export default function AnalyticsDashboardPage() {
                 {t('title')}<span className="text-orange-500">{t('titleHighlight')}</span>
               </h1>
               <p className="text-lg text-slate-600 dark:text-slate-400 font-medium max-w-2xl">
-                 {t('desc')}
+                {t('desc')}
               </p>
             </div>
           </div>
@@ -57,8 +56,8 @@ export default function AnalyticsDashboardPage() {
           <div className="mt-12 rounded-[2.5rem] border border-orange-200 dark:border-slate-800 bg-linear-to-r from-orange-50 to-white dark:from-slate-900 dark:to-slate-800 p-10 text-center shadow-sm">
             <h4 className="text-2xl font-bold text-slate-800 dark:text-slate-200 italic">{t('growthQuote')}</h4>
             <div className="mt-6 flex justify-center">
-              <Link 
-                href="/dashboard/create" 
+              <Link
+                href="/dashboard/create"
                 className="rounded-2xl bg-slate-900 dark:bg-slate-100 px-8 py-3 text-sm font-bold text-white dark:text-slate-900 shadow-lg transition-all hover:scale-105 hover:bg-slate-800 dark:hover:bg-white"
               >
                 {t('logNewBtn')}

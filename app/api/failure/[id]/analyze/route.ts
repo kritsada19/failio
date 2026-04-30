@@ -72,6 +72,47 @@ export async function PUT(
             }
         })
 
+        let aiUsage = await prisma.aiUsage.findUnique({
+            where: {
+                userId: String(session.user.id),
+            },
+        });
+
+        if (!aiUsage) {
+            aiUsage = await prisma.aiUsage.create({
+                data: {
+                    userId: String(session.user.id),
+                    aiUsedToday: 0,
+                    resetAt: new Date(),
+                }
+            })
+        }
+
+        // รีเซ็ทโควต้าการใช้งานถ้ารีเซ็ทแล้ว
+        const today = new Date();
+        const lastReset = new Date(aiUsage.resetAt);
+
+        if (lastReset.toDateString() !== today.toDateString()) {
+            await prisma.aiUsage.update({
+                where: {
+                    userId: String(session.user.id),
+                },
+                data: {
+                    aiUsedToday: 0,
+                    resetAt: new Date(),
+                }
+            })
+        }
+
+        if (user.plan === "FREE" && aiUsage.aiUsedToday >= 5) {
+            return NextResponse.json(
+                { message: "AI usage limit reached" },
+                { status: 400 }
+            )
+        }
+
+
+
         const genAI = new GoogleGenerativeAI(env.GOOGLE_GENERATIVE_AI_API_KEY);
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-flash",
@@ -160,6 +201,18 @@ export async function PUT(
                 aiAnalyzedAt: new Date(),
             }
         })
+
+        // เพิ่มจำนวนการใช้งาน AI
+        await prisma.aiUsage.update({
+            where: {
+                userId: String(session.user.id),
+            },
+            data: {
+                aiUsedToday: {
+                    increment: 1
+                }
+            }
+        });
 
         return NextResponse.json({
             message: "Failure analyzed successfully",

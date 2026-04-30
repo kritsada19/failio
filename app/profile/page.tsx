@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { useFetch } from "@/hooks/useFetch";
 import { useSession, signOut } from "next-auth/react";
 import ProfileAvatar from "@/components/ProfileAvatar";
-import { Mail, CalendarDays, User2, LogOut } from "lucide-react";
-import { useTranslations } from 'next-intl';
+import { Mail, CalendarDays, User2, LogOut, ShieldCheck, CreditCard, AlertCircle } from "lucide-react";
+import { useTranslations, useLocale } from 'next-intl';
+import { useState } from "react";
 
 interface UserProfile {
     id: string;
@@ -15,12 +16,20 @@ interface UserProfile {
     image: string | null;
     role: string;
     createdAt: string;
+    plan: "FREE" | "PRO";
+    stripeStatus?: string;
+    stripeCurrentPeriodEnd: string | null;
 }
 
 export default function ProfilePage() {
     const router = useRouter();
     const { data: session, status } = useSession();
     const t = useTranslations('Profile');
+    const tSub = useTranslations('Subscription');
+    const locale = useLocale();
+
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancelLoading, setCancelLoading] = useState(false);
 
     const { data: user, loading, error } = useFetch<UserProfile>(`/api/me`);
 
@@ -29,6 +38,27 @@ export default function ProfilePage() {
             router.replace("/sign-in");
         }
     }, [status, router]);
+
+    const handleCancelSubscription = async () => {
+        setCancelLoading(true);
+        try {
+            const response = await fetch("/api/subscription/cancel", {
+                method: "POST",
+            });
+            if (response.ok) {
+                setShowCancelModal(false);
+                window.location.reload();
+            } else {
+                const errorData = await response.json();
+                alert(errorData.error || "Failed to cancel subscription");
+            }
+        } catch (error) {
+            console.error("Error canceling subscription:", error);
+            alert("An unexpected error occurred. Please try again.");
+        } finally {
+            setCancelLoading(false);
+        }
+    };
 
     if (status === "loading" || loading) {
         return (
@@ -59,7 +89,7 @@ export default function ProfilePage() {
     if (!session?.user || !user) return null;
 
     const joinedDate = user.createdAt
-        ? new Date(user.createdAt).toLocaleDateString("th-TH", {
+        ? new Date(user.createdAt).toLocaleDateString(locale === "th" ? "th-TH" : "en-US", {
             year: "numeric",
             month: "long",
             day: "numeric",
@@ -120,6 +150,40 @@ export default function ProfilePage() {
                             />
                         </div>
 
+                        {/* Subscription Section */}
+                        <div className="mt-8">
+                            <h3 className="text-sm font-medium text-gray-500 dark:text-slate-500 mb-4">{t('subscriptionSection')}</h3>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <InfoCard
+                                    icon={<ShieldCheck className="w-5 h-5 text-gray-700 dark:text-slate-300" />}
+                                    label={t('planLabel')}
+                                    value={user.plan === "PRO" ? t('planPro') : t('planFree')}
+                                />
+                                {user.stripeCurrentPeriodEnd && (
+                                    <InfoCard
+                                        icon={<CreditCard className="w-5 h-5 text-gray-700 dark:text-slate-300" />}
+                                        label={t('expiresLabel')}
+                                        value={new Date(user.stripeCurrentPeriodEnd).toLocaleDateString(locale === "th" ? "th-TH" : "en-US", {
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                        })}
+                                    />
+                                )}
+                            </div>
+
+                            {user.plan === "PRO" && user.stripeStatus !== "canceled" && (
+                                <div className="mt-4 flex justify-start">
+                                    <button
+                                        onClick={() => setShowCancelModal(true)}
+                                        className="text-sm font-medium text-slate-500 hover:text-red-500 transition-colors duration-200"
+                                    >
+                                        {tSub("cancelSubscription")}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
                         {/* Optional small note */}
                         <div className="mt-6 rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3">
                             <p className="text-sm text-gray-500 dark:text-slate-400">
@@ -140,6 +204,50 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </div>
+
+            {/* Cancel Confirmation Modal */}
+            {showCancelModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity"
+                        onClick={() => !cancelLoading && setShowCancelModal(false)}
+                    />
+
+                    {/* Modal Content */}
+                    <div className="relative w-full max-w-md scale-100 transform overflow-hidden rounded-3xl bg-white dark:bg-slate-900 p-8 shadow-2xl ring-1 ring-slate-200 dark:ring-slate-800 transition-all duration-300">
+                        <div className="text-center">
+                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                                <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+                            </div>
+
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                                {tSub("cancelModalTitle")}
+                            </h3>
+                            <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                                {tSub("cancelModalDesc")}
+                            </p>
+
+                            <div className="mt-8 flex flex-col gap-3">
+                                <button
+                                    onClick={handleCancelSubscription}
+                                    disabled={cancelLoading}
+                                    className="w-full rounded-2xl bg-red-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-red-900/20 transition-all hover:bg-red-500 hover:shadow-red-900/40 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {cancelLoading ? tSub("canceling") : tSub("cancelConfirm")}
+                                </button>
+                                <button
+                                    onClick={() => setShowCancelModal(false)}
+                                    disabled={cancelLoading}
+                                    className="w-full rounded-2xl bg-slate-100 dark:bg-slate-800 px-6 py-4 text-sm font-bold text-slate-900 dark:text-white transition-all hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {tSub("cancelKeep")}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

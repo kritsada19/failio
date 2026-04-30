@@ -17,14 +17,14 @@ export async function proxy(request: NextRequest) {
 
   // Get the pathname of the request
   const { pathname } = request.nextUrl
-  
+
   // Exclude static paths and API for auth checks
   if (pathname.startsWith('/_next') || pathname.startsWith('/api') || pathname.includes('.')) {
     return response;
   }
 
   // Only check auth for specific paths
-  const isProtectedPath = pathname.startsWith('/dashboard') || pathname.startsWith('/profile') || pathname.startsWith('/admin');
+  const isProtectedPath = pathname.startsWith('/dashboard') || pathname.startsWith('/profile') || pathname.startsWith('/subscription') || pathname.startsWith('/admin');
 
   if (isProtectedPath) {
     const user = await getToken({
