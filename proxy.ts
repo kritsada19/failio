@@ -24,7 +24,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Only check auth for specific paths
-  const isProtectedPath = pathname.startsWith('/dashboard') || pathname.startsWith('/profile') || pathname.startsWith('/subscription') || pathname.startsWith('/admin');
+  const isProtectedPath = pathname.startsWith('/dashboard') || pathname.startsWith('/profile') || pathname.startsWith('/admin');
 
   if (isProtectedPath) {
     const user = await getToken({

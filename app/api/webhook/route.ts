@@ -7,6 +7,10 @@ import { getPeriodEnd } from "@/lib/stripe";
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY!);
 
+if (!env.STRIPE_WEBHOOK_SECRET) {
+    throw new Error("STRIPE_WEBHOOK_SECRET is not defined");
+}
+
 export async function POST(req: NextRequest) {
     const body = await req.text();
     const signature = req.headers.get("stripe-signature")!;
@@ -71,6 +75,22 @@ export async function POST(req: NextRequest) {
                 break;
             }
 
+            case "invoice.payment_failed": {
+                if (!session.subscription) return NextResponse.json({ received: true });
+
+                const subscription = (await stripe.subscriptions.retrieve(
+                    session.subscription as string
+                )) as any;
+
+                await prisma.user.update({
+                    where: { stripeSubscriptionId: subscription.id },
+                    data: {
+                        stripeStatus: subscription.status,
+                    },
+                });
+                break;
+            }
+
             case "customer.subscription.deleted": {
                 await prisma.user.update({
                     where: { stripeSubscriptionId: session.id },
@@ -89,7 +109,7 @@ export async function POST(req: NextRequest) {
                     data: {
                         stripeStatus: subscription.status,
                         stripeCurrentPeriodEnd: getPeriodEnd(subscription),
-                        plan: (subscription.status === "active" || subscription.status === "trialing") ? "PRO" : "FREE",
+                        plan: (subscription.status === "active" || subscription.status === "trialing" || subscription.status === "past_due") ? "PRO" : "FREE",
                     },
                 });
                 break;
@@ -100,10 +120,7 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json({ received: true }, { status: 200 });
-    } catch (error: any) {
-        console.error("Webhook processing failed:");
-        console.error("MESSAGE:", error?.message);
-        console.error("STACK:", error?.stack);
+    } catch {
         return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
     }
 }

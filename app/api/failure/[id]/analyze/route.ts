@@ -93,7 +93,7 @@ export async function PUT(
         const lastReset = new Date(aiUsage.resetAt);
 
         if (lastReset.toDateString() !== today.toDateString()) {
-            await prisma.aiUsage.update({
+            aiUsage = await prisma.aiUsage.update({
                 where: {
                     userId: String(session.user.id),
                 },
@@ -111,7 +111,17 @@ export async function PUT(
             )
         }
 
-
+        // เพิ่มจำนวนการใช้งาน AI
+        await prisma.aiUsage.update({
+            where: {
+                userId: String(session.user.id),
+            },
+            data: {
+                aiUsedToday: {
+                    increment: 1
+                }
+            }
+        });
 
         const genAI = new GoogleGenerativeAI(env.GOOGLE_GENERATIVE_AI_API_KEY);
         const model = genAI.getGenerativeModel({
@@ -202,18 +212,6 @@ export async function PUT(
             }
         })
 
-        // เพิ่มจำนวนการใช้งาน AI
-        await prisma.aiUsage.update({
-            where: {
-                userId: String(session.user.id),
-            },
-            data: {
-                aiUsedToday: {
-                    increment: 1
-                }
-            }
-        });
-
         return NextResponse.json({
             message: "Failure analyzed successfully",
             status: 200,
@@ -221,6 +219,14 @@ export async function PUT(
 
     } catch (error) {
         const { id } = await params;
+        const session = await getSession();
+
+        if (!session) {
+            return NextResponse.json(
+                { message: "Unauthorized" },
+                { status: 401 }
+            )
+        }
 
         const failure = await prisma.failure.findUnique({
             where: {
@@ -243,6 +249,18 @@ export async function PUT(
                 aiStatus: "FAILED",
             }
         })
+
+        await prisma.aiUsage.update({
+            where: {
+                userId: String(session.user.id),
+            },
+            data: {
+                aiUsedToday: {
+                    decrement: 1
+                }
+            }
+        });
+
         console.log(error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }

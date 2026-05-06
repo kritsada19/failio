@@ -173,7 +173,14 @@ export default function ProfilePage() {
                             </div>
 
                             {user.plan === "PRO" && user.stripeStatus !== "canceled" && (
-                                <div className="mt-4 flex justify-start">
+                                <div className="mt-4 flex flex-col gap-3 items-start">
+                                    <button
+                                        onClick={() => window.location.href = "/api/subscription/manage"}
+                                        className="inline-flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-900 dark:text-white transition-all hover:bg-slate-200 dark:hover:bg-slate-700"
+                                    >
+                                        <CreditCard className="h-4 w-4" />
+                                        {tSub("manageSubscription")}
+                                    </button>
                                     <button
                                         onClick={() => setShowCancelModal(true)}
                                         className="text-sm font-medium text-slate-500 hover:text-red-500 transition-colors duration-200"

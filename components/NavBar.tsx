@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 // ...
 import { useSession } from "next-auth/react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -75,7 +75,7 @@ function NavBar() {
             {t('growthInsights')}
           </Link>
           <Link
-            href="/subscription"
+            href="/dashboard/subscription"
             className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"}
             onClick={() => setIsOpen(false)}
           >
@@ -159,6 +159,12 @@ function NavBar() {
                 className="inline-flex items-center rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
               >
                 {t('profile')}
+                {session.user.plan === "PRO" && (
+                  <span className="pro-badge-shimmer ml-2 inline-flex items-center gap-1 rounded-full bg-linear-to-r from-amber-200 via-amber-400 to-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-950 shadow-[0_0_10px_rgba(251,191,36,0.4)] transition-all hover:scale-105">
+                    <Sparkles className="h-2.5 w-2.5" />
+                    PRO
+                  </span>
+                )}
               </Link>
             ) : (
               <div className="flex items-center gap-3">
@@ -219,6 +225,12 @@ function NavBar() {
                 onClick={() => setIsOpen(false)}
               >
                 {t('profileSettings')}
+                {session.user.plan === "PRO" && (
+                  <span className="pro-badge-shimmer ml-2 inline-flex items-center gap-1 rounded-full bg-linear-to-r from-amber-200 via-amber-400 to-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-950 shadow-sm">
+                    <Sparkles className="h-2.5 w-2.5" />
+                    PRO
+                  </span>
+                )}
               </Link>
             ) : (
               <>

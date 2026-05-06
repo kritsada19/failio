@@ -344,11 +344,9 @@
     "perMonth": "/ month",
     "currency": "THB",
     "freeFeature1": "Limited failure logs",
-    "freeFeature2": "Basic AI analysis",
+    "freeFeature2": "AI analysis limited to 5 times per day",
     "proFeature1": "Unlimited failure logs",
-    "proFeature2": "Advanced AI analysis",
-    "proFeature3": "Detailed growth insights",
-    "proFeature4": "Priority support",
+    "proFeature2": "Unlimited AI analysis",
     "currentPlan": "Current Plan",
     "choosePlan": "Choose Plan",
     "upgradeNow": "Upgrade Now",
@@ -357,6 +355,15 @@
     "cancelModalDesc": "Are you sure you want to cancel your subscription? Your Pro access will end immediately, and you will not be charged again.",
     "cancelConfirm": "Yes, cancel it",
     "cancelKeep": "No, keep it",
-    "canceling": "Canceling..."
+    "canceling": "Canceling...",
+    "manageSubscription": "Manage Subscription on Stripe"
+  },
+  "Checkout": {
+    "successTitle": "Payment Successful!",
+    "successDesc": "Thank you for subscribing to Failio Pro. Your account has been upgraded and you now have access to all premium features.",
+    "successBtn": "Go to Dashboard",
+    "cancelTitle": "Payment Cancelled",
+    "cancelDesc": "The payment process was cancelled. No charges were made to your account.",
+    "cancelBtn": "Try Again"
   }
 }

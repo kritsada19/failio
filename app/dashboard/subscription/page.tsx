@@ -95,8 +95,6 @@ export default function SubscriptionPage() {
       features: [
         t("proFeature1"),
         t("proFeature2"),
-        t("proFeature3"),
-        t("proFeature4"),
       ],
       buttonText: currentPlan === "PRO" ? t("currentPlan") : t("upgradeNow"),
       isCurrent: currentPlan === "PRO",
@@ -177,12 +175,20 @@ export default function SubscriptionPage() {
               </button>
 
               {plan.isCurrent && plan.highlight && user?.stripeStatus !== "canceled" && (
-                <button
-                  onClick={() => setShowCancelModal(true)}
-                  className="mt-4 text-sm font-medium text-slate-500 hover:text-red-500 transition-colors duration-200 text-center w-full"
-                >
-                  {t("cancelSubscription")}
-                </button>
+                <div className="mt-4 space-y-3">
+                  <button
+                    onClick={() => window.location.href = "/api/subscription/manage"}
+                    className="w-full rounded-2xl bg-slate-100 dark:bg-slate-800 px-6 py-3 text-sm font-bold text-slate-900 dark:text-white transition-all hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none"
+                  >
+                    {t("manageSubscription")}
+                  </button>
+                  <button
+                    onClick={() => setShowCancelModal(true)}
+                    className="mt-4 text-sm font-medium text-slate-500 hover:text-red-500 transition-colors duration-200 text-center w-full"
+                  >
+                    {t("cancelSubscription")}
+                  </button>
+                </div>
               )}
             </div>
           ))}
