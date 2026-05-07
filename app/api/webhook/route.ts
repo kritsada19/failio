@@ -4,6 +4,7 @@ import { env } from "@/env";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getPeriodEnd } from "@/lib/stripe";
+import { sendNotificationSubscript } from "@/lib/notificationSubscription";
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY!);
 
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
                     return NextResponse.json({ error: "User ID not found in metadata" }, { status: 400 });
                 }
 
+
                 await prisma.user.update({
                     where: { id: session.metadata.userId },
                     data: {
@@ -54,6 +56,13 @@ export async function POST(req: NextRequest) {
                         plan: "PRO",
                     },
                 });
+
+                const email = await prisma.user.findUnique({
+                    where: { id: session.metadata.userId },
+                    select: { email: true },
+                });
+
+                sendNotificationSubscript(email?.email as string);
                 break;
             }
 
@@ -72,6 +81,13 @@ export async function POST(req: NextRequest) {
                         stripeCurrentPeriodEnd: getPeriodEnd(subscription),
                     },
                 });
+
+                const email = await prisma.user.findUnique({
+                    where: { stripeSubscriptionId: subscription.id },
+                    select: { email: true },
+                });
+
+                sendNotificationSubscript(email?.email as string);
                 break;
             }
 
