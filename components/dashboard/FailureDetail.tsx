@@ -1,7 +1,6 @@
 "use client";
-import { useState } from "react";
-
-import { Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Sparkles, CheckCircle2, Search, BrainCircuit, Lightbulb } from "lucide-react";
 
 
 interface FailureData {
@@ -37,7 +36,28 @@ function FailureDetail({
   onAnalyze: () => Promise<void> | void;
 }) {
   const [isLocalAnalyzing, setIsLocalAnalyzing] = useState(false);
+  const [thinkingIndex, setThinkingIndex] = useState(0);
   const isProcessing = failure.aiStatus === "PROCESSING" || isLocalAnalyzing;
+
+  const thinkingPhrases = [
+    "Analyzing failure context...",
+    "Identifying emotional patterns...",
+    "Synthesizing lessons learned...",
+    "Reframing perspective...",
+    "Generating growth suggestions...",
+  ];
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isProcessing) {
+      interval = setInterval(() => {
+        setThinkingIndex((prev) => (prev + 1) % thinkingPhrases.length);
+      }, 2500);
+    } else {
+      setThinkingIndex(0);
+    }
+    return () => clearInterval(interval);
+  }, [isProcessing, thinkingPhrases.length]);
 
   const handleAnalyzeClick = async () => {
     setIsLocalAnalyzing(true);
@@ -142,54 +162,78 @@ function FailureDetail({
             </div>
 
             {isProcessing ? (
-              <div className="space-y-4 mt-6">
+              <div className="space-y-4 mt-6 animate-pulse">
+                <div className="flex flex-col items-center justify-center py-4 mb-2">
+                  <div className="relative">
+                    <div className="absolute inset-0 animate-ping rounded-full bg-orange-200 dark:bg-orange-900/30 opacity-75"></div>
+                    <div className="relative rounded-full bg-orange-100 dark:bg-orange-900/50 p-3">
+                      <BrainCircuit className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm font-medium text-slate-600 dark:text-slate-400 animate-bounce">
+                    {thinkingPhrases[thinkingIndex]}
+                  </p>
+                </div>
+
                 {/* Skeleton Summary */}
-                <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-sm">
+                <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-sm">
+                  <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-orange-100/10 dark:via-orange-400/5 to-transparent animate-shimmer" style={{ width: '200%' }}></div>
                   <div className="flex items-center gap-3">
-                    <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
-                    <div className="h-3 w-24 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
+                    <Search className="h-4 w-4 text-slate-400" />
+                    <div className="h-3 w-24 rounded-full bg-slate-100 dark:bg-slate-800" />
                   </div>
                   <div className="mt-4 space-y-2">
-                    <div className="h-3 w-full animate-pulse rounded-full bg-slate-50 dark:bg-slate-900" />
-                    <div className="h-3 w-[85%] animate-pulse rounded-full bg-slate-50 dark:bg-slate-900" />
+                    <div className="h-3 w-full rounded-full bg-slate-50 dark:bg-slate-900" />
+                    <div className="h-3 w-[85%] rounded-full bg-slate-50 dark:bg-slate-900" />
                   </div>
                 </div>
 
                 {/* Skeleton Suggestions */}
-                <div className="rounded-3xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/10 p-4 shadow-sm">
+                <div className="relative overflow-hidden rounded-3xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/10 p-4 shadow-sm">
+                   <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-blue-200/20 dark:via-blue-400/10 to-transparent animate-shimmer" style={{ width: '200%' }}></div>
                   <div className="flex items-center gap-2">
-                    <span className="animate-bounce text-sm">✨</span>
-                    <div className="h-3 w-32 animate-pulse rounded-full bg-blue-200 dark:bg-blue-800/50" />
+                    <Sparkles className="h-4 w-4 text-blue-400" />
+                    <div className="h-3 w-32 rounded-full bg-blue-200 dark:bg-blue-800/50" />
                   </div>
                   <div className="mt-4 space-y-2">
-                    <div className="h-3 w-full animate-pulse rounded-full bg-blue-100/50 dark:bg-blue-900/20" />
-                    <div className="h-3 w-[90%] animate-pulse rounded-full bg-blue-100/50 dark:bg-blue-900/20" />
+                    <div className="h-3 w-full rounded-full bg-blue-100/50 dark:bg-blue-900/20" />
+                    <div className="h-3 w-[90%] rounded-full bg-blue-100/50 dark:bg-blue-900/20" />
                   </div>
                 </div>
 
                 {/* Skeleton Grid */}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-sm">
-                    <div className="h-2.5 w-20 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
-                    <div className="mt-3 h-4 w-full animate-pulse rounded-full bg-slate-100 dark:bg-slate-900" />
+                    <div className="h-2.5 w-20 rounded-full bg-slate-200 dark:bg-slate-800" />
+                    <div className="mt-3 h-4 w-full rounded-full bg-slate-100 dark:bg-slate-900" />
                   </div>
                   <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-sm">
-                    <div className="h-2.5 w-24 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
-                    <div className="mt-3 h-4 w-full animate-pulse rounded-full bg-slate-100 dark:bg-slate-900" />
+                    <div className="h-2.5 w-24 rounded-full bg-slate-200 dark:bg-slate-800" />
+                    <div className="mt-3 h-4 w-full rounded-full bg-slate-100 dark:bg-slate-900" />
                   </div>
                 </div>
               </div>
             ) : failure.aiResult ? (
-              <div className="space-y-4 mt-6">
-                <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-sm">
-                  <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Summary</p>
+              <div className="space-y-4 mt-6 animate-pop">
+                <div className="flex items-center gap-2 mb-2 px-1">
+                  <CheckCircle2 className="h-5 w-5 text-green-500 animate-bounce" />
+                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">Analysis Complete</span>
+                </div>
+
+                <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-sm animate-fade-in-up">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Search className="h-4 w-4 text-slate-400" />
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Summary</p>
+                  </div>
                   <p className="mt-2 text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-7">
                     {failure.aiResult.summary}
                   </p>
                 </div>
 
-                <div className="rounded-3xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/10 p-4 shadow-sm">
-                  <p className="text-sm font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2">✨ AI Suggestions</p>
+                <div className="rounded-3xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/10 p-4 shadow-sm animate-fade-in-up animate-delay-100">
+                  <p className="text-sm font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" /> AI Suggestions
+                  </p>
                   <ul className="mt-2 text-sm text-slate-700 dark:text-slate-300 list-disc list-inside space-y-1">
                     {failure.aiResult?.suggestions?.map((suggestion, index) => (
                       <li key={index} className="leading-relaxed whitespace-pre-wrap">{suggestion}</li>
@@ -198,12 +242,18 @@ function FailureDetail({
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-sm">
-                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Root Cause</p>
+                  <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-sm animate-fade-in-up animate-delay-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <BrainCircuit className="h-4 w-4 text-slate-400" />
+                      <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Root Cause</p>
+                    </div>
                     <p className="mt-2 font-bold text-slate-800 dark:text-slate-100">{failure.aiResult.rootCause}</p>
                   </div>
-                  <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-sm">
-                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Lesson Learned</p>
+                  <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-sm animate-fade-in-up animate-delay-300">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lightbulb className="h-4 w-4 text-slate-400" />
+                      <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Lesson Learned</p>
+                    </div>
                     <p className="mt-2 font-bold text-slate-800 dark:text-slate-100">{failure.aiResult.lesson}</p>
                   </div>
                 </div>
