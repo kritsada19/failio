@@ -1,20 +1,22 @@
 import { env } from "@/env";
 import nodemailer from "nodemailer";
+import { getTranslations } from "next-intl/server";
 
 const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: env.EMAIL_USER,
-        pass: env.EMAIL_PASS,
-    }
+  service: "gmail",
+  auth: {
+    user: env.EMAIL_USER,
+    pass: env.EMAIL_PASS,
+  }
 })
 
-export async function sendNotificationSubscript(email: string) {
-    await transporter.sendMail({
-        from: `"Failio" <${env.EMAIL_USER}>`,
-        to: email,
-        subject: "Subscription Activated Successfully",
-        html: `
+export async function sendNotificationSubscript(email: string, locale: string = "en") {
+  const t = await getTranslations({ locale, namespace: "Email" });
+  await transporter.sendMail({
+    from: `"Failio" <${env.EMAIL_USER}>`,
+    to: email,
+    subject: t("subscriptionSubject"),
+    html: `
   <div
     style="
       max-width:520px;
@@ -51,7 +53,7 @@ export async function sendNotificationSubscript(email: string) {
         color:#ffffff;
       "
     >
-      Welcome to Failio
+      ${t("welcome")}
     </h1>
 
     <p
@@ -62,7 +64,7 @@ export async function sendNotificationSubscript(email: string) {
         color:#cbd5e1;
       "
     >
-      Your subscription has been activated successfully.
+      ${t("activatedDesc")}
     </p>
 
     <p
@@ -73,8 +75,8 @@ export async function sendNotificationSubscript(email: string) {
         color:#94a3b8;
       "
     >
-      Thank you for supporting Failio.  
-      You now have access to all premium features.
+      ${t("thanksSupport")} <br/>
+      ${t("accessPremium")}
     </p>
 
     <div
@@ -86,9 +88,9 @@ export async function sendNotificationSubscript(email: string) {
         color:#64748b;
       "
     >
-      © 2026 Failio. All rights reserved.
+      ${t("copyright")}
     </div>
   </div>
 `,
-    })
+  })
 }

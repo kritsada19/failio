@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { sendResetEmail } from "@/lib/sendResetEmail";
+import { getLocale } from "next-intl/server";
 
 export async function POST(request: Request) {
   try {
@@ -45,8 +46,9 @@ export async function POST(request: Request) {
 
     // แนบ token กับหน้า frontend เพราะ frontend ต้องส่ง password ด้วย
     const link = `http://localhost:3000/reset-password?token=${token}`;
+    const locale = await getLocale();
 
-    await sendResetEmail(email, link);
+    await sendResetEmail(email, link, locale);
 
     return NextResponse.json(
       { message: "Reset email sent" },

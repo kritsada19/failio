@@ -4,11 +4,13 @@ import { env } from "@/env";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
+import { getLocale } from "next-intl/server";
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 
 export async function POST() {
     const sessionUser = await getServerSession(authOptions);
+    const locale = await getLocale();
 
     if (!sessionUser?.user?.id) {
         return NextResponse.json(
@@ -42,11 +44,13 @@ export async function POST() {
 
         metadata: {
             userId: sessionUser.user.id,
+            locale: locale,
         },
 
         subscription_data: {
             metadata: {
                 userId: sessionUser.user.id,
+                locale: locale,
             },
         },
 

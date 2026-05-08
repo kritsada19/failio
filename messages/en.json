@@ -365,5 +365,22 @@
     "cancelTitle": "Payment Cancelled",
     "cancelDesc": "The payment process was cancelled. No charges were made to your account.",
     "cancelBtn": "Try Again"
+  },
+  "Email": {
+    "subscriptionSubject": "Subscription Activated Successfully",
+    "welcome": "Welcome to Failio",
+    "activatedDesc": "Your subscription has been activated successfully.",
+    "thanksSupport": "Thank you for supporting Failio.",
+    "accessPremium": "You now have access to all premium features.",
+    "copyright": "© 2026 Failio. All rights reserved.",
+    "verifySubject": "Verify your email",
+    "verifyTitle": "Verify your email",
+    "verifyDesc": "Click the button below to verify your account.",
+    "verifyBtn": "Verify Email",
+    "verifyBackup": "If the button doesn't work, copy this link:",
+    "resetSubject": "Reset your password",
+    "resetTitle": "Reset your password",
+    "resetDesc": "Click the button below to reset your password.",
+    "resetBtn": "Reset Password"
   }
 }

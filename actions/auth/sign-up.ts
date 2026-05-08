@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/sendEmail";
 import { signUpSchema } from "@/lib/validations/auth";
+import { getLocale } from "next-intl/server";
 
 export type SignUpState = {
     success: boolean;
@@ -91,9 +92,10 @@ export async function signUpAction(
 
         // สร้าง link แนบ token
         const verifyLink = `${env.NEXTAUTH_URL}/api/auth/verify-email?token=${token}`;
+        const locale = await getLocale();
 
         // ส่ง link ให้ email ที่กรอกมาถ้าส่งได้แสดงว่า email นั้นมีจริง
-        await sendVerificationEmail(email, verifyLink);
+        await sendVerificationEmail(email, verifyLink, locale);
 
         return {
             success: true,

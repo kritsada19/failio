@@ -62,7 +62,8 @@ export async function POST(req: NextRequest) {
                     select: { email: true },
                 });
 
-                sendNotificationSubscript(email?.email as string);
+                const locale = session?.metadata?.locale || "en";
+                sendNotificationSubscript(email?.email as string, locale);
                 break;
             }
 
@@ -87,7 +88,8 @@ export async function POST(req: NextRequest) {
                     select: { email: true },
                 });
 
-                sendNotificationSubscript(email?.email as string);
+                const locale = subscription?.metadata?.locale || "en";
+                sendNotificationSubscript(email?.email as string, locale);
                 break;
             }
 

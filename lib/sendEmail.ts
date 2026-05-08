@@ -1,6 +1,8 @@
 import { env } from "@/env";
 import nodemailer from "nodemailer";
 
+import { getTranslations } from "next-intl/server";
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -10,14 +12,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendVerificationEmail(email: string, link: string) {
+export async function sendVerificationEmail(email: string, link: string, locale: string = "en") {
+  const t = await getTranslations({ locale, namespace: "Email" });
   await transporter.sendMail({
     from: `"Failio" <${env.EMAIL_USER}>`,
     to: email,
-    subject: "Verify your email",
+    subject: t("verifySubject"),
     html: `
-      <h2>Verify your email</h2>
-      <p>Click the button below to verify your account.</p>
+      <h2>${t("verifyTitle")}</h2>
+      <p>${t("verifyDesc")}</p>
 
       <a href="${link}" 
         style="
@@ -28,10 +31,10 @@ export async function sendVerificationEmail(email: string, link: string) {
           text-decoration:none;
           border-radius:6px;
         ">
-        Verify Email
+        ${t("verifyBtn")}
       </a>
 
-      <p>If the button doesn't work, copy this link:</p>
+      <p>${t("verifyBackup")}</p>
       <p>${link}</p>
     `,
   });
