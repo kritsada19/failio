@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma"
 import { createFailureSchema, updateFailureSchema, deleteFailureSchema } from "@/lib/validations/failure";
 import { getSession } from "@/lib/auth";
+import { getTranslations } from "next-intl/server";
 
 export type FailureState = {
     success: boolean;
@@ -19,12 +20,13 @@ export async function createFailure(
     prevState: FailureState,
     formData: FormData
 ) {
+    const t = await getTranslations("Actions");
     try {
         const session = await getSession();
         if (!session) {
             return {
                 success: false,
-                message: "Unauthorized",
+                message: t("unauthorized"),
             };
         }
 
@@ -38,7 +40,7 @@ export async function createFailure(
         if (!validatedFields.success) {
             return {
                 success: false,
-                message: "Invalid fields",
+                message: t("invalidFields"),
                 error: validatedFields.error.flatten().fieldErrors,
             };
         }
@@ -61,14 +63,14 @@ export async function createFailure(
 
         return {
             success: true,
-            message: "Failure created successfully",
+            message: t("createSuccess"),
         };
 
     } catch (error) {
         console.error("Error during create failure:", error);
         return {
             success: false,
-            message: "Server error during create failure",
+            message: t("createError"),
         };
     }
 }
@@ -77,12 +79,13 @@ export async function updateFailure(
     prevState: FailureState,
     formData: FormData
 ) {
+    const t = await getTranslations("Actions");
     try {
         const session = await getSession();
         if (!session) {
             return {
                 success: false,
-                message: "Unauthorized",
+                message: t("unauthorized"),
             };
         }
 
@@ -98,7 +101,7 @@ export async function updateFailure(
         if (!validatedFields.success) {
             return {
                 success: false,
-                message: "Invalid fields",
+                message: t("invalidFields"),
                 error: validatedFields.error.flatten().fieldErrors,
             };
         }
@@ -112,7 +115,7 @@ export async function updateFailure(
         if (!user) {
             return {
                 success: false,
-                message: "User not found",
+                message: t("userNotFound"),
             };
         }
 
@@ -125,7 +128,7 @@ export async function updateFailure(
         if (!failure) {
             return {
                 success: false,
-                message: "Failure not found",
+                message: t("failureNotFound"),
             };
         }
 
@@ -135,7 +138,7 @@ export async function updateFailure(
         if (!isAdmin && !isOwner) {
             return {
                 success: false,
-                message: "Forbidden",
+                message: t("forbidden"),
             };
         }
 
@@ -159,25 +162,26 @@ export async function updateFailure(
 
         return {
             success: true,
-            message: "Failure updated successfully",
+            message: t("updateSuccess"),
         };
 
     } catch (error) {
         console.error("Error during update failure:", error);
         return {
             success: false,
-            message: "Server error during update failure",
+            message: t("updateError"),
         };
     }
 }
 
 export async function deleteFailure(id: number) {
+    const t = await getTranslations("Actions");
     try {
         const session = await getSession();
         if (!session) {
             return {
                 success: false,
-                message: "Unauthorized",
+                message: t("unauthorized"),
             };
         }
 
@@ -188,7 +192,7 @@ export async function deleteFailure(id: number) {
         if (!validatedFields.success) {
             return {
                 success: false,
-                message: "Invalid fields",
+                message: t("invalidFields"),
                 error: validatedFields.error.flatten().fieldErrors,
             };
         }
@@ -202,7 +206,7 @@ export async function deleteFailure(id: number) {
         if (!failure) {
             return {
                 success: false,
-                message: "Failure not found",
+                message: t("failureNotFound"),
             };
         }
 
@@ -212,7 +216,7 @@ export async function deleteFailure(id: number) {
         if (!isAdmin && !isOwner) {
             return {
                 success: false,
-                message: "Forbidden",
+                message: t("forbidden"),
             };
         }
 
@@ -224,13 +228,13 @@ export async function deleteFailure(id: number) {
 
         return {
             success: true,
-            message: "Failure deleted successfully",
+            message: t("deleteSuccess"),
         };
     } catch (error) {
         console.error("Error during delete failure:", error);
         return {
             success: false,
-            message: "Server error during delete failure",
+            message: t("deleteError"),
         };
     }
 }

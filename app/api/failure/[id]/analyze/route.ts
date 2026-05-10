@@ -62,16 +62,6 @@ export async function PUT(
             )
         }
 
-
-        await prisma.failure.update({
-            where: {
-                id: failure.id,
-            },
-            data: {
-                aiStatus: "PROCESSING"
-            }
-        })
-
         let aiUsage = await prisma.aiUsage.findUnique({
             where: {
                 userId: String(session.user.id),
@@ -106,10 +96,19 @@ export async function PUT(
 
         if (user.plan === "FREE" && aiUsage.aiUsedToday >= 5) {
             return NextResponse.json(
-                { message: "AI usage limit reached" },
-                { status: 400 }
+                { message: "QUOTA_EXCEEDED" },
+                { status: 429 }
             )
         }
+
+        await prisma.failure.update({
+            where: {
+                id: failure.id,
+            },
+            data: {
+                aiStatus: "PROCESSING"
+            }
+        })
 
         // เพิ่มจำนวนการใช้งาน AI
         await prisma.aiUsage.update({
@@ -133,9 +132,21 @@ export async function PUT(
 
         // เช็ค input เพื่อป้องกัน prompt injection
         function sanitize(input: string) {
+            if (!input) return "";
             return input
+                // 1. ลบ HTML tags
                 .replace(/<[^>]*>?/gm, "")
-                .replace(/(ignore instructions|system prompt|act as)/gi, "")
+                // 2. ลบคำสั่งที่พยายาม override ระบบ (Ignore instructions, System prompt, etc.)
+                .replace(/(?:ignore|forget|skip|reset|override|disregard)\s+(?:all\s+)?(?:instructions|previous|rules|system|settings|directives)/gi, "")
+                .replace(/(?:system|hidden)\s+(?:prompt|message|instruction)/gi, "")
+                .replace(/(?:act\s+as|you\s+are\s+now|new\s+role|persona)/gi, "")
+                .replace(/instead\s+of\s+following/gi, "")
+                .replace(/output\s+(?:the\s+)?(?:prompt|instructions)/gi, "")
+                .replace(/do\s+not\s+(?:follow|heed)/gi, "")
+                // 3. ป้องกันการหลุดจากขอบเขตข้อมูล (Delimiter escape)
+                .replace(/<\/DATA>/gi, "[DATA_END_TAG_BLOCKED]")
+                // 4. ลบตัวอักษรควบคุม (Control characters) ที่อาจใช้ซ่อนคำสั่ง
+                .replace(/[\x00-\x1F\x7F\u200B-\u200D\uFEFF]/g, "")
                 .trim();
         }
 
@@ -183,7 +194,7 @@ export async function PUT(
         try {
             aiResponse = JSON.parse(result.response.text());
         } catch {
-            throw new Error("Invalid AI JSON response");
+            throw new Error("AI_INVALID_RESPONSE");
         };
 
         // เช็ค response เพื่อป้องกัน prompt injection
@@ -198,7 +209,7 @@ export async function PUT(
         }
 
         if (!isValidAIResponse(aiResponse)) {
-            throw new Error("AI response schema invalid");
+            throw new Error("AI_SCHEMA_INVALID");
         }
 
         await prisma.failure.update({
@@ -217,7 +228,7 @@ export async function PUT(
             status: 200,
         })
 
-    } catch (error) {
+    } catch (error: unknown) {
         const { id } = await params;
         const session = await getSession();
 
@@ -250,18 +261,32 @@ export async function PUT(
             }
         })
 
-        await prisma.aiUsage.update({
-            where: {
-                userId: String(session.user.id),
-            },
-            data: {
-                aiUsedToday: {
-                    decrement: 1
-                }
-            }
+        // คืนจำนวนการใช้งาน AI หากล้มเหลว
+        const currentUsage = await prisma.aiUsage.findUnique({
+            where: { userId: String(session.user.id) },
+            select: { aiUsedToday: true }
         });
 
+        if (currentUsage && currentUsage.aiUsedToday > 0) {
+            await prisma.aiUsage.update({
+                where: {
+                    userId: String(session.user.id),
+                },
+                data: {
+                    aiUsedToday: {
+                        decrement: 1
+                    }
+                }
+            });
+        }
+
         console.log(error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        
+        let message = "Internal Server Error";
+        if (error instanceof Error) {
+            message = error.message;
+        }
+
+        return NextResponse.json({ message: message }, { status: 500 });
     }
 }

@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Sparkles, CheckCircle2, Search, BrainCircuit, Lightbulb } from "lucide-react";
+import { useTranslations, useFormatter } from "next-intl";
+import { Sparkles, CheckCircle2, Search, BrainCircuit, Lightbulb, AlertCircle, RefreshCw, Crown } from "lucide-react";
+import Link from "next/link";
 
 
 interface FailureData {
@@ -19,6 +21,11 @@ interface FailureData {
     id: number;
     name: string;
   };
+  userPlan?: "FREE" | "PRO";
+  aiUsage?: {
+    aiUsedToday: number;
+    resetAt: string;
+  };
 }
 
 interface AiResult {
@@ -33,18 +40,22 @@ function FailureDetail({
   onAnalyze,
 }: {
   failure: FailureData;
-  onAnalyze: () => Promise<void> | void;
+  onAnalyze: (resetError?: boolean) => Promise<void> | void;
 }) {
+  const t = useTranslations("FailureDetail");
+  const format = useFormatter();
   const [isLocalAnalyzing, setIsLocalAnalyzing] = useState(false);
   const [thinkingIndex, setThinkingIndex] = useState(0);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+
   const isProcessing = failure.aiStatus === "PROCESSING" || isLocalAnalyzing;
 
   const thinkingPhrases = [
-    "Analyzing failure context...",
-    "Identifying emotional patterns...",
-    "Synthesizing lessons learned...",
-    "Reframing perspective...",
-    "Generating growth suggestions...",
+    t("thinking1"),
+    t("thinking2"),
+    t("thinking3"),
+    t("thinking4"),
+    t("thinking5"),
   ];
 
   useEffect(() => {
@@ -60,28 +71,112 @@ function FailureDetail({
   }, [isProcessing, thinkingPhrases.length]);
 
   const handleAnalyzeClick = async () => {
+    setAnalysisError(null);
     setIsLocalAnalyzing(true);
     try {
       await onAnalyze();
+    } catch (err: unknown) {
+        if (err && typeof err === 'object' && 'response' in err) {
+            const axiosError = err as { response: { data: { message: string } } };
+            setAnalysisError(axiosError.response?.data?.message || "Something went wrong");
+        } else if (err instanceof Error) {
+            setAnalysisError(err.message);
+        } else {
+            setAnalysisError("An unknown error occurred");
+        }
     } finally {
       setIsLocalAnalyzing(false);
     }
   };
 
   const getButtonText = () => {
-    if (isProcessing) return "Analyzing...";
+    if (isProcessing) return t("analyzing");
 
     switch (failure.aiStatus) {
       case "NOT_STARTED":
-        return "Analyze with AI";
+        return t("analyzeWithAi");
       case "COMPLETED":
-        return "Re-analyze";
+        return t("reAnalyze");
       case "FAILED":
-        return "Try Again";
+        return t("tryAgain");
       default:
-        return "Analyze with AI";
+        return t("analyzeWithAi");
     }
   };
+
+  const getLimitInfo = () => {
+    if (!failure.aiUsage) return null;
+    
+    if (failure.userPlan === "PRO") {
+        return {
+            text: t("proUnlimited"),
+            isFull: false,
+            remaining: Infinity
+        };
+    }
+
+    const used = failure.aiUsage.aiUsedToday;
+    const limit = 5;
+    const left = Math.max(0, limit - used);
+
+    return {
+        text: left > 0 ? t("remaining", { remaining: left }) : t("dailyLimitReached"),
+        isFull: left <= 0,
+        remaining: left
+    };
+  };
+
+  const limitInfo = getLimitInfo();
+
+  const renderErrorMessage = () => {
+      if (!analysisError && failure.aiStatus !== "FAILED") return null;
+
+      const errorKey = analysisError || "aiAnalysisFailed";
+      
+      let displayMessage = t("aiAnalysisFailed");
+      let showUpgrade = false;
+
+      if (errorKey === "QUOTA_EXCEEDED") {
+          displayMessage = t("quotaExceeded");
+          showUpgrade = true;
+      } else if (errorKey === "AI_INVALID_RESPONSE") {
+          displayMessage = t("aiInvalidResponse");
+      } else if (errorKey === "AI_SCHEMA_INVALID") {
+          displayMessage = t("aiSchemaInvalid");
+      }
+
+      return (
+        <div className="mt-6 rounded-2xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/50 dark:bg-rose-900/10 p-5 animate-shake">
+            <div className="flex items-start gap-3">
+                <AlertCircle className="mt-0.5 h-5 w-5 text-rose-500 shrink-0" />
+                <div className="space-y-3">
+                    <p className="text-sm font-medium text-rose-800 dark:text-rose-300">
+                        {displayMessage}
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                        <button
+                            onClick={handleAnalyzeClick}
+                            className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-rose-700 active:scale-95"
+                        >
+                            <RefreshCw className={`h-3.5 w-3.5 ${isProcessing ? 'animate-spin' : ''}`} />
+                            {t("retryBtn")}
+                        </button>
+                        
+                        {showUpgrade && (
+                            <Link
+                                href="/subscription"
+                                className="inline-flex items-center gap-2 rounded-lg bg-slate-900 dark:bg-slate-100 px-3 py-1.5 text-xs font-semibold text-white dark:text-slate-900 shadow-sm transition-all hover:bg-slate-800 dark:hover:bg-white active:scale-95"
+                            >
+                                <Crown className="h-3.5 w-3.5 text-orange-400" />
+                                {t("upgradeToPro")}
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+      );
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -95,7 +190,13 @@ function FailureDetail({
               </span>
 
               <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
-                {new Date(failure.createdAt).toLocaleString()}
+                {format.dateTime(new Date(failure.createdAt), {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric'
+                })}
               </span>
             </div>
 
@@ -104,8 +205,7 @@ function FailureDetail({
             </h1>
 
             <p className="max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-              Every failure is a reflection point. Review what happened, identify
-              the emotions behind it, and turn the lesson into growth.
+              {t("reflectionPoint")}
             </p>
           </div>
         </div>
@@ -114,7 +214,7 @@ function FailureDetail({
           {/* description */}
           <section className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/60 p-5 sm:p-6 transition-all duration-300">
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              What happened
+              {t("whatHappened")}
             </h2>
 
             <p className="whitespace-pre-wrap text-[15px] leading-8 text-slate-700 dark:text-slate-300">
@@ -125,7 +225,7 @@ function FailureDetail({
           {/* emotions */}
           <section>
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Emotions
+              {t("emotions")}
             </h2>
 
             <div className="flex flex-wrap gap-2">
@@ -142,23 +242,50 @@ function FailureDetail({
 
           {/* ai reflection */}
           <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm sm:p-6 transition-all duration-300">
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                  AI Reflection
-                </h2>
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                  {t("aiReflection")}
+                  {failure.userPlan === "PRO" && (
+                    <Crown className="h-4 w-4 text-orange-400" />
+                  )}
+                </h3>
                 <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
-                  Let AI help you reframe this failure into actionable lessons.
+                  {t("aiReflectionDesc")}
                 </p>
               </div>
 
-              <button
-                onClick={handleAnalyzeClick}
-                disabled={isProcessing}
-                className="inline-flex items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-100 px-4 py-2.5 text-sm font-medium text-white dark:text-slate-900 shadow-sm transition-all duration-300 hover:scale-105 hover:bg-slate-800 dark:hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {getButtonText()}
-              </button>
+              <div className="flex flex-col items-end gap-2">
+                <button
+                    onClick={handleAnalyzeClick}
+                    disabled={isProcessing || (limitInfo?.isFull && failure.aiStatus === "NOT_STARTED")}
+                    className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-100 px-5 py-2.5 text-sm font-semibold text-white dark:text-slate-900 shadow-sm transition-all duration-300 hover:scale-105 hover:bg-slate-800 dark:hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    {isProcessing && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
+                    {getButtonText()}
+                </button>
+                
+                {limitInfo && (
+                    <div className="flex flex-col items-end gap-1.5">
+                        <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${
+                            limitInfo.isFull 
+                            ? "border-rose-100 bg-rose-50 text-rose-600 dark:border-rose-900/30 dark:bg-rose-950/30 dark:text-rose-400" 
+                            : "border-slate-100 bg-slate-50 text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400"
+                        }`}>
+                            {limitInfo.text}
+                        </span>
+                        {limitInfo.isFull && (
+                            <Link 
+                                href="/subscription" 
+                                className="text-[11px] font-bold text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 flex items-center gap-1"
+                            >
+                                <Crown className="h-3 w-3" />
+                                {t("upgradeToPro")}
+                            </Link>
+                        )}
+                    </div>
+                )}
+              </div>
             </div>
 
             {isProcessing ? (
@@ -217,13 +344,13 @@ function FailureDetail({
               <div className="space-y-4 mt-6 animate-pop">
                 <div className="flex items-center gap-2 mb-2 px-1">
                   <CheckCircle2 className="h-5 w-5 text-green-500 animate-bounce" />
-                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">Analysis Complete</span>
+                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">{t("analysisComplete")}</span>
                 </div>
 
                 <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-sm animate-fade-in-up">
                   <div className="flex items-center gap-2 mb-2">
                     <Search className="h-4 w-4 text-slate-400" />
-                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Summary</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{t("summary")}</p>
                   </div>
                   <p className="mt-2 text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-7">
                     {failure.aiResult.summary}
@@ -232,7 +359,7 @@ function FailureDetail({
 
                 <div className="rounded-3xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/10 p-4 shadow-sm animate-fade-in-up animate-delay-100">
                   <p className="text-sm font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4" /> AI Suggestions
+                    <Sparkles className="h-4 w-4" /> {t("aiSuggestions")}
                   </p>
                   <ul className="mt-2 text-sm text-slate-700 dark:text-slate-300 list-disc list-inside space-y-1">
                     {failure.aiResult?.suggestions?.map((suggestion, index) => (
@@ -245,27 +372,30 @@ function FailureDetail({
                   <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-sm animate-fade-in-up animate-delay-200">
                     <div className="flex items-center gap-2 mb-2">
                       <BrainCircuit className="h-4 w-4 text-slate-400" />
-                      <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Root Cause</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{t("rootCause")}</p>
                     </div>
                     <p className="mt-2 font-bold text-slate-800 dark:text-slate-100">{failure.aiResult.rootCause}</p>
                   </div>
                   <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4 shadow-sm animate-fade-in-up animate-delay-300">
                     <div className="flex items-center gap-2 mb-2">
                       <Lightbulb className="h-4 w-4 text-slate-400" />
-                      <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Lesson Learned</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{t("lessonLearned")}</p>
                     </div>
                     <p className="mt-2 font-bold text-slate-800 dark:text-slate-100">{failure.aiResult.lesson}</p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-5 py-6 text-center">
-                <p className="text-sm leading-6 text-slate-500 dark:text-slate-400 italic">
-                  {failure.aiStatus === "FAILED"
-                    ? "AI analysis failed. Please try again."
-                    : "AI can help analyze this failure and suggest ways to improve."}
-                </p>
-              </div>
+              <>
+                <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-5 py-6 text-center mt-6">
+                    <p className="text-sm leading-6 text-slate-500 dark:text-slate-400 italic">
+                    {failure.aiStatus === "FAILED"
+                        ? t("aiAnalysisFailed")
+                        : t("aiCanHelp")}
+                    </p>
+                </div>
+                {renderErrorMessage()}
+              </>
             )}
 
           </section>

@@ -9,6 +9,8 @@ import FacebookProvider from "next-auth/providers/facebook";
 import GithubProvider from "next-auth/providers/github";
 import { signInSchema } from "@/lib/validations/auth";
 import { tokenSchema } from "@/lib/validations/auth";
+import { redis } from "@/lib/redis";
+import crypto from "crypto";
 
 declare module "next-auth" {
   interface Session {

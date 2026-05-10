@@ -20,8 +20,9 @@ export const signInSchema = z.object({
 export type SignInSchema = z.infer<typeof signInSchema>;
 
 export const tokenSchema = z.object({
-  id: z.union([z.string(), z.number()]).optional(),
-  role: z.string().optional(),
+    id: z.union([z.string(), z.number()]).optional(),
+    role: z.string().optional(),
+    plan: z.string().optional(),
 });
 
 export type TokenSchema = z.infer<typeof tokenSchema>;

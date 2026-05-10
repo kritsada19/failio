@@ -25,6 +25,7 @@ export async function GET(
         aiResult: true,
         aiAnalyzedAt: true,
         createdAt: true,
+        userId: true,
         category: {
           select: {
             id: true,
@@ -47,7 +48,25 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(failure, { status: 200 });
+    // Fetch user plan and AI usage
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        plan: true,
+        aiUsage: {
+          select: {
+            aiUsedToday: true,
+            resetAt: true,
+          }
+        }
+      }
+    });
+
+    return NextResponse.json({
+      ...failure,
+      userPlan: user?.plan || "FREE",
+      aiUsage: user?.aiUsage || { aiUsedToday: 0, resetAt: new Date() }
+    }, { status: 200 });
   } catch (error) {
     console.error("Error fetching failure:", error);
     return NextResponse.json(

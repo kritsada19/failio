@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/sendEmail";
 import { signUpSchema } from "@/lib/validations/auth";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export type SignUpState = {
     success: boolean;
@@ -24,6 +24,7 @@ export async function signUpAction(
     prevState: SignUpState,
     formData: FormData
 ) {
+    const t = await getTranslations("Actions");
     try {
         const token = crypto.randomBytes(32).toString("hex");
 
@@ -39,7 +40,7 @@ export async function signUpAction(
         if (!result.success) {
             return {
                 success: false,
-                message: "Invalid input.",
+                message: t("invalidInput"),
                 error: result.error.flatten().fieldErrors
             };
         }
@@ -58,7 +59,7 @@ export async function signUpAction(
             } else {
                 return {
                     success: false,
-                    message: "Email already exists.",
+                    message: t("emailExists"),
                 };
             }
         }
@@ -100,14 +101,14 @@ export async function signUpAction(
         return {
             success: true,
             email,
-            message: "User created successfully",
+            message: t("userCreated"),
         };
 
     } catch (error) {
         console.error("Error during sign-up:", error);
         return {
             success: false,
-            message: "Server error during sign-up",
+            message: t("signUpError"),
         };
     }
 }

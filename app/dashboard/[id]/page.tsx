@@ -22,6 +22,11 @@ interface FailureData {
     id: number;
     name: string;
   };
+  userPlan: "FREE" | "PRO";
+  aiUsage: {
+    aiUsedToday: number;
+    resetAt: string;
+  };
 }
 
 interface AiResult {
@@ -41,10 +46,10 @@ function DetailFailurePage() {
   const handleAnalyze = async () => {
     try {
       await axios.put(`/api/failure/${id}/analyze`);
-
       await reFetch();
     } catch (err) {
       console.error(err);
+      throw err; // Re-throw to allow FailureDetail to catch it
     }
   };
 
