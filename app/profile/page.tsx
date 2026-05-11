@@ -60,6 +60,10 @@ export default function ProfilePage() {
         }
     };
 
+    const handleLogout = async () => {
+        await signOut({ callbackUrl: "/" });
+    };
+
     if (status === "loading" || loading) {
         return (
             <main className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center transition-colors duration-500">
@@ -201,7 +205,7 @@ export default function ProfilePage() {
                         {/* Actions */}
                         <div className="mt-6 flex justify-end">
                             <button
-                                onClick={() => signOut({ callbackUrl: "/" })}
+                                onClick={handleLogout}
                                 className="inline-flex items-center gap-2 rounded-xl bg-red-50 dark:bg-red-900/10 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 transition-all duration-200 hover:bg-red-100 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                             >
                                 <LogOut className="h-4 w-4" />

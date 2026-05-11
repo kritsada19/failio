@@ -9,6 +9,7 @@ import FacebookProvider from "next-auth/providers/facebook";
 import GithubProvider from "next-auth/providers/github";
 import { signInSchema } from "@/lib/validations/auth";
 import { tokenSchema } from "@/lib/validations/auth";
+import { sessionSchema } from "@/lib/validations/auth";
 import { redis } from "@/lib/redis";
 import crypto from "crypto";
 
@@ -31,9 +32,7 @@ declare module "next-auth" {
 }
 declare module "next-auth/jwt" {
   interface JWT {
-    id: string;
-    role?: string;
-    plan?: string;
+    sessionId: string;
   }
 }
 
@@ -162,23 +161,68 @@ export const authOptions: NextAuthOptions = {
       // login สำเร็จ (credentials หรือ google)
       // หลังจากนั้น refresh หน้า → จะไม่มี user แล้ว
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.plan = user.plan;
+        const sessionId = crypto
+          .randomBytes(32)
+          .toString("hex");
+
+        // เก็บ session id ลง JWT
+        token.sessionId = sessionId;
+
+        await redis.set(
+          `session:${sessionId}`,
+          JSON.stringify({
+            id: user.id,
+            role: user.role,
+            plan: user.plan,
+          }),
+          "EX",
+          60 * 60
+        );
       }
 
-      tokenSchema.parse(token);
+      const validatedToken = tokenSchema.safeParse(token);
+      if (!validatedToken.success) {
+        throw new Error("Invalid token structure");
+      }
+
       return token;
     },
 
     // session = object ที่จะถูกส่งไป frontend
     async session({ session, token }) {
-      if (session.user && token.id) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.plan = token.plan;
+      if (!session.user || !token.sessionId) return session
+
+      try {
+        const raw = await redis.get(`session:${token.sessionId}`);
+
+        if (!raw) {
+          return session
+        }
+
+        const userObj = sessionSchema.parse(JSON.parse(raw));
+
+        session.user.id = userObj.id;
+        session.user.role = userObj.role;
+        session.user.plan = userObj.plan;
+
+      } catch {
+        // ลบ session เพื่อบังคับให้ login ใหม่
+        await redis.del(`session:${token.sessionId}`);
+        return session;
       }
+
       return session;
+    },
+  },
+  events: {
+    async signOut({ token }) {
+      if (token?.sessionId) {
+        try {
+          await redis.del(`session:${token.sessionId}`);
+        } catch (error) {
+          console.error("Error deleting Redis session on signOut:", error);
+        }
+      }
     },
   },
 };
