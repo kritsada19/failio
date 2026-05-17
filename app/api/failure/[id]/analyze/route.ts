@@ -4,11 +4,13 @@ import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { redis } from "@/lib/redis";
 
 export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> },
 ) {
+    const { id } = await params;
     try {
         const session = await getSession();
         if (!session) {
@@ -17,8 +19,6 @@ export async function PUT(
                 { status: 401 }
             )
         }
-
-        const { id } = await params;
 
         const failure = await prisma.failure.findUnique({
             where: {
@@ -62,43 +62,19 @@ export async function PUT(
             )
         }
 
-        let aiUsage = await prisma.aiUsage.findUnique({
-            where: {
-                userId: String(session.user.id),
-            },
-        });
+        const aiUsageKey = `ai_usage:${session.user.id}`;
 
-        if (!aiUsage) {
-            aiUsage = await prisma.aiUsage.create({
-                data: {
-                    userId: String(session.user.id),
-                    aiUsedToday: 0,
-                    resetAt: new Date(),
-                }
-            })
+
+        const aiUsage = await redis.incr(aiUsageKey);
+
+        if (Number(aiUsage) === 1) {
+            await redis.expire(aiUsageKey, 60 * 60 * 24);
         }
 
-        // รีเซ็ทโควต้าการใช้งานถ้ารีเซ็ทแล้ว
-        const today = new Date();
-        const lastReset = new Date(aiUsage.resetAt);
+        if (user.plan === "FREE" && Number(aiUsage) > 5) {
+            await redis.decr(aiUsageKey);
 
-        if (lastReset.toDateString() !== today.toDateString()) {
-            aiUsage = await prisma.aiUsage.update({
-                where: {
-                    userId: String(session.user.id),
-                },
-                data: {
-                    aiUsedToday: 0,
-                    resetAt: new Date(),
-                }
-            })
-        }
-
-        if (user.plan === "FREE" && aiUsage.aiUsedToday >= 5) {
-            return NextResponse.json(
-                { message: "QUOTA_EXCEEDED" },
-                { status: 429 }
-            )
+            return NextResponse.json({ message: "QUOTA_EXCEEDED" }, { status: 429 });
         }
 
         await prisma.failure.update({
@@ -109,18 +85,6 @@ export async function PUT(
                 aiStatus: "PROCESSING"
             }
         })
-
-        // เพิ่มจำนวนการใช้งาน AI
-        await prisma.aiUsage.update({
-            where: {
-                userId: String(session.user.id),
-            },
-            data: {
-                aiUsedToday: {
-                    increment: 1
-                }
-            }
-        });
 
         const genAI = new GoogleGenerativeAI(env.GOOGLE_GENERATIVE_AI_API_KEY);
         const model = genAI.getGenerativeModel({
@@ -229,13 +193,25 @@ export async function PUT(
         })
 
     } catch (error: unknown) {
-        const { id } = await params;
         const session = await getSession();
 
         if (!session) {
             return NextResponse.json(
                 { message: "Unauthorized" },
                 { status: 401 }
+            )
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: String(session.user.id),
+            },
+        });
+
+        if (!user) {
+            return NextResponse.json(
+                { message: "User not found" },
+                { status: 404 }
             )
         }
 
@@ -252,6 +228,16 @@ export async function PUT(
             )
         }
 
+        const isOwner = user.id === failure.userId;
+
+        if (!isOwner) {
+            return NextResponse.json(
+                { message: "Forbidden" },
+                { status: 403 }
+            )
+        }
+
+
         await prisma.failure.update({
             where: {
                 id: failure.id,
@@ -261,27 +247,13 @@ export async function PUT(
             }
         })
 
-        // คืนจำนวนการใช้งาน AI หากล้มเหลว
-        const currentUsage = await prisma.aiUsage.findUnique({
-            where: { userId: String(session.user.id) },
-            select: { aiUsedToday: true }
-        });
+        const aiUsageKey = `ai_usage:${session.user.id}`;
+        const aiUsage = await redis.get(aiUsageKey);
 
-        if (currentUsage && currentUsage.aiUsedToday > 0) {
-            await prisma.aiUsage.update({
-                where: {
-                    userId: String(session.user.id),
-                },
-                data: {
-                    aiUsedToday: {
-                        decrement: 1
-                    }
-                }
-            });
+        if (Number(aiUsage) > 0) {
+            await redis.decr(aiUsageKey);
         }
 
-        console.log(error);
-        
         let message = "Internal Server Error";
         if (error instanceof Error) {
             message = error.message;

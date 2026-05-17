@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { redis } from "@/lib/redis";
 
 export async function GET(
   request: NextRequest,
@@ -53,19 +54,15 @@ export async function GET(
       where: { id: session.user.id },
       select: {
         plan: true,
-        aiUsage: {
-          select: {
-            aiUsedToday: true,
-            resetAt: true,
-          }
-        }
       }
     });
+
+    const aiUsage = await redis.get(`ai_usage:${session.user.id}`);
 
     return NextResponse.json({
       ...failure,
       userPlan: user?.plan || "FREE",
-      aiUsage: user?.aiUsage || { aiUsedToday: 0, resetAt: new Date() }
+      aiUsage: aiUsage || 0
     }, { status: 200 });
   } catch (error) {
     console.error("Error fetching failure:", error);
