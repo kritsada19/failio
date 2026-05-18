@@ -80,14 +80,29 @@ export const authOptions: NextAuthOptions = {
           );
         }
 
-        const isValid = await bcrypt.compare(
-          password,
-          user.password,
-        );
+        const failedLoginKey = `failed_login:${email}`;
+
+        // ✅ เช็ค rate limit ก่อนเลย — ไม่ต้องแตะ bcrypt ถ้าโดนบล็อกแล้ว
+        const failedLoginCount = await redis.get(failedLoginKey);
+        if (Number(failedLoginCount) >= 5) {
+          throw new Error("Too many failed login attempts. Please try again later.");
+        }
+
+        console.log(failedLoginCount)
+
+        const isValid = await bcrypt.compare(password, user.password);
 
         if (!isValid) {
+          // ✅ ไม่ประกาศ key ซ้ำ
+          const count = await redis.incr(failedLoginKey);
+          if (count === 1) {
+            await redis.expire(failedLoginKey, 60 * 15); // 15 นาที
+          }
           throw new Error("Invalid email or password");
         }
+
+        // ✅ login สำเร็จ → ล้าง counter
+        await redis.del(failedLoginKey);
 
         return {
           id: user.id,

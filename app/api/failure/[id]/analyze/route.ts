@@ -64,7 +64,6 @@ export async function PUT(
 
         const aiUsageKey = `ai_usage:${session.user.id}`;
 
-
         const aiUsage = await redis.incr(aiUsageKey);
 
         if (Number(aiUsage) === 1) {
