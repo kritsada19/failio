@@ -5,12 +5,23 @@ import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { redis } from "@/lib/redis";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/getClientIp";
 
 export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> },
 ) {
     const { id } = await params;
+    const ip = getClientIp(request);
+    const rateLimitResult = await rateLimit(ip, 5, 60);
+
+    if (!rateLimitResult.success) {
+        return NextResponse.json(
+            { message: "Too many requests" },
+            { status: 429 }
+        );
+    }
     try {
         const session = await getSession();
         if (!session) {

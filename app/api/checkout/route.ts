@@ -1,14 +1,25 @@
 import Stripe from "stripe";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { env } from "@/env";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { getLocale } from "next-intl/server";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/getClientIp";
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+    const ip = getClientIp(request);
+    const rateLimitResult = await rateLimit(ip, 5, 60);
+
+    if (!rateLimitResult.success) {
+        return NextResponse.json(
+            { message: "Too many requests" },
+            { status: 429 }
+        );
+    }
     const sessionUser = await getServerSession(authOptions);
     const locale = await getLocale();
 

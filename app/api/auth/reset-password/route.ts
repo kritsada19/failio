@@ -1,9 +1,21 @@
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/getClientIp";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rateLimitResult = await rateLimit(ip, 5, 60);
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { message: "Too many requests" },
+        { status: 429 }
+      );
+    }
+
     const { token, password } = await request.json();
 
     if (!token) {

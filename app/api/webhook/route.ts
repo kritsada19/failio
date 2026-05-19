@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getPeriodEnd } from "@/lib/stripe";
 import { sendNotificationSubscript } from "@/lib/notificationSubscription";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/getClientIp";
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY!);
 
@@ -13,6 +15,16 @@ if (!env.STRIPE_WEBHOOK_SECRET) {
 }
 
 export async function POST(req: NextRequest) {
+    const ip = getClientIp(req);
+    const rateLimitResult = await rateLimit(ip, 100, 60);
+
+    if (!rateLimitResult.success) {
+        return NextResponse.json(
+            { message: "Too many requests" },
+            { status: 429 }
+        );
+    }
+
     const body = await req.text();
     const signature = req.headers.get("stripe-signature")!;
 

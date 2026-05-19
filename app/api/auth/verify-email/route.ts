@@ -1,8 +1,20 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/getClientIp";
 
 export async function GET(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rateLimitResult = await rateLimit(ip, 10, 60);
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { message: "Too many requests" },
+        { status: 429 }
+      );
+    }
+
     const token = request.nextUrl.searchParams.get("token");
 
     if (!token) {
@@ -10,7 +22,7 @@ export async function GET(request: NextRequest) {
     }
 
     const record = await prisma.verificationToken.findFirst({
-      where: { 
+      where: {
         token,
         type: "EMAIL_VERIFY"
       },
@@ -40,7 +52,7 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.verificationToken.delete({
-        where: { 
+        where: {
           id: record.id
         },
       }),

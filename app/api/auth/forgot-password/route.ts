@@ -1,11 +1,23 @@
 import prisma from "@/lib/prisma";
 import crypto from "crypto";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { sendResetEmail } from "@/lib/sendResetEmail";
 import { getLocale } from "next-intl/server";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/getClientIp";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rateLimitResult = await rateLimit(ip, 5, 60);
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { message: "Too many requests" },
+        { status: 429 }
+      );
+    }
+
     const { email } = await request.json();
 
     if (!email) {
