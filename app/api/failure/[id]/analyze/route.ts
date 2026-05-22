@@ -14,7 +14,7 @@ export async function PUT(
 ) {
     const { id } = await params;
     const ip = getClientIp(request);
-    const rateLimitResult = await rateLimit(ip, 5, 60);
+    const rateLimitResult = await rateLimit(ip, 5, 60, request);
 
     if (!rateLimitResult.success) {
         return NextResponse.json(
@@ -196,6 +196,10 @@ export async function PUT(
                 aiAnalyzedAt: new Date(),
             }
         })
+
+        // delete cache
+        await redis.del(`failure:${id}`);
+        await redis.incr(`failures_version:${session.user.id}`);
 
         return NextResponse.json({
             message: "Failure analyzed successfully",

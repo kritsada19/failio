@@ -6,7 +6,7 @@ import { getClientIp } from "@/lib/getClientIp";
 export async function GET(request: NextRequest) {
   try {
     const ip = getClientIp(request);
-    const rateLimitResult = await rateLimit(ip, 10, 60);
+    const rateLimitResult = await rateLimit(ip, 10, 60, request);
 
     if (!rateLimitResult.success) {
       return NextResponse.json(

@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { redis } from "@/lib/redis";
 
 export async function GET() {
   try {
+    const cached = await redis.get("categories");
+    if (cached) {
+      return NextResponse.json(JSON.parse(cached), { status: 200 });
+    }
+
     const categories = await prisma.category.findMany();
+
+    await redis.set("categories", JSON.stringify(categories), "EX", 60 * 60 * 24); // Cache for 24 hours
+
     return NextResponse.json(categories, { status: 200 });
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -40,6 +49,8 @@ export async function POST(request: Request) {
         name: name.trim(),
       },
     });
+
+    await redis.del("categories");
 
     return NextResponse.json(
       { message: "Category created successfully" },

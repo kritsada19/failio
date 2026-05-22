@@ -12,7 +12,7 @@ const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 
 export async function POST(request: NextRequest) {
     const ip = getClientIp(request);
-    const rateLimitResult = await rateLimit(ip, 5, 60);
+    const rateLimitResult = await rateLimit(ip, 5, 60, request);
 
     if (!rateLimitResult.success) {
         return NextResponse.json(

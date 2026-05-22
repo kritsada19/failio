@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma"
 import { createFailureSchema, updateFailureSchema, deleteFailureSchema } from "@/lib/validations/failure";
 import { getSession } from "@/lib/auth";
 import { getTranslations } from "next-intl/server";
+import { redis } from "@/lib/redis";
 
 export type FailureState = {
     success: boolean;
@@ -60,6 +61,8 @@ export async function createFailure(
                     : undefined,
             },
         });
+
+        await redis.incr(`failures_version:${session.user.id}`);
 
         return {
             success: true,
@@ -160,6 +163,9 @@ export async function updateFailure(
             },
         });
 
+        await redis.del(`failure:${id}`);
+        await redis.incr(`failures_version:${session.user.id}`);
+
         return {
             success: true,
             message: t("updateSuccess"),
@@ -225,6 +231,9 @@ export async function deleteFailure(id: number) {
                 id: Number(id),
             },
         });
+
+        await redis.del(`failure:${id}`);
+        await redis.incr(`failures_version:${session.user.id}`);
 
         return {
             success: true,

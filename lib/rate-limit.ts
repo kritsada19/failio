@@ -1,8 +1,10 @@
 import { redis } from "./redis";
+import { NextRequest } from "next/server";
 
-export async function rateLimit(identifier: string, limit: number = 100, windowInSeconds: number = 60) {
+export async function rateLimit(identifier: string, limit: number = 100, windowInSeconds: number = 60, request: NextRequest) {
     try {
-        const key = `rate-limit:${identifier}`;
+        const path = request.nextUrl.pathname;
+        const key = `rate-limit:${identifier}:${path}`;
 
         const current = await redis.incr(key);
 

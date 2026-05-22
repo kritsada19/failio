@@ -16,7 +16,7 @@ if (!env.STRIPE_WEBHOOK_SECRET) {
 
 export async function POST(req: NextRequest) {
     const ip = getClientIp(req);
-    const rateLimitResult = await rateLimit(ip, 100, 60);
+    const rateLimitResult = await rateLimit(ip, 100, 60, req);
 
     if (!rateLimitResult.success) {
         return NextResponse.json(
