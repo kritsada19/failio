@@ -5,12 +5,25 @@ import { redis } from "@/lib/redis";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/getClientIp";
 import { aiQueue } from "@/lib/ai-analysis/queue";
+import { failureIdParamSchema } from "@/lib/validations/failure";
 
 export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> },
 ) {
-    const { id } = await params;
+    const rawParams = await params;
+    const validatedParams = failureIdParamSchema.safeParse(rawParams);
+
+    if (!validatedParams.success) {
+        return NextResponse.json(
+            { message: validatedParams.error.issues[0].message },
+            { status: 400 }
+        );
+    }
+
+    const { id } = validatedParams.data;
+
+
     const ip = getClientIp(request);
     const rateLimitResult = await rateLimit(ip, 5, 60, request);
 
@@ -32,9 +45,10 @@ export async function PUT(
 
         const failure = await prisma.failure.findUnique({
             where: {
-                id: Number(id),
+                id: id,
             },
         });
+
 
         if (!failure) {
             return NextResponse.json(

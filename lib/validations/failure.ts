@@ -24,3 +24,13 @@ export const deleteFailureSchema = z.object({
 });
 
 export type DeleteFailureSchema = z.infer<typeof deleteFailureSchema>;
+
+export const failureIdParamSchema = z.object({
+    id: z.string()
+        .regex(/^\d+$/, "ID must be a numeric string") // check if the string contains only numbers
+        .transform((val) => parseInt(val, 10)) // convert string to number
+        .pipe(z.number().int().positive()), // check if the number is a positive integer
+});
+
+
+export type FailureIdParamSchema = z.infer<typeof failureIdParamSchema>;
