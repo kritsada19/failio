@@ -105,6 +105,7 @@ export async function PUT(
 
         // Enqueue background job
         await aiQueue.add("analyze", {
+            jobId: `ai_analysis_${failure.id}`,
             failureId: failure.id,
             userId: session.user.id,
         });

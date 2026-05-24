@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import FailureDetail from "@/components/dashboard/FailureDetail";
 import axios from "axios";
 import Link from "next/link";
+import { useEffect } from "react";
 
 interface FailureData {
   id: number;
@@ -42,6 +43,15 @@ function DetailFailurePage() {
 
   const { data: failure, loading, error, reFetch } =
     useFetch<FailureData>(`/api/failure/${id}`);
+
+  useEffect(() => {
+    if (failure?.aiStatus === "PROCESSING") {
+      const interval = setInterval(() => {
+        reFetch(true);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [failure?.aiStatus, reFetch]);
 
   const handleAnalyze = async () => {
     try {

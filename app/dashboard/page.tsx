@@ -44,8 +44,19 @@ function Dashboard() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const { data, loading, error } = useFetch<ResponseData
-  >(`/api/failure?page=${page}&limit=10&categoryId=${category || ""}&search=${debouncedSearch}`);
+  const { data, loading, error, reFetch } = useFetch<ResponseData>(
+    `/api/failure?page=${page}&limit=10&categoryId=${category || ""}&search=${debouncedSearch}`
+  );
+
+  useEffect(() => {
+    const hasProcessing = data?.failures.some((f) => f.aiStatus === "PROCESSING");
+    if (hasProcessing) {
+      const interval = setInterval(() => {
+        reFetch(true);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [data?.failures, reFetch]);
 
   return (
     <>

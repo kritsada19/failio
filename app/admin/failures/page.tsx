@@ -79,7 +79,18 @@ export default function FailureManagement() {
     `/api/admin/failure?page=${page}&limit=10&search=${debouncedSearch}`
   );
 
-  const [selectedFailure, setSelectedFailure] = useState<Failure | null>(null);
+  useEffect(() => {
+    const hasProcessing = data?.failures.some((f) => f.aiStatus === "PROCESSING");
+    if (hasProcessing) {
+      const interval = setInterval(() => {
+        reFetch(true);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [data?.failures, reFetch]);
+
+  const [selectedFailureId, setSelectedFailureId] = useState<number | null>(null);
+  const selectedFailure = data?.failures.find(f => f.id === selectedFailureId) || null;
 
   const handleDelete = async (id: number) => {
     if (!confirm(t('failuresConfirmDelete'))) return;
@@ -87,6 +98,7 @@ export default function FailureManagement() {
     try {
       await axios.delete(`/api/admin/failure/${id}`);
       reFetch();
+      if (selectedFailureId === id) setSelectedFailureId(null);
     } catch (err) {
       console.error(err);
       alert(t('failuresDeleteFailed'));
@@ -272,7 +284,7 @@ export default function FailureManagement() {
                       <td className="px-8 py-5 text-right">
                         <div className="flex items-center justify-end gap-2 translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
                           <button
-                            onClick={() => setSelectedFailure(item)}
+                            onClick={() => setSelectedFailureId(item.id)}
                             className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-all"
                           >
                             <Eye size={16} />
@@ -336,7 +348,7 @@ export default function FailureManagement() {
       {/* Detail Overlay / Modal */}
       {selectedFailure && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 overflow-y-auto">
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setSelectedFailure(null)} />
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setSelectedFailureId(null)} />
           <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-8">
             <div className="h-40 bg-orange-500 relative flex items-center justify-center overflow-hidden">
               <Activity className="text-white/20 absolute -right-4 -bottom-4 rotate-12" size={200} />
@@ -345,7 +357,7 @@ export default function FailureManagement() {
                 <h2 className="text-3xl font-black text-white line-clamp-1">{selectedFailure.title}</h2>
               </div>
               <button
-                onClick={() => setSelectedFailure(null)}
+                onClick={() => setSelectedFailureId(null)}
                 className="absolute top-6 right-6 p-2 rounded-2xl bg-white/10 hover:bg-white/20 text-white transition-all"
               >
                 <ChevronLeft size={24} />
@@ -471,7 +483,7 @@ export default function FailureManagement() {
                       <button
                         onClick={() => {
                           handleDelete(selectedFailure.id);
-                          setSelectedFailure(null);
+                          setSelectedFailureId(null);
                         }}
                         className="w-full py-4 rounded-2xl bg-red-600 hover:bg-red-700 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all active:scale-95 flex items-center justify-center gap-2"
                       >
@@ -496,7 +508,7 @@ export default function FailureManagement() {
                 </div>
               </div>
               <button
-                onClick={() => setSelectedFailure(null)}
+                onClick={() => setSelectedFailureId(null)}
                 className="px-12 py-4 rounded-2xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-black uppercase tracking-widest transition-all"
               >
                 {t('failuresModalReturn')}
