@@ -328,9 +328,7 @@
     "cancel": "ยกเลิก",
     "sortBy": "เรียงตาม:",
     "sortNewest": "ใหม่ล่าสุด",
-    "sortFrequency": "ความถี่",
     "sortUsageFrequency": "ความถี่การใช้งาน",
-    "sortAZ": "ก-ฮ / A-Z",
     "sortAlphabetical": "ตามตัวอักษร",
     "pageOf": "หน้า {page} จาก {total}"
   },

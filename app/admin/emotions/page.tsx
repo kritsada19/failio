@@ -2,13 +2,13 @@
 
 import React, { useState } from 'react';
 import { useFetch } from '@/hooks/useFetch';
-import { 
-  Heart, 
-  Plus, 
-  Search, 
-  Edit2, 
-  Trash2, 
-  X, 
+import {
+  Heart,
+  Plus,
+  Search,
+  Edit2,
+  Trash2,
+  X,
   AlertCircle,
   Loader2,
   Activity,
@@ -29,15 +29,16 @@ interface Emotion {
 
 export default function EmotionManagement() {
   const t = useTranslations('Admin');
-  const { data: emotions, loading, error, reFetch } = useFetch<Emotion[]>('/api/admin/emotion');
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  const { data: emotions, loading, error, reFetch } = useFetch<Emotion[]>(`/api/admin/emotion?sortBy=${sortBy}`);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmotion, setEditingEmotion] = useState<Emotion | null>(null);
   const [emotionName, setEmotionName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  const filteredEmotions = emotions?.filter(emo => 
+  const filteredEmotions = emotions?.filter(emo =>
     emo.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
@@ -110,8 +111,8 @@ export default function EmotionManagement() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200 dark:border-slate-800">
           <div className="space-y-4">
-            <Link 
-              href="/admin" 
+            <Link
+              href="/admin"
               className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-pink-500 transition-colors uppercase tracking-widest group"
             >
               <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
@@ -180,10 +181,14 @@ export default function EmotionManagement() {
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs font-bold text-slate-400 uppercase">{t('sortBy')}</span>
-              <select className="bg-transparent border-none text-xs font-black uppercase text-slate-600 dark:text-slate-300 outline-none cursor-pointer">
-                <option>{t('sortNewest')}</option>
-                <option>{t('sortFrequency')}</option>
-                <option>{t('sortAZ')}</option>
+              <select 
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-transparent border-none text-xs font-black uppercase text-slate-600 dark:text-slate-300 outline-none cursor-pointer"
+              >
+                <option value="newest">{t('sortNewest')}</option>
+                <option value="frequency">{t('sortUsageFrequency')}</option>
+                <option value="alphabetical">{t('sortAlphabetical')}</option>
               </select>
             </div>
           </div>

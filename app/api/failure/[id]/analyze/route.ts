@@ -25,7 +25,7 @@ export async function PUT(
 
 
     const ip = getClientIp(request);
-    const rateLimitResult = await rateLimit(ip, 5, 60, request);
+    const rateLimitResult = await rateLimit(ip, 20, 60, request);
 
     if (!rateLimitResult.success) {
         return NextResponse.json(
@@ -33,7 +33,7 @@ export async function PUT(
             { status: 429 }
         );
     }
-    
+
     try {
         const session = await getSession();
         if (!session) {
@@ -116,7 +116,7 @@ export async function PUT(
 
     } catch (error: unknown) {
         console.error("Analysis Queue Error:", error);
-        
+
         let message = "Internal Server Error";
         if (error instanceof Error) {
             message = error.message;

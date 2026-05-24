@@ -328,9 +328,7 @@
     "cancel": "Cancel",
     "sortBy": "Sort by:",
     "sortNewest": "Newest First",
-    "sortFrequency": "Frequency",
     "sortUsageFrequency": "Usage Frequency",
-    "sortAZ": "A-Z",
     "sortAlphabetical": "Alphabetical",
     "pageOf": "Page {page} of {total}"
   },

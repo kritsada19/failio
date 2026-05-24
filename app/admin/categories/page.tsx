@@ -29,8 +29,9 @@ interface Category {
 
 export default function CategoryManagement() {
   const t = useTranslations('Admin');
-  const { data: categories, loading, error, reFetch } = useFetch<Category[]>('/api/admin/category');
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  const { data: categories, loading, error, reFetch } = useFetch<Category[]>(`/api/admin/category?sortBy=${sortBy}`);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryName, setCategoryName] = useState('');
@@ -180,10 +181,14 @@ export default function CategoryManagement() {
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs font-bold text-slate-400 uppercase">{t('sortBy')}</span>
-              <select className="bg-transparent border-none text-xs font-black uppercase text-slate-600 dark:text-slate-300 outline-none cursor-pointer">
-                <option>{t('sortNewest')}</option>
-                <option>{t('sortUsageFrequency')}</option>
-                <option>{t('sortAlphabetical')}</option>
+              <select 
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-transparent border-none text-xs font-black uppercase text-slate-600 dark:text-slate-300 outline-none cursor-pointer"
+              >
+                <option value="newest">{t('sortNewest')}</option>
+                <option value="frequency">{t('sortUsageFrequency')}</option>
+                <option value="alphabetical">{t('sortAlphabetical')}</option>
               </select>
             </div>
           </div>

@@ -19,8 +19,7 @@ export async function runAIAnalysis(
 
     const genAI = new GoogleGenerativeAI(env.GOOGLE_GENERATIVE_AI_API_KEY);
     const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash", // Using 2.0 as 2.5 isn't a standard model name yet, but I will stick to what the user requested if they insist. Actually the user wrote 2.5 in their prompt but also in the existing code? 
-        // Let me check the existing code again VERY carefully.
+        model: "gemini-2.5-flash",
         generationConfig: { responseMimeType: "application/json" },
     });
 
@@ -53,7 +52,15 @@ export async function runAIAnalysis(
         Respond in the same language as the input.
     `;
 
-    const result = await model.generateContent(prompt);
+    let result;
+    try {
+        result = await model.generateContent(prompt);
+    } catch (error: unknown) {
+        if (error instanceof Error && error.message.includes("429")) {
+            throw new Error("AI_QUOTA_EXCEEDED");
+        }
+        throw error;
+    }
 
     let aiResponse: unknown;
     try {

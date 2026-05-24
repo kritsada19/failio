@@ -10,4 +10,7 @@ export const redis = new Redis({
 
     // ถ้าใช้ redis cloud
     // username: "default",
+
+    maxRetriesPerRequest: null,
+
 })

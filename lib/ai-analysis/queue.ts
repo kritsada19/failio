@@ -74,6 +74,8 @@ export const initAIWorker = () => {
             } catch (error) {
                 console.error(`[AI Worker] Error processing failure ${failureId}:`, error);
 
+                const isQuotaError = error instanceof Error && error.message === "AI_QUOTA_EXCEEDED";
+
                 // Update status to FAILED and rollback AI usage count
                 await prisma.failure.update({
                     where: { id: failure.id },
@@ -86,7 +88,13 @@ export const initAIWorker = () => {
                     await redis.decr(aiUsageKey);
                 }
 
-                throw error; // Allow BullMQ to handle retries based on policy
+                // Don't retry on quota exceeded — it won't help
+                if (isQuotaError) {
+                    console.warn(`[AI Worker] Quota exceeded for failure ${failureId}, skipping retries.`);
+                    return;
+                }
+
+                throw error; // Allow BullMQ to handle retries for other errors
             }
         },
 
