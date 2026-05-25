@@ -183,6 +183,8 @@ export const authOptions: NextAuthOptions = {
         // เก็บ session id ลง JWT
         token.sessionId = sessionId;
 
+        // เก็บ session id ลง Redis
+        // พร้อมกับเก็บข้อมูล user
         await redis.set(
           `session:${sessionId}`,
           JSON.stringify({
