@@ -97,6 +97,11 @@ export async function PUT(
             return NextResponse.json({ message: "QUOTA_EXCEEDED" }, { status: 429 });
         }
 
+        if (user.plan === "PRO" && Number(aiUsage) > 100) {
+            await redis.decr(aiUsageKey);
+            return NextResponse.json({ message: "QUOTA_EXCEEDED" }, { status: 429 });
+        }
+
         // Update status to PROCESSING
         await prisma.failure.update({
             where: { id: failure.id },
@@ -105,9 +110,10 @@ export async function PUT(
 
         // Enqueue background job
         await aiQueue.add("analyze", {
-            jobId: `ai_analysis_${failure.id}`,
             failureId: failure.id,
             userId: session.user.id,
+        }, {
+            jobId: `ai_analysis_${failure.id}`,
         });
 
         return NextResponse.json(

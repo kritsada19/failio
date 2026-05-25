@@ -3,6 +3,7 @@ import { Queue, Worker, Job } from "bullmq";
 import { redis } from "@/lib/redis";
 import prisma from "@/lib/prisma";
 import { runAIAnalysis } from "./run-analysis";
+import { env } from "@/env";
 
 // Create a queue for AI analysis
 export const aiQueue = new Queue("ai-analysis", {
@@ -52,10 +53,15 @@ export const initAIWorker = () => {
             if (!failure) return;
 
             try {
-                const aiResponse = await runAIAnalysis(
-                    failure.title,
-                    failure.description
+                // Set a manual timeout for the AI analysis (2 minutes)
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("AI_TIMEOUT")), 120000)
                 );
+
+                const aiResponse = await Promise.race([
+                    runAIAnalysis(failure.title, failure.description),
+                    timeoutPromise,
+                ]);
 
                 await prisma.failure.update({
                     where: { id: failure.id },
@@ -103,7 +109,7 @@ export const initAIWorker = () => {
             connection: redis,
 
             // Allow 3 jobs to run at the same time
-            concurrency: 3,
+            concurrency: Number(env.CONCURRENCY_LIMIT),
         }
     );
 

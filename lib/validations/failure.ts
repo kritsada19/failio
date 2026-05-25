@@ -10,7 +10,10 @@ export const createFailureSchema = z.object({
 export type CreateFailureSchema = z.infer<typeof createFailureSchema>;
 
 export const updateFailureSchema = z.object({
-    id: z.string().min(1, "Id is required"),
+    id: z.string()
+        .regex(/^\d+$/, "ID must be a numeric string")
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number().int().positive()),
     title: z.string().min(1, "Title is required"),
     description: z.string().min(1, "Description is required"),
     categoryId: z.number().min(1, "Category is required"),

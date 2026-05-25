@@ -164,7 +164,7 @@ export const authOptions: NextAuthOptions = {
   // ใช้ token แทน
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60, // 1 ชั่วโมง
+    maxAge: 60 * 60 * 24, // 24 ชั่วโมง
   },
 
   callbacks: {
@@ -191,7 +191,7 @@ export const authOptions: NextAuthOptions = {
             plan: user.plan,
           }),
           "EX",
-          60 * 60
+          60 * 60 * 24
         );
       }
 
