@@ -50,4 +50,5 @@ export const env = createEnv({
         STRIPE_PRO_PRICE_ID: process.env.STRIPE_PRO_PRICE_ID,
         CONCURRENCY_LIMIT: process.env.CONCURRENCY_LIMIT,
     },
+    skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.NODE_ENV === 'test',
 });

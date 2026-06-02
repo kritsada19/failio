@@ -97,7 +97,7 @@ export async function updateFailure(
             id: formData.get("id"),
             title: formData.get("title"),
             description: formData.get("description"),
-            categoryId: formData.get("categoryId"),
+            categoryId: Number(formData.get("categoryId")),
             emotions: formData.getAll("emotions").map((id) => Number(id)),
         });
 
@@ -203,6 +203,19 @@ export async function deleteFailure(id: number) {
             };
         }
 
+        const user = await prisma.user.findUnique({
+            where: {
+                id: String(session.user.id),
+            },
+        });
+
+        if (!user) {
+            return {
+                success: false,
+                message: t("userNotFound"),
+            };
+        }
+
         const failure = await prisma.failure.findUnique({
             where: {
                 id: Number(id),
@@ -216,8 +229,8 @@ export async function deleteFailure(id: number) {
             };
         }
 
-        const isAdmin = session.user.role === "ADMIN";
-        const isOwner = session.user.id === failure.userId;
+        const isAdmin = user.role === "ADMIN";
+        const isOwner = user.id === failure.userId;
 
         if (!isAdmin && !isOwner) {
             return {
