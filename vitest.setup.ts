@@ -29,9 +29,17 @@ vi.mock('@/lib/auth', () => ({
 // และช่วยให้เราใช้ vi.fn() มาตรวจสอบได้ว่าโค้ดมีการเรียกใช้ Cache จริงหรือไม่
 vi.mock('@/lib/redis', () => ({
     redis: {
-        incr: vi.fn(),
-        del: vi.fn(),
-        get: vi.fn(),
-        set: vi.fn(),
+        incr: vi.fn().mockResolvedValue(1),
+        decr: vi.fn().mockResolvedValue(0),
+        expire: vi.fn().mockResolvedValue(1),
+        del: vi.fn().mockResolvedValue(1),
+        get: vi.fn().mockResolvedValue(null),
+        set: vi.fn().mockResolvedValue('OK'),
+    },
+}));
+
+vi.mock('@/lib/ai-analysis/queue', () => ({
+    aiQueue: {
+        add: vi.fn(),
     },
 }));
