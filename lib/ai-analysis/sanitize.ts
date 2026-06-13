@@ -10,6 +10,7 @@ export function sanitize(input: string): string {
         .replace(/output\s+(?:the\s+)?(?:prompt|instructions)/gi, "")
         .replace(/do\s+not\s+(?:follow|heed)/gi, "")
         .replace(/[\x00-\x1F\x7F\u200B-\u200D\uFEFF]/g, "")
+        .replace(/\s\s+/g, " ")
         .trim();
 }
 
