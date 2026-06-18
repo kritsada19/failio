@@ -8,7 +8,7 @@ import { getLocale } from "next-intl/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/getClientIp";
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY);
+export const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 
 export async function POST(request: NextRequest) {
     const ip = getClientIp(request);
@@ -69,5 +69,5 @@ export async function POST(request: NextRequest) {
         cancel_url: `${env.NEXT_PUBLIC_APP_URL}/dashboard/cancel`,
     });
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: session.url, status: 200 });
 }

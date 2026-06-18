@@ -75,7 +75,6 @@ describe("signUpAction", () => {
 
     it('ควรลบข้อมูลเก่าถ้ามี email ซ้ำและยังไม่ยืนยัน', async () => {
         const findUniqueMock = vi.mocked(prisma.user.findUnique)
-        const deleteMock = vi.mocked(prisma.user.delete)
 
         findUniqueMock.mockResolvedValue({
             id: "",
