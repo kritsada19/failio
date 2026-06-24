@@ -8,6 +8,8 @@ import { sendNotificationSubscript } from "@/lib/notificationSubscription";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/getClientIp";
 
+import { redis } from "@/lib/redis";
+
 const stripe = new Stripe(env.STRIPE_SECRET_KEY!);
 
 if (!env.STRIPE_WEBHOOK_SECRET) {
@@ -50,14 +52,11 @@ export async function POST(req: NextRequest) {
                     session.subscription as string
                 )) as any;
 
-                console.log(subscription);
-
                 if (!session?.metadata?.userId) {
                     return NextResponse.json({ error: "User ID not found in metadata" }, { status: 400 });
                 }
 
-
-                await prisma.user.update({
+                const user = await prisma.user.update({
                     where: { id: session.metadata.userId },
                     data: {
                         stripeCustomerId: session.customer as string,
@@ -69,13 +68,11 @@ export async function POST(req: NextRequest) {
                     },
                 });
 
-                const email = await prisma.user.findUnique({
-                    where: { id: session.metadata.userId },
-                    select: { email: true },
-                });
+                // ✅ Clear cache
+                await redis.del(`user:${user.id}`);
 
                 const locale = session?.metadata?.locale || "en";
-                sendNotificationSubscript(email?.email as string, locale);
+                sendNotificationSubscript(user.email, locale);
                 break;
             }
 
@@ -86,7 +83,7 @@ export async function POST(req: NextRequest) {
                     session.subscription as string
                 )) as any;
 
-                await prisma.user.update({
+                const user = await prisma.user.update({
                     where: { stripeSubscriptionId: subscription.id },
                     data: {
                         stripePriceId: subscription.items.data[0].price.id || subscription.items.data[0].price,
@@ -95,13 +92,11 @@ export async function POST(req: NextRequest) {
                     },
                 });
 
-                const email = await prisma.user.findUnique({
-                    where: { stripeSubscriptionId: subscription.id },
-                    select: { email: true },
-                });
+                // ✅ Clear cache
+                await redis.del(`user:${user.id}`);
 
                 const locale = subscription?.metadata?.locale || "en";
-                sendNotificationSubscript(email?.email as string, locale);
+                sendNotificationSubscript(user.email, locale);
                 break;
             }
 
@@ -112,29 +107,35 @@ export async function POST(req: NextRequest) {
                     session.subscription as string
                 )) as any;
 
-                await prisma.user.update({
+                const user = await prisma.user.update({
                     where: { stripeSubscriptionId: subscription.id },
                     data: {
                         stripeStatus: subscription.status,
                     },
                 });
+
+                // ✅ Clear cache
+                await redis.del(`user:${user.id}`);
                 break;
             }
 
             case "customer.subscription.deleted": {
-                await prisma.user.update({
+                const user = await prisma.user.update({
                     where: { stripeSubscriptionId: session.id },
                     data: {
                         stripeStatus: "canceled",
                         plan: "FREE",
                     },
                 });
+
+                // ✅ Clear cache
+                await redis.del(`user:${user.id}`);
                 break;
             }
 
             case "customer.subscription.updated": {
                 const subscription = event.data.object as any;
-                await prisma.user.update({
+                const user = await prisma.user.update({
                     where: { stripeSubscriptionId: subscription.id },
                     data: {
                         stripeStatus: subscription.status,
@@ -142,6 +143,9 @@ export async function POST(req: NextRequest) {
                         plan: (subscription.status === "active" || subscription.status === "trialing" || subscription.status === "past_due") ? "PRO" : "FREE",
                     },
                 });
+
+                // ✅ Clear cache
+                await redis.del(`user:${user.id}`);
                 break;
             }
 
@@ -150,7 +154,8 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json({ received: true }, { status: 200 });
-    } catch {
+    } catch (error) {
+        console.error("Webhook Error Handled:", error);
         return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
     }
 }

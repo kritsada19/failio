@@ -64,7 +64,7 @@ export async function PUT(
             );
         }
 
-        const user = await prisma.user.findUnique({
+        let user = await prisma.user.findUnique({
             where: {
                 id: String(session.user.id),
             },
@@ -75,6 +75,17 @@ export async function PUT(
                 { message: "User not found" },
                 { status: 404 }
             );
+        }
+
+        // ✅ Lazy check subscription expiration
+        if (user.plan === "PRO" && user.stripeCurrentPeriodEnd && user.stripeCurrentPeriodEnd < new Date()) {
+            console.log(`[Plan Checker] User ${user.id} plan expired during analysis request. Downgrading to FREE.`);
+            user = await prisma.user.update({
+                where: { id: user.id },
+                data: { plan: "FREE" },
+            });
+            // Clear user cache
+            await redis.del(`user:${user.id}`);
         }
 
         const isOwner = user.id === failure.userId;

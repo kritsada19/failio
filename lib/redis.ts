@@ -1,16 +1,19 @@
-import Redis from "ioredis"
+import IORedis from "ioredis";
+import { Redis as UpstashRedis } from "@upstash/redis";
 
-// สร้าง redis client
-export const redis = new Redis({
-    host: "localhost",
-    port: 6379,
+let redis: IORedis | UpstashRedis;
 
-    // ถ้ามี password
-    // password: "1234",
+if (process.env.NODE_ENV === "production") {
+    redis = new UpstashRedis({
+        url: process.env.UPSTASH_REDIS_REST_URL!,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    });
+} else {
+    redis = new IORedis({
+        host: "localhost",
+        port: 6379,
+        maxRetriesPerRequest: null,
+    });
+}
 
-    // ถ้าใช้ redis cloud
-    // username: "default",
-
-    maxRetriesPerRequest: null,
-
-})
+export { redis };

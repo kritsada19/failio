@@ -163,7 +163,7 @@ export default function ProfilePage() {
                                     label={t('planLabel')}
                                     value={user.plan === "PRO" ? t('planPro') : t('planFree')}
                                 />
-                                {user.stripeCurrentPeriodEnd && (
+                                {user.plan === "PRO" && user.stripeCurrentPeriodEnd && (
                                     <InfoCard
                                         icon={<CreditCard className="w-5 h-5 text-gray-700 dark:text-slate-300" />}
                                         label={t('expiresLabel')}
