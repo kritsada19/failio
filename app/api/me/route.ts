@@ -13,11 +13,13 @@ export async function GET() {
 
         const cached = await redis.get(`user:${session.user.id}`);
         if (cached) {
-            const userObj = JSON.parse(cached);
+            const userObj = typeof cached === "string" ? JSON.parse(cached) : cached;
             const isExpired = userObj.plan === "PRO" && 
                              userObj.stripeCurrentPeriodEnd && 
+                            //  เช็คว่า plan หมดอายุหรือยัง
                              new Date(userObj.stripeCurrentPeriodEnd) < new Date();
             
+            // ถ้า plan ยังไม่หมดอายุ ให้ return ข้อมูลจาก cache
             if (!isExpired) {
                 return NextResponse.json(userObj, { status: 200 });
             }
@@ -73,7 +75,11 @@ export async function GET() {
             if (user.plan === "FREE") {
                 user.stripeCurrentPeriodEnd = null;
             }
-            await redis.set(`user:${session.user.id}`, JSON.stringify(user), "EX", 60 * 60); // Cache for 1 hour
+            if (process.env.NODE_ENV === "production") {
+                await (redis as any).set(`user:${session.user.id}`, JSON.stringify(user), { ex: 60 * 60 });
+            } else {
+                await (redis as any).set(`user:${session.user.id}`, JSON.stringify(user), "EX", 60 * 60);
+            }
         }
 
         return NextResponse.json(user, { status: 200 });
