@@ -1,0 +1,154 @@
+# 1. ชื่อของ Workflow ที่จะแสดงในหน้า Actions ของ GitHub
+name: CI/CD Pipeline
+
+# 2. กำหนดเหตุการณ์ (Events) ที่จะทำให้ Workflow เริ่มทำงาน
+on:
+  # รันเมื่อมีการ Push โค้ด
+  push:
+    # เฉพาะที่ Branch 'main' เท่านั้น
+    branches: [ "main" ]
+  # รันเมื่อมีการสร้าง Pull Request
+  pull_request:
+    # ที่จะรวมเข้า Branch 'main'
+    branches: [ "main" ]
+
+# 3. กำหนดงาน (Jobs) ต่างๆ ที่จะทำ
+jobs:
+  # งานที่ 1: ตรวจสอบ Code และรัน Test
+  build-and-test:
+    # รันบนระบบปฏิบัติการ Ubuntu เวอร์ชันล่าสุด
+    runs-on: ubuntu-latest
+
+    # กำหนด Environment Variables สำหรับงานนี้
+    env:
+      # URL สำหรับฐานข้อมูลจำลองในขั้นตอนการเทส
+      DATABASE_URL: postgresql://user:password@localhost:5432/db?schema=public
+      # Secret สำหรับ NextAuth (ใช้ค่าจริงจาก Secret หรือค่าจำลองถ้าไม่มี)
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'placeholder-secret-at-least-32-chars-long' }}
+      # URL ของแอป (จำลองเป็น localhost)
+      NEXTAUTH_URL: http://localhost:3000
+      # ข้ามการตรวจสอบ Env ตอน Build (เพราะเราไม่ได้ใส่ Key ของจริงในขั้นตอนนี้)
+      SKIP_ENV_VALIDATION: 1
+
+    # ติดตั้ง Service เสริม (ในที่นี้คือ Postgres Database)
+    services:
+      # ชื่อ Service คือ postgres
+      postgres:
+        # ใช้ Image postgres เวอร์ชัน 15 แบบน้ำหนักเบา
+        image: postgres:15-alpine
+        # กำหนดค่าเริ่มต้นของ Database
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: db
+        # Mapping Port จากเครื่องรัน (5432) เข้า Service (5432)
+        ports:
+          - 5432:5432
+        # ตรวจสอบว่า Database พร้อมใช้งานหรือยังก่อนเริ่มรันขั้นตอนถัดไป
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    # ลำดับขั้นตอนการทำงานในงานนี้
+    steps:
+      # คัดลอกโค้ดจาก Repository ลงเครื่อง Runner
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ติดตั้ง Node.js (แนะนำเวอร์ชัน 20 เป็น LTS ที่เสถียรที่สุดตอนนี้)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          # เปิดใช้งานระบบ Cache สำหรับ npm เพื่อให้รันครั้งหน้าเร็วขึ้น
+          cache: 'npm'
+
+      # ติดตั้ง Dependencies โดยใช้ไฟล์ package-lock.json เพื่อความแม่นยำ
+      - name: Install dependencies
+        run: npm ci
+
+      # สร้าง Prisma Client เพื่อให้โค้ดรู้จักไฟล์ Database Schema
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      # ตรวจสอบมาตรฐานของ Code (Linting)
+      - name: Run Lint
+        run: npm run lint
+
+      # เตรียมฐานข้อมูลสำหรับทดสอบ (รันในเครื่อง Runner)
+      - name: Setup Test Database
+        run: |
+          # บังคับอัปเดต Schema ลง DB เทส (ไม่สนใจเรื่อง Migration History)
+          npx prisma db push --accept-data-loss
+          # ใส่ข้อมูลเริ่มต้นสำหรับการเทส
+          npx prisma db seed
+
+      # รันคำสั่งเทส (ที่กำหนดไว้ใน package.json)
+      - name: Run Tests
+        run: npm run test
+        env:
+          # ระบุว่าเป็นโหมดเทส
+          NODE_ENV: test
+
+      # ทดลอง Build โปรเจกต์เพื่อเช็คว่าไม่มีไฟล์ไหนเขียนผิดจนคอมไพล์ไม่ผ่าน
+      - name: Build project
+        run: npm run build
+
+  # งานที่ 2: การ Deploy (จะทำงานเมื่อ 'build-and-test' ผ่านแล้วเท่านั้น)
+  deploy:
+    # ระบุว่าต้องรอให้งาน 'build-and-test' ผ่านก่อน
+    needs: build-and-test
+    # รันเฉพาะเมื่อเป็นเหตุการณ์ Push และอยู่ที่ Branch 'main' เท่านั้น
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # รันบน Ubuntu รุ่นล่าสุด
+    runs-on: ubuntu-latest
+    
+    # กำหนด Environment Variables สำหรับ Vercel (ต้องตั้งค่าใน GitHub Secrets ก่อน)
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+      # คัดลอกโค้ดลงเครื่อง Runner
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ติดตั้ง Node.js เวอร์ชันเดียวกับที่ใช้ในเครื่องเรา
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ติดตั้ง Dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # ขั้นตอนสำคัญ: อัปเดตโครงสร้างฐานข้อมูลตัวจริง (Production)
+      - name: Migrate Production Database
+        run: npx prisma migrate deploy
+        env:
+          # ใช้ URL ของฐานข้อมูลจริงจาก GitHub Secret
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+      # สร้าง Prisma Client อีกครั้งเพื่อเตรียมรองรับการ Build
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      # ติดตั้งเครื่องมือ Vercel CLI แบบ Global
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      # ดึงข้อมูลการตั้งค่าและ Environment จาก Vercel ลงมาเตรียมไว้
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      # ทำการ Build แอปพลิเคชันด้วยคำสั่งของ Vercel (เพื่อให้ได้ไฟล์ที่ Optimize แล้ว)
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      # ส่งไฟล์ที่ Build เสร็จแล้วขึ้นไปรันบน Vercel ทันที
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
