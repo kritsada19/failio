@@ -43,7 +43,7 @@ describe('createFailure Action', () => {
         /**
          * [Arrange] - เตรียมสถานะ: จำลองว่า Login แล้ว และตระเตรียมข้อมูลที่จะส่งเข้า Action
          */
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
 
         // ดึงข้อมูล Category และ Emotion จริงๆ จากที่ Seed ไว้ เพื่อให้ ID ตรงกับที่มีใน DB
         const category = await prisma.category.findUnique({ where: { name: 'Work' } });
