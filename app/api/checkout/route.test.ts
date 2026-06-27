@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { Mock } from "vitest";
+import type { Stripe } from "stripe";
 import { POST } from "./route";
 import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
@@ -75,14 +77,14 @@ describe('POST /api/checkout', () => {
         mockGetServerSession.mockResolvedValue(mockUserSession);
 
 
-        (prisma.user.findUnique as any).mockResolvedValue({
+        (prisma.user.findUnique as Mock).mockResolvedValue({
             stripeCustomerId: 'cus_test',
             email: 'test@failio.com',
         });
 
         mockCheckoutCreate.mockResolvedValue({
             url: 'https://checkout.stripe.com/c/checkout/test_session_id',
-        } as any);
+        } as Stripe.Response<Stripe.Checkout.Session>);
 
         const req = new NextRequest('http://localhost/api/checkout', {
             method: 'POST',
