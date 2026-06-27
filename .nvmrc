@@ -12,3 +12,5 @@ npm install
 git add .nvmrc package-lock.json
 git commit -m "chore: pin Node 22, regenerate lock file"
 git push
+
+legacy-peer-deps=true
