@@ -3,6 +3,7 @@
  * ครอบคลุมการทำงาน: Create, Update และ Delete
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { Mock } from 'vitest';
 import { createFailure, updateFailure, deleteFailure } from './failure';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
@@ -78,7 +79,7 @@ describe('createFailure Action', () => {
 
     it('ควรล้มเหลวหากผู้ใช้ยังไม่ได้ Login', async () => {
         // [Arrange] - จำลองว่ายังไม่ได้ Login (Session เป็น null)
-        (getSession as any).mockResolvedValue(null);
+        (getSession as Mock).mockResolvedValue(null);
 
         // [Act]
         const result = await createFailure({ success: false, message: '' }, new FormData());
@@ -109,7 +110,7 @@ describe('updateFailure Action', () => {
 
     it('ควรแก้ไข Failure สำเร็จหากเป็นเจ้าของข้อมูล (รวมถึงการแก้ Emotions)', async () => {
         // [Arrange]
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
 
         const category = await prisma.category.findUnique({ where: { name: 'Work' } });
         const availableEmotions = await prisma.emotion.findMany({ take: 2 });
@@ -155,7 +156,7 @@ describe('updateFailure Action', () => {
 
     it('ควรล้มเหลวหากพยายามแก้ไขข้อมูลของคนอื่น (Forbidden)', async () => {
         // [Arrange] - Login เป็น otherUser แต่พยายามจะมาแก้ของ mockUser
-        (getSession as any).mockResolvedValue({ user: { id: otherUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: otherUser.id } });
 
         const category = await prisma.category.findUnique({ where: { name: 'Work' } });
         if (!category) throw new Error("Seed data missing");
@@ -184,7 +185,7 @@ describe('updateFailure Action', () => {
         await prisma.user.create({
             data: { id: adminId, email: 'admin@test.com', name: 'Admin', role: 'ADMIN' }
         });
-        (getSession as any).mockResolvedValue({ user: { id: adminId, role: 'ADMIN' } });
+        (getSession as Mock).mockResolvedValue({ user: { id: adminId, role: 'ADMIN' } });
 
         const category = await prisma.category.findUnique({ where: { name: 'Work' } });
         const emotion = await prisma.emotion.findUnique({ where: { name: 'Sad' } });
@@ -230,7 +231,7 @@ describe('deleteFailure Action', () => {
 
     it('ควรลบ Failure สำเร็จหากเป็นเจ้าของ', async () => {
         // [Arrange]
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
         const category = await prisma.category.findUnique({ where: { name: 'Work' } });
         if (!category) throw new Error("Seed data missing");
 
@@ -249,7 +250,7 @@ describe('deleteFailure Action', () => {
 
     it('ควรล้มเหลวหากคนอื่นพยายามมาลบ (Forbidden)', async () => {
         // [Arrange]
-        (getSession as any).mockResolvedValue({ user: { id: 'other-id' } });
+        (getSession as Mock).mockResolvedValue({ user: { id: 'other-id' } });
         await prisma.user.create({
             data: { id: 'other-id', email: 'other@test.com' }
         });
@@ -270,7 +271,7 @@ describe('deleteFailure Action', () => {
 
     it('ควรลบได้สำเร็จหากเป็น Admin', async () => {
         // [Arrange]
-        (getSession as any).mockResolvedValue({ user: { id: 'admin-id', role: 'ADMIN' } });
+        (getSession as Mock).mockResolvedValue({ user: { id: 'admin-id', role: 'ADMIN' } });
         await prisma.user.create({
             data: { id: 'admin-id', email: 'admin@test.com', role: 'ADMIN' }
         });
@@ -292,7 +293,7 @@ describe('deleteFailure Action', () => {
 
     it('ควรล้มเหลวหากพยายามลบข้อมูลที่ไม่มีอยู่จริง', async () => {
         // [Arrange]
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
 
         // [Act]
         const result = await deleteFailure(9999);
