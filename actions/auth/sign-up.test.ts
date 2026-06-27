@@ -55,7 +55,7 @@ const prevState = {
 
 describe("signUpAction", () => {
     beforeEach(() => {
-        vi.clearAllMocks
+        vi.clearAllMocks()
     })
 
     it('ควรคืนค่า invalidInput เมื่อส่งข้อมูลไม่ถูกต้อง', async () => {
