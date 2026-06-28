@@ -209,14 +209,14 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (!session.user || !token.sessionId) return session
 
+      const raw = await redis.get(`session:${token.sessionId}`);
+
+      if (!raw) {
+        return session
+      }
       try {
-        const raw = await redis.get(`session:${token.sessionId}`);
 
-        if (!raw) {
-          return session
-        }
-
-        const userObj = sessionSchema.parse(JSON.parse(raw));
+        const userObj = sessionSchema.parse(JSON.parse(raw as string));
 
         session.user.id = userObj.id;
         session.user.role = userObj.role;
