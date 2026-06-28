@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const cached = await redis.get("categories");
     if (cached) {
-      return NextResponse.json(JSON.parse(cached), { status: 200 });
+      return NextResponse.json(JSON.parse(cached as string), { status: 200 });
     }
 
     const categories = await prisma.category.findMany();
