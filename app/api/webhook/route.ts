@@ -60,6 +60,10 @@ export async function POST(req: NextRequest) {
                     return NextResponse.json({ error: "User ID not found in metadata" }, { status: 400 });
                 }
 
+                const existingUser = await prisma.user.findUnique({
+                    where: { id: session.metadata.userId },
+                });
+
                 const user = await prisma.user.update({
                     where: { id: session.metadata.userId },
                     data: {
@@ -76,7 +80,7 @@ export async function POST(req: NextRequest) {
                 await redis.del(`user:${user.id}`);
 
                 const locale = session?.metadata?.locale || "en";
-                sendNotificationSubscript(user.email, locale);
+                sendNotificationSubscript(existingUser?.email ?? "", locale);
                 break;
             }
 
