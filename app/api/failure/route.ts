@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const cached = await redis.get(cacheKey);
 
     if (cached) {
-      return NextResponse.json(JSON.parse(cached), { status: 200 });
+      return NextResponse.json(JSON.parse(cached as string), { status: 200 });
     }
 
     const skip = (page - 1) * limit;
