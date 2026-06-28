@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { redis } from '@/lib/redis';
+import type { Mock } from 'vitest';
 
 /**
  * API Route Test for GET /api/failure/[id]
@@ -40,7 +41,7 @@ describe('Failure API Route (GET /api/failure/[id])', () => {
 
     it('ควรดึงข้อมูลจาก Redis ได้ทันทีหากมีข้อมูลใน Cache (Cache Hit)', async () => {
         // [Arrange] - เตรียมสถานะ: จำลองว่า Login แล้ว และมีข้อมูล "รอ" อยู่ใน Redis
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
 
         const mockCachedFailure = {
             title: 'I am from Redis',
@@ -50,7 +51,7 @@ describe('Failure API Route (GET /api/failure/[id])', () => {
 
         const targetId = '123';
         // จำลองพฤติกรรม Redis: ถ้าเรียก key นี้ ให้คืนค่า JSON ที่เรากำหนด
-        (redis.get as any).mockImplementation((key: string) => {
+        (redis.get as Mock).mockImplementation((key: string) => {
             if (key === `failure:${targetId}`) return Promise.resolve(JSON.stringify(mockCachedFailure));
             if (key.startsWith('ai_usage:')) return Promise.resolve('5'); // AI Usage = 5
             return Promise.resolve(null);
@@ -75,8 +76,8 @@ describe('Failure API Route (GET /api/failure/[id])', () => {
 
     it('ควรดึงจาก DB และบันทึกลง Redis หากไม่มีข้อมูลใน Cache (Cache Miss)', async () => {
         // [Arrange] - เตรียมสถานะ: จำลองว่า Redis ไม่มีข้อมูล (คืนค่า null)
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
-        (redis.get as any).mockResolvedValue(null);
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
+        (redis.get as Mock).mockResolvedValue(null);
 
         // ดึง Category และ Emotion จาก Seed (ใช้ชื่อที่เรารู้ว่ามีอยู่แล้ว)
         const category = await prisma.category.findUnique({ where: { name: 'Work' } });
@@ -116,7 +117,7 @@ describe('Failure API Route (GET /api/failure/[id])', () => {
 
     it('ควรคืนค่า 401 หากผู้ใช้ยังไม่ได้ Login', async () => {
         // [Arrange] - จำลองว่ายังไม่ได้ Login
-        (getSession as any).mockResolvedValue(null);
+        (getSession as Mock).mockResolvedValue(null);
 
         const req = new NextRequest('http://localhost/api/failure/1');
         const params = Promise.resolve({ id: '1' });
@@ -130,8 +131,8 @@ describe('Failure API Route (GET /api/failure/[id])', () => {
 
     it('ควรคืนค่า 404 หากไม่พบข้อมูลทั้งใน Cache และ DB', async () => {
         // [Arrange]
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
-        (redis.get as any).mockResolvedValue(null);
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
+        (redis.get as Mock).mockResolvedValue(null);
 
         const req = new NextRequest('http://localhost/api/failure/999');
         const params = Promise.resolve({ id: '999' });

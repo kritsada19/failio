@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { aiQueue } from "@/lib/ai-analysis/queue";
 import { redis } from "@/lib/redis";
+import type { Mock } from 'vitest';
 
 describe('PUT /api/failure/[id]/analyze', () => {
 
@@ -24,9 +25,9 @@ describe('PUT /api/failure/[id]/analyze', () => {
         vi.resetAllMocks();
 
         // [New Fix] ตั้งค่า Default Mock สำหรับ Redis หลังจาก reset
-        (redis.incr as any).mockResolvedValue(1);
-        (redis.decr as any).mockResolvedValue(0);
-        (redis.expire as any).mockResolvedValue(1);
+        (redis.incr as Mock).mockResolvedValue(1);
+        (redis.decr as Mock).mockResolvedValue(0);
+        (redis.expire as Mock).mockResolvedValue(1);
 
         await prisma.failure.deleteMany();
         await prisma.user.deleteMany();
@@ -34,7 +35,7 @@ describe('PUT /api/failure/[id]/analyze', () => {
 
     it('ควรบันทึกลง queue ได้สำเร็จเมื่อมีข้อมูลครบถ้วน', async () => {
         // [Arrange]
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
 
         await prisma.user.create({
             data: mockUser
@@ -72,7 +73,7 @@ describe('PUT /api/failure/[id]/analyze', () => {
     });
 
     it('ควรคืนค่า 401 เมื่อไม่ได้ Login', async () => {
-        (getSession as any).mockResolvedValue(null);
+        (getSession as Mock).mockResolvedValue(null);
 
         const req = new NextRequest(`http://localhost/api/failure/1/analyze`);
         const params = Promise.resolve({ id: '1' });
@@ -85,7 +86,7 @@ describe('PUT /api/failure/[id]/analyze', () => {
     })
 
     it('ควรคืนค่า 403 เมื่อไม่ได้เป็นเจ้าของ Failure', async () => {
-        (getSession as any).mockResolvedValue({ user: { id: otherUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: otherUser.id } });
 
         await prisma.user.createMany({
             data: [mockUser, otherUser]
@@ -116,10 +117,10 @@ describe('PUT /api/failure/[id]/analyze', () => {
     })
 
     it('ควรคืนค่า 429 เมื่อใช้ AI เกินโควต้า (PRO)', async () => {
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
 
         // ใช้ mockImplementation เพื่อเช็ค Key
-        (redis.incr as any).mockImplementation((key: string) => {
+        (redis.incr as Mock).mockImplementation((key: string) => {
             if (key.startsWith('ai_usage:')) {
                 return Promise.resolve(101); // เกินโควต้า AI
             }
@@ -154,7 +155,7 @@ describe('PUT /api/failure/[id]/analyze', () => {
         expect(data.message).toBe('QUOTA_EXCEEDED');
     })
     it('ควรคืนค่า 429 เมื่อใช้ AI เกินโควต้า (FREE)', async () => {
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
 
         // [Arrange] กำหนดค่า User ให้เป็น FREE
         await prisma.user.create({
@@ -165,7 +166,7 @@ describe('PUT /api/failure/[id]/analyze', () => {
         });
 
         // [Arrange] ตั้งค่า Redis ให้เหมือนเดิม (101 คือเกินโควต้า 5)
-        (redis.incr as any).mockImplementation((key: string) => {
+        (redis.incr as Mock).mockImplementation((key: string) => {
             if (key.startsWith('ai_usage:')) {
                 return Promise.resolve(101);
             }
@@ -199,7 +200,7 @@ describe('PUT /api/failure/[id]/analyze', () => {
     })
 
     it('ควรคืนค่า 400 เมื่ออยู่ในสถานะ PROCESSING', async () => {
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
 
         await prisma.user.create({
             data: mockUser
@@ -231,7 +232,7 @@ describe('PUT /api/failure/[id]/analyze', () => {
     })
 
     it('ควนรคืนค่า 404 เมื่อไม่เจอ Failure', async () => {
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
 
         await prisma.user.create({
             data: mockUser
@@ -259,13 +260,13 @@ describe('PUT /api/failure/[id]/analyze', () => {
     })
 
     it('ควรคืนค่า 429 เมื่อ rate-limit api เกิน', async () => {
-        (getSession as any).mockResolvedValue({ user: { id: mockUser.id } });
+        (getSession as Mock).mockResolvedValue({ user: { id: mockUser.id } });
 
         await prisma.user.create({
             data: mockUser
         });
 
-        (redis.incr as any).mockResolvedValue(101);
+        (redis.incr as Mock).mockResolvedValue(101);
 
         const req = new NextRequest(`http://localhost/api/failure/1/analyze`);
         const params = Promise.resolve({ id: '1' });
