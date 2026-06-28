@@ -12,11 +12,15 @@ import { redis } from "@/lib/redis";
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY!);
 
-if (!env.STRIPE_WEBHOOK_SECRET) {
-    throw new Error("STRIPE_WEBHOOK_SECRET is not defined");
-}
-
 export async function POST(req: NextRequest) {
+
+    if (!env.STRIPE_WEBHOOK_SECRET) {
+        return NextResponse.json(
+            { error: "STRIPE_WEBHOOK_SECRET is not defined" },
+            { status: 500 }
+        );
+    }
+
     const ip = getClientIp(req);
     const rateLimitResult = await rateLimit(ip, 100, 60, req);
 
