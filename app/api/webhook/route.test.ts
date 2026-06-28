@@ -4,7 +4,6 @@ import { NextRequest } from "next/server"
 import prisma from "@/lib/prisma"
 import { rateLimit } from "@/lib/rate-limit"
 import { sendNotificationSubscript } from "@/lib/notificationSubscription"
-import Stripe from "stripe"
 
 /**
  * --- ส่วนการจำลอง (Mocks) ---

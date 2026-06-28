@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redis } from "@/lib/redis";
+import type { Redis } from "ioredis";
 
 export async function GET() {
     try {
@@ -14,11 +15,11 @@ export async function GET() {
         const cached = await redis.get(`user:${session.user.id}`);
         if (cached) {
             const userObj = typeof cached === "string" ? JSON.parse(cached) : cached;
-            const isExpired = userObj.plan === "PRO" && 
-                             userObj.stripeCurrentPeriodEnd && 
-                            //  เช็คว่า plan หมดอายุหรือยัง
-                             new Date(userObj.stripeCurrentPeriodEnd) < new Date();
-            
+            const isExpired = userObj.plan === "PRO" &&
+                userObj.stripeCurrentPeriodEnd &&
+                //  เช็คว่า plan หมดอายุหรือยัง
+                new Date(userObj.stripeCurrentPeriodEnd) < new Date();
+
             // ถ้า plan ยังไม่หมดอายุ ให้ return ข้อมูลจาก cache
             if (!isExpired) {
                 return NextResponse.json(userObj, { status: 200 });
@@ -47,7 +48,7 @@ export async function GET() {
 
         if (user && user.plan === "PRO" && user.stripeCurrentPeriodEnd && user.stripeCurrentPeriodEnd < new Date()) {
             console.log(`[Plan Checker] User ${user.id} plan expired. Downgrading to FREE.`);
-            
+
             // Update database to FREE
             user = await prisma.user.update({
                 where: { id: user.id },
@@ -76,9 +77,9 @@ export async function GET() {
                 user.stripeCurrentPeriodEnd = null;
             }
             if (process.env.NODE_ENV === "production") {
-                await (redis as any).set(`user:${session.user.id}`, JSON.stringify(user), { ex: 60 * 60 });
+                await (redis as Redis).set(`user:${session.user.id}`, JSON.stringify(user), "EX", 60 * 60);
             } else {
-                await (redis as any).set(`user:${session.user.id}`, JSON.stringify(user), "EX", 60 * 60);
+                await (redis as Redis).set(`user:${session.user.id}`, JSON.stringify(user), "EX", 60 * 60);
             }
         }
 
