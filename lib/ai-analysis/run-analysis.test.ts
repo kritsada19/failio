@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { runAIAnalysis } from './run-analysis';
 import { sanitize } from './sanitize';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import type { Mock } from 'vitest';
 
 // 2. จำลอง (Mock) module ของ Google AI ทั้งหมด เพื่อไม่ให้มีการเรียก API จริง
 vi.mock("@google/generative-ai");
@@ -65,14 +66,14 @@ describe('AI Analysis Logic (lib/ai-analysis)', () => {
         beforeEach(() => {
             // ล้างสถานะ Mock ทุกครั้งก่อนเริ่ม Test Case ใหม่
             vi.clearAllMocks();
-            
+
             // 3. ตั้งค่าพฤติกรรมจำลองของ GoogleGenerativeAI ให้ส่งค่ากลับมาตามที่เราต้องการ
             vi.mocked(GoogleGenerativeAI).mockImplementation(function () {
                 return {
                     getGenerativeModel: vi.fn().mockReturnValue({
                         generateContent: mockGenerateContent
                     })
-                } as any;
+                } as unknown as GoogleGenerativeAI;
             });
         });
 
@@ -148,7 +149,7 @@ describe('AI Analysis Logic (lib/ai-analysis)', () => {
                     text: () => JSON.stringify({
                         summary: "S",
                         rootCause: "R",
-                        suggestions: [], 
+                        suggestions: [],
                         lesson: "L"
                     })
                 }
@@ -164,7 +165,7 @@ describe('AI Analysis Logic (lib/ai-analysis)', () => {
                     text: () => JSON.stringify({
                         summary: "S",
                         rootCause: "R",
-                        suggestions: ["Valid", 123, null], 
+                        suggestions: ["Valid", 123, null],
                         lesson: "L"
                     })
                 }
@@ -176,7 +177,7 @@ describe('AI Analysis Logic (lib/ai-analysis)', () => {
         it('ควรตัดข้อความ Title และ Description ที่ยาวเกินกำหนด (Truncation)', async () => {
             const longTitle = "A".repeat(300);
             const longDesc = "B".repeat(2500);
-            
+
             mockGenerateContent.mockResolvedValue({
                 response: {
                     text: () => JSON.stringify({
@@ -207,7 +208,7 @@ describe('AI Analysis Logic (lib/ai-analysis)', () => {
         it('ควรจัดการข้อความภาษาไทยใน Prompt ได้ถูกต้อง', async () => {
             const title = "ล้มเหลวในการเขียนโค้ด";
             const description = "ลืมรันเทสก่อน push";
-            
+
             mockGenerateContent.mockResolvedValue({
                 response: { text: () => JSON.stringify({ summary: "S", rootCause: "R", suggestions: ["S"], lesson: "L" }) }
             });
@@ -224,6 +225,6 @@ describe('AI Analysis Logic (lib/ai-analysis)', () => {
 });
 
 // Helper function สำหรับ mock reject (ถ้าใช้บ่อย)
-function mockRejectedValueWithReason(mock: any, error: Error) {
+function mockRejectedValueWithReason(mock: Mock, error: Error) {
     mock.mockRejectedValue(error);
 }
