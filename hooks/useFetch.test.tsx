@@ -2,6 +2,7 @@ import { renderHook, waitFor, act } from "@testing-library/react";
 import { useFetch } from "./useFetch";
 import axios from "axios";
 import { vi, describe, it, expect, beforeEach } from "vitest";
+import type { Mock } from "vitest";
 
 // Mock axios เพื่อไม่ให้มีการยิง API จริงๆ
 vi.mock("axios", () => {
@@ -23,7 +24,7 @@ describe("useFetch Hook", () => {
     it("ควรดึงข้อมูลสำเร็จเมื่อ URL ถูกต้อง", async () => {
         const mockData = { id: 1, name: "Test Product" };
         // กำหนดให้ axios.get คืนค่าข้อมูลที่จำลองไว้
-        (axios.get as any).mockResolvedValue({ data: mockData });
+        (axios.get as Mock).mockResolvedValue({ data: mockData });
 
         const { result } = renderHook(() => useFetch("/api/products"));
 
@@ -48,7 +49,7 @@ describe("useFetch Hook", () => {
         await waitFor(() => {
             expect(result.current.loading).toBe(false);
         });
-        
+
         expect(result.current.data).toBeNull();
         expect(result.current.error).toBeNull();
         // axios ไม่ควรถูกเรียก
@@ -57,12 +58,12 @@ describe("useFetch Hook", () => {
 
     it("ควรแสดงข้อความ Error เมื่อ API ตอบกลับด้วย Error", async () => {
         const errorMessage = "API error message";
-        
+
         // จำลอง Axios Error
-        (axios.get as any).mockRejectedValue({
+        (axios.get as Mock).mockRejectedValue({
             response: { data: { message: errorMessage } },
         });
-        (axios.isAxiosError as any).mockReturnValue(true);
+        (axios.isAxiosError as unknown as Mock).mockReturnValue(true);
 
         const { result } = renderHook(() => useFetch("/api/fail"));
 
@@ -77,9 +78,9 @@ describe("useFetch Hook", () => {
     it("ควรเรียกข้อมูลใหม่เมื่อใช้ฟังก์ชัน reFetch", async () => {
         const data1 = { version: 1 };
         const data2 = { version: 2 };
-        
+
         // กำหนดคืนค่าแตกต่างกันในการเรียกแต่ละครั้ง
-        (axios.get as any)
+        (axios.get as Mock)
             .mockResolvedValueOnce({ data: data1 })
             .mockResolvedValueOnce({ data: data2 });
 
@@ -100,13 +101,13 @@ describe("useFetch Hook", () => {
     it("ควรเรียกข้อมูลเป็นระยะเมื่อกำหนด refreshInterval", async () => {
         // ใช้ Fake Timers เพื่อควบคุมเวลาในการเทส
         vi.useFakeTimers();
-        
-        (axios.get as any).mockResolvedValue({ data: { success: true } });
+
+        (axios.get as Mock).mockResolvedValue({ data: { success: true } });
 
         renderHook(() => useFetch("/api/auto-refresh", { refreshInterval: 5000 }));
 
         // ครั้งแรกตอน mount
-        await vi.advanceTimersByTimeAsync(0); 
+        await vi.advanceTimersByTimeAsync(0);
         expect(axios.get).toHaveBeenCalledTimes(1);
 
         // เลื่อนเวลาไป 5 วินาที
@@ -119,7 +120,7 @@ describe("useFetch Hook", () => {
     });
 
     it("ไม่ควรเปลี่ยนสถานะ loading เมื่อใช้ isSilent ใน reFetch", async () => {
-        (axios.get as any).mockResolvedValue({ data: { updated: true } });
+        (axios.get as Mock).mockResolvedValue({ data: { updated: true } });
 
         const { result } = renderHook(() => useFetch("/api/quiet"));
 
@@ -135,9 +136,9 @@ describe("useFetch Hook", () => {
             // ระหว่างที่รัน fetchData (isSilent: true) loading จะต้องยังคงเป็น false
             expect(result.current.loading).toBe(false);
         });
-        
+
         await reFetchPromise!;
-        
+
         // หลังจากเสร็จสิ้น loading ก็ต้องยังคงเป็น false
         expect(result.current.loading).toBe(false);
     });
