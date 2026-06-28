@@ -65,6 +65,7 @@ function FailureDetail({
         setThinkingIndex((prev) => (prev + 1) % thinkingPhrases.length);
       }, 2500);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setThinkingIndex(0);
     }
     return () => clearInterval(interval);
@@ -260,8 +261,8 @@ function FailureDetail({
                 {limitInfo && (
                   <div className="flex flex-col items-end gap-1.5">
                     <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${limitInfo.isFull
-                        ? "border-rose-100 bg-rose-50 text-rose-600 dark:border-rose-900/30 dark:bg-rose-950/30 dark:text-rose-400"
-                        : "border-slate-100 bg-slate-50 text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400"
+                      ? "border-rose-100 bg-rose-50 text-rose-600 dark:border-rose-900/30 dark:bg-rose-950/30 dark:text-rose-400"
+                      : "border-slate-100 bg-slate-50 text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400"
                       }`}>
                       {limitInfo.text}
                     </span>
