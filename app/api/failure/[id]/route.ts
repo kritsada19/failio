@@ -25,7 +25,7 @@ export async function GET(
 
     if (cached) {
       try {
-        failure = JSON.parse(cached);
+        failure = JSON.parse(cached as string);
       } catch {
         await redis.del(`failure:${id}`);
       }
