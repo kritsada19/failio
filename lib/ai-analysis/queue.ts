@@ -1,15 +1,40 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Queue, Worker, Job } from "bullmq";
+import type { ConnectionOptions } from "bullmq";
 import { redis } from "@/lib/redis";
 import prisma from "@/lib/prisma";
 import { runAIAnalysis } from "./run-analysis";
 import { env } from "@/env";
 
+// BullMQ requires a raw ioredis ConnectionOptions object — it manages its own
+// internal ioredis instance. Passing an externally-created Redis instance
+// causes a type conflict between the top-level ioredis and BullMQ's bundled copy.
+//
+// Production: set REDIS_URL to the Upstash TCP URL (rediss://...)
+//             found in Upstash Dashboard → Connect → ioredis
+// Local:      falls back to localhost:6379 automatically
+const bullmqConnection: ConnectionOptions = process.env.REDIS_URL
+    ? {
+          // Parse the full Redis URL (e.g. rediss://default:<token>@host:port)
+          host: new URL(process.env.REDIS_URL).hostname,
+          port: Number(new URL(process.env.REDIS_URL).port),
+          username: new URL(process.env.REDIS_URL).username || undefined,
+          password: new URL(process.env.REDIS_URL).password || undefined,
+          // Enable TLS for rediss:// (Upstash requires it)
+          tls: process.env.REDIS_URL.startsWith("rediss://") ? {} : undefined,
+          maxRetriesPerRequest: null,
+      }
+    : {
+          host: process.env.REDIS_HOST ?? "localhost",
+          port: Number(process.env.REDIS_PORT ?? 6379),
+          maxRetriesPerRequest: null,
+      };
+
 // Create a queue for AI analysis
 export const aiQueue = new Queue("ai-analysis", {
 
-    // Redis connection
-    connection: redis,
+    // Redis connection (raw options — BullMQ manages its own ioredis instance)
+    connection: bullmqConnection,
 
     // Set default job options
     defaultJobOptions: {
@@ -104,9 +129,9 @@ export const initAIWorker = () => {
             }
         },
 
-        // Redis connection
+        // Redis connection (raw options — BullMQ manages its own ioredis instance)
         {
-            connection: redis,
+            connection: bullmqConnection,
 
             // Allow 3 jobs to run at the same time
             concurrency: Number(env.CONCURRENCY_LIMIT),
