@@ -132,7 +132,7 @@ export async function proxy(request: NextRequest) {
 
       // parse JSON + validate schema
       const user = sessionSchema.parse(
-        JSON.parse(raw)
+        JSON.parse(raw as string)
       );
 
       // ---------------------------
