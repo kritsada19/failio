@@ -167,6 +167,13 @@ jobs:
           cut -d'=' -f1 .vercel/.env.production.local 2>/dev/null || echo "EMPTY OR MISSING"
           echo "--- linked project ---"
           cat .vercel/project.json
+        
+      - name: Debug - check env value lengths
+        run: |
+          while IFS='=' read -r key value; do
+            [[ "$key" =~ ^#.*$ || -z "$key" ]] && continue
+            echo "$key : length=${#value}"
+          done < .vercel/.env.production.local
 
       # ทำการ Build แอปพลิเคชันด้วยคำสั่งของ Vercel (เพื่อให้ได้ไฟล์ที่ Optimize แล้ว)
       - name: Build Project Artifacts
