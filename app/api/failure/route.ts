@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { redis } from "@/lib/redis";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,6 +14,14 @@ export async function GET(request: NextRequest) {
     const limit = Number(request.nextUrl.searchParams.get("limit")) || 10;
     const categoryId = Number(request.nextUrl.searchParams.get("categoryId")) || undefined;
     const search = request.nextUrl.searchParams.get("search") || "";
+
+    const version = await redis.get(`failures_version:${session.user.id}`) || "0";
+    const cacheKey = `failures:${session.user.id}:${version}:${page}:${limit}:${categoryId || 'all'}:${search}`;
+    const cached = await redis.get(cacheKey);
+
+    if (cached) {
+      return NextResponse.json(JSON.parse(cached as string), { status: 200 });
+    }
 
     const skip = (page - 1) * limit;
 
@@ -65,17 +74,18 @@ export async function GET(request: NextRequest) {
       }),
     ]);
 
-    return NextResponse.json(
-      {
-        failures,
-        total,
-        pagination: {
-          page,
-          totalPages: Math.ceil(total / limit),
-        },
+    const result = {
+      failures,
+      total,
+      pagination: {
+        page,
+        totalPages: Math.ceil(total / limit),
       },
-      { status: 200 },
-    );
+    };
+
+    await redis.set(cacheKey, JSON.stringify(result), "EX", 60 * 30); // Cache for 30 minutes
+
+    return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error("Error fetching failures:", error);
     return NextResponse.json(

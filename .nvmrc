@@ -1,0 +1,16 @@
+# สร้างไฟล์ .nvmrc
+echo "22" > .nvmrc
+
+# สลับไปใช้ Node 22
+nvm use 22
+
+# ลบแล้ว generate lock file ใหม่ด้วย Node 22
+rm -rf node_modules package-lock.json
+npm install
+
+# commit ทั้งหมด
+git add .nvmrc package-lock.json
+git commit -m "chore: pin Node 22, regenerate lock file"
+git push
+
+legacy-peer-deps=true

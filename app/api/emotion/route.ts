@@ -2,14 +2,18 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 
+import { redis } from "@/lib/redis";
+
 export async function GET() {
   try {
-    const session = await getSession();
-    if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    const cached = await redis.get("emotions");
+    if (cached) {
+      return NextResponse.json(JSON.parse(cached as string), { status: 200 });
     }
 
     const emotions = await prisma.emotion.findMany();
+
+    await redis.set("emotions", JSON.stringify(emotions), "EX", 60 * 60 * 24); // Cache for 24 hours
 
     return NextResponse.json(emotions, { status: 200 });
   } catch (error) {
@@ -46,6 +50,8 @@ export async function POST(request: Request) {
         name: name.trim(),
       },
     });
+
+    await redis.del("emotions");
 
     return NextResponse.json(
       { message: "Emotion created successfully" },

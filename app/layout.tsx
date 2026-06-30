@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
-import { Toaster } from "sonner";
+import AppToaster from "@/components/AppToaster";
+import { env } from "@/env";
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import SessionProvider from "../components/SessionProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,10 +23,32 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Failio",
   description: "Failio is an AI-powered reflection app that helps you analyze failures and transform them into actionable growth.",
+  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   icons: {
     icon: "/logo.png",
   },
+  openGraph: {
+    title: "Failio",
+    description: "Failio is an AI-powered reflection app that helps you analyze failures and transform them into actionable growth.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Failio - AI Failure Analysis",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Failio",
+    description: "Transform failures into lessons using AI.",
+    images: ["/og-image.png"],
+  },
 };
+
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 
 export default async function RootLayout({
   children,
@@ -32,16 +56,27 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession(authOptions);
+
+  // ดึง locale และ messages จาก next-intl ที่ได้จาก request.ts
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SessionProvider session={session}>
-          <NavBar />
-          {children}
-          <Toaster richColors position="top-right" />
-        </SessionProvider>
+        {/* NextIntlClientProvider คือ component ของ next-intl ที่ใช้ส่ง messages ไปยัง client component */}
+        {/* ทำให้เรียกใช้ hook useTranslations() ใน client component ได้ */}
+        <NextIntlClientProvider messages={messages}>
+          <SessionProvider session={session}>
+            <ThemeProvider>
+              <NavBar />
+              {children}
+              <AppToaster />
+            </ThemeProvider>
+          </SessionProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

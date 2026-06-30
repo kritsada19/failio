@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import FailureDetail from "@/components/dashboard/FailureDetail";
 import axios from "axios";
 import Link from "next/link";
+import { useEffect } from "react";
 
 interface FailureData {
   id: number;
@@ -22,6 +23,11 @@ interface FailureData {
     id: number;
     name: string;
   };
+  userPlan: "FREE" | "PRO";
+  aiUsage: {
+    aiUsedToday: number;
+    resetAt: string;
+  };
 }
 
 interface AiResult {
@@ -38,19 +44,28 @@ function DetailFailurePage() {
   const { data: failure, loading, error, reFetch } =
     useFetch<FailureData>(`/api/failure/${id}`);
 
+  useEffect(() => {
+    if (failure?.aiStatus === "PROCESSING") {
+      const interval = setInterval(() => {
+        reFetch(true);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [failure?.aiStatus, reFetch]);
+
   const handleAnalyze = async () => {
     try {
       await axios.put(`/api/failure/${id}/analyze`);
-
       await reFetch();
     } catch (err) {
       console.error(err);
+      throw err; // Re-throw to allow FailureDetail to catch it
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white">
+      <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-500">
         <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
           <Link
             href="/dashboard"
@@ -59,8 +74,8 @@ function DetailFailurePage() {
             ← Back to My Failures
           </Link>
 
-          <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Loading...</p>
+          <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-16 text-center shadow-sm">
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Loading...</p>
           </div>
         </div>
       </div>
@@ -69,7 +84,7 @@ function DetailFailurePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white">
+      <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-500">
         <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
           <Link
             href="/dashboard"
@@ -78,8 +93,8 @@ function DetailFailurePage() {
             ← Back to My Failures
           </Link>
 
-          <div className="rounded-3xl border border-red-100 bg-white px-6 py-16 text-center shadow-sm">
-            <p className="text-sm font-medium text-red-500">{error}</p>
+          <div className="rounded-3xl border border-red-100 dark:border-red-900/50 bg-white dark:bg-slate-900 px-6 py-16 text-center shadow-sm">
+            <p className="text-sm font-medium text-red-500 dark:text-red-400">{error}</p>
           </div>
         </div>
       </div>
@@ -89,11 +104,11 @@ function DetailFailurePage() {
   if (!failure) return null;
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white">
+    <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-500">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
           href="/dashboard"
-          className="mb-6 inline-flex text-sm font-medium text-slate-500 transition-colors duration-200 hover:text-orange-600"
+          className="mb-6 inline-flex text-sm font-medium text-slate-500 dark:text-slate-500 transition-colors duration-200 hover:text-orange-600 dark:hover:text-orange-400"
         >
           ← Back to My Failures
         </Link>

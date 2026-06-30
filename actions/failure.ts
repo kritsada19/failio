@@ -3,6 +3,8 @@
 import prisma from "@/lib/prisma"
 import { createFailureSchema, updateFailureSchema, deleteFailureSchema } from "@/lib/validations/failure";
 import { getSession } from "@/lib/auth";
+import { getTranslations } from "next-intl/server";
+import { redis } from "@/lib/redis";
 
 export type FailureState = {
     success: boolean;
@@ -19,26 +21,27 @@ export async function createFailure(
     prevState: FailureState,
     formData: FormData
 ) {
+    const t = await getTranslations("Actions");
     try {
         const session = await getSession();
         if (!session) {
             return {
                 success: false,
-                message: "Unauthorized",
+                message: t("unauthorized"),
             };
         }
 
         const validatedFields = createFailureSchema.safeParse({
             title: formData.get("title"),
             description: formData.get("description"),
-            categoryId: formData.get("categoryId"),
-            emotions: formData.getAll("emotions"),
+            categoryId: Number(formData.get("categoryId")),
+            emotions: formData.getAll("emotions").map((id) => Number(id)),
         });
 
         if (!validatedFields.success) {
             return {
                 success: false,
-                message: "Invalid fields",
+                message: t("invalidFields"),
                 error: validatedFields.error.flatten().fieldErrors,
             };
         }
@@ -50,25 +53,27 @@ export async function createFailure(
                 title,
                 description,
                 userId: String(session.user.id),
-                categoryId: Number(categoryId),
+                categoryId,
                 emotions: Array.isArray(emotions)
                     ? {
-                        connect: emotions.map((id: string) => ({ id: Number(id) })),
+                        connect: emotions.map((id) => ({ id })),
                     }
                     : undefined,
             },
         });
 
+        await redis.incr(`failures_version:${session.user.id}`);
+
         return {
             success: true,
-            message: "Failure created successfully",
+            message: t("createSuccess"),
         };
 
     } catch (error) {
         console.error("Error during create failure:", error);
         return {
             success: false,
-            message: "Server error during create failure",
+            message: t("createError"),
         };
     }
 }
@@ -77,12 +82,13 @@ export async function updateFailure(
     prevState: FailureState,
     formData: FormData
 ) {
+    const t = await getTranslations("Actions");
     try {
         const session = await getSession();
         if (!session) {
             return {
                 success: false,
-                message: "Unauthorized",
+                message: t("unauthorized"),
             };
         }
 
@@ -91,14 +97,14 @@ export async function updateFailure(
             id: formData.get("id"),
             title: formData.get("title"),
             description: formData.get("description"),
-            categoryId: formData.get("categoryId"),
-            emotions: formData.getAll("emotions"),
+            categoryId: Number(formData.get("categoryId")),
+            emotions: formData.getAll("emotions").map((id) => Number(id)),
         });
 
         if (!validatedFields.success) {
             return {
                 success: false,
-                message: "Invalid fields",
+                message: t("invalidFields"),
                 error: validatedFields.error.flatten().fieldErrors,
             };
         }
@@ -112,7 +118,7 @@ export async function updateFailure(
         if (!user) {
             return {
                 success: false,
-                message: "User not found",
+                message: t("userNotFound"),
             };
         }
 
@@ -125,7 +131,7 @@ export async function updateFailure(
         if (!failure) {
             return {
                 success: false,
-                message: "Failure not found",
+                message: t("failureNotFound"),
             };
         }
 
@@ -135,7 +141,7 @@ export async function updateFailure(
         if (!isAdmin && !isOwner) {
             return {
                 success: false,
-                message: "Forbidden",
+                message: t("forbidden"),
             };
         }
 
@@ -148,36 +154,40 @@ export async function updateFailure(
             data: {
                 title,
                 description,
-                categoryId: Number(categoryId),
+                categoryId,
                 emotions: Array.isArray(emotions)
                     ? {
-                        set: emotions.map((id: string) => ({ id: Number(id) })),
+                        set: emotions.map((id) => ({ id })),
                     }
                     : undefined,
             },
         });
 
+        await redis.del(`failure:${id}`);
+        await redis.incr(`failures_version:${session.user.id}`);
+
         return {
             success: true,
-            message: "Failure updated successfully",
+            message: t("updateSuccess"),
         };
 
     } catch (error) {
         console.error("Error during update failure:", error);
         return {
             success: false,
-            message: "Server error during update failure",
+            message: t("updateError"),
         };
     }
 }
 
 export async function deleteFailure(id: number) {
+    const t = await getTranslations("Actions");
     try {
         const session = await getSession();
         if (!session) {
             return {
                 success: false,
-                message: "Unauthorized",
+                message: t("unauthorized"),
             };
         }
 
@@ -188,8 +198,21 @@ export async function deleteFailure(id: number) {
         if (!validatedFields.success) {
             return {
                 success: false,
-                message: "Invalid fields",
+                message: t("invalidFields"),
                 error: validatedFields.error.flatten().fieldErrors,
+            };
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: String(session.user.id),
+            },
+        });
+
+        if (!user) {
+            return {
+                success: false,
+                message: t("userNotFound"),
             };
         }
 
@@ -202,17 +225,17 @@ export async function deleteFailure(id: number) {
         if (!failure) {
             return {
                 success: false,
-                message: "Failure not found",
+                message: t("failureNotFound"),
             };
         }
 
-        const isAdmin = session.user.role === "ADMIN";
-        const isOwner = session.user.id === failure.userId;
+        const isAdmin = user.role === "ADMIN";
+        const isOwner = user.id === failure.userId;
 
         if (!isAdmin && !isOwner) {
             return {
                 success: false,
-                message: "Forbidden",
+                message: t("forbidden"),
             };
         }
 
@@ -222,15 +245,18 @@ export async function deleteFailure(id: number) {
             },
         });
 
+        await redis.del(`failure:${id}`);
+        await redis.incr(`failures_version:${session.user.id}`);
+
         return {
             success: true,
-            message: "Failure deleted successfully",
+            message: t("deleteSuccess"),
         };
     } catch (error) {
         console.error("Error during delete failure:", error);
         return {
             success: false,
-            message: "Server error during delete failure",
+            message: t("deleteError"),
         };
     }
 }

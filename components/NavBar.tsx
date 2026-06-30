@@ -2,15 +2,49 @@
 
 import Image from "next/image";
 import Link from "next/link";
+// ...
 import { useSession } from "next-auth/react";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useTheme } from "next-themes";
+import ThemeToggle from "./ThemeToggle";
+
+import { useFetch } from "@/hooks/useFetch";
+
+interface UserProfile {
+  plan: "FREE" | "PRO";
+}
 
 function NavBar() {
   const { data: session } = useSession();
+  const { data: user } = useFetch<UserProfile>(session ? `/api/me` : null);
+  const currentPlan = user?.plan || session?.user?.plan;
   const [isOpen, setIsOpen] = useState(false);
+  const t = useTranslations('Navigation');
+  const locale = useLocale();
+  const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const isDark = resolvedTheme === "dark";
+
 
   const toggleMenu = () => setIsOpen(!isOpen);
+
+  const toggleLanguage = () => {
+    const nextLocale = locale === 'en' ? 'th' : 'en';
+    document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000`;
+    router.refresh();
+  };
 
   const isAdmin = session?.user.role === "ADMIN";
 
@@ -18,35 +52,42 @@ function NavBar() {
     <>
       <Link
         href="/"
-        className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
+        className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"}
         onClick={() => setIsOpen(false)}
       >
-        Home
+        {t('home')}
       </Link>
 
       {isAdmin ? (
         <Link
           href="/admin"
-          className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
+          className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"}
           onClick={() => setIsOpen(false)}
         >
-          Dashboard
+          {t('dashboard')}
         </Link>
       ) : (
         <>
           <Link
             href="/dashboard"
-            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
+            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"}
             onClick={() => setIsOpen(false)}
           >
-            My Failures
+            {t('myFailures')}
           </Link>
           <Link
             href="/dashboard/analytics"
-            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
+            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"}
             onClick={() => setIsOpen(false)}
           >
-            Growth Insights
+            {t('growthInsights')}
+          </Link>
+          <Link
+            href="/dashboard/subscription"
+            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"}
+            onClick={() => setIsOpen(false)}
+          >
+            {t('subscription')}
           </Link>
         </>
       )}
@@ -55,31 +96,31 @@ function NavBar() {
         <>
           <Link
             href="/admin/users"
-            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
+            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"}
             onClick={() => setIsOpen(false)}
           >
-            Users
+            {t('users')}
           </Link>
           <Link
             href="/admin/failures"
-            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
+            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"}
             onClick={() => setIsOpen(false)}
           >
-            Failures
+            {t('failures')}
           </Link>
           <Link
             href="/admin/categories"
-            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
+            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"}
             onClick={() => setIsOpen(false)}
           >
-            Categories
+            {t('categories')}
           </Link>
           <Link
             href="/admin/emotions"
-            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"}
+            className={className || "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"}
             onClick={() => setIsOpen(false)}
           >
-            Emotions
+            {t('emotions')}
           </Link>
         </>
       )}
@@ -87,12 +128,12 @@ function NavBar() {
   );
 
   return (
-    <nav className="sticky top-0 z-100 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+    <nav className="sticky top-0 z-100 border-b border-slate-200 bg-white/90 backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/90">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
         {/* Logo */}
         <Link href="/" className="flex items-center">
           <Image
-            src="/logo-nav.png"
+            src={isDark ? "/logo-nav-dark.png" : "/logo-nav.png"}
             alt="Failio logo"
             width={120}
             height={120}
@@ -107,29 +148,46 @@ function NavBar() {
         </div>
 
         {/* Auth / Profile & Mobile Toggle */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center justify-center h-9 w-14 gap-1.5 rounded-lg border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 text-sm font-medium text-slate-600 dark:text-slate-300 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 active:scale-95"
+            aria-label="Toggle language"
+            title={locale === 'en' ? 'Switch to Thai' : 'Switch to English'}
+          >
+            <span className="uppercase">{locale}</span>
+          </button>
+
           <div className="hidden items-center sm:flex">
             {session ? (
               <Link
                 href="/profile"
-                className="inline-flex items-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
+                className="inline-flex items-center rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
               >
-                Profile
+                {t('profile')}
+                {currentPlan === "PRO" && (
+                  <span className="pro-badge-shimmer ml-2 inline-flex items-center gap-1 rounded-full bg-linear-to-r from-amber-200 via-amber-400 to-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-950 shadow-[0_0_10px_rgba(251,191,36,0.4)] transition-all hover:scale-105">
+                    <Sparkles className="h-2.5 w-2.5" />
+                    PRO
+                  </span>
+                )}
               </Link>
             ) : (
               <div className="flex items-center gap-3">
                 <Link
                   href="/sign-in"
-                  className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
+                  className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                 >
-                  Sign In
+                  {t('signIn')}
                 </Link>
 
                 <Link
                   href="/sign-up"
                   className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-orange-600"
                 >
-                  Sign Up
+                  {t('signUp')}
                 </Link>
               </div>
             )}
@@ -138,7 +196,7 @@ function NavBar() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={toggleMenu}
-            className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 md:hidden"
+            className="rounded-lg p-2 text-slate-600 dark:text-slate-400 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 md:hidden"
             aria-label="Toggle menu"
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -156,41 +214,47 @@ function NavBar() {
 
       {/* Mobile Menu Container */}
       <div
-        className={`fixed left-0 top-[61px] h-[calc(100vh-61px)] w-full overflow-y-auto bg-white transition-all duration-300 ease-in-out md:hidden ${isOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
+        className={`fixed left-0 top-[61px] h-[calc(100vh-61px)] w-full overflow-y-auto bg-white dark:bg-slate-900 transition-all duration-300 ease-in-out md:hidden ${isOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
           }`}
       >
         <div className="flex flex-col gap-2 p-6">
           <div className="mb-4 flex flex-col gap-2">
-            <span className="px-4 text-xs font-semibold tracking-wider text-slate-400 uppercase">
-              Navigation
+            <span className="px-4 text-xs font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase">
+              {t('navigation')}
             </span>
-            {renderNavLinks("block rounded-xl px-4 py-3 text-base font-medium text-slate-600 hover:bg-slate-50 hover:text-orange-600")}
+            {renderNavLinks("block rounded-xl px-4 py-3 text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-orange-600")}
           </div>
 
-          <div className="mt-auto flex flex-col gap-3 pt-6 border-t border-slate-100">
+          <div className="mt-auto flex flex-col gap-3 pt-6 border-t border-slate-100 dark:border-slate-800">
             {session ? (
               <Link
                 href="/profile"
-                className="flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-base font-medium text-white shadow-sm transition-all active:scale-95"
+                className="flex items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-100 px-4 py-3 text-base font-medium text-white dark:text-slate-900 shadow-sm transition-all active:scale-95"
                 onClick={() => setIsOpen(false)}
               >
-                Profile Settings
+                {t('profileSettings')}
+                {currentPlan === "PRO" && (
+                  <span className="pro-badge-shimmer ml-2 inline-flex items-center gap-1 rounded-full bg-linear-to-r from-amber-200 via-amber-400 to-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-950 shadow-sm">
+                    <Sparkles className="h-2.5 w-2.5" />
+                    PRO
+                  </span>
+                )}
               </Link>
             ) : (
               <>
                 <Link
                   href="/sign-in"
-                  className="flex items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-base font-medium text-slate-600 transition-all hover:bg-slate-50"
+                  className="flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-base font-medium text-slate-600 dark:text-slate-300 transition-all hover:bg-slate-50 dark:hover:bg-slate-800"
                   onClick={() => setIsOpen(false)}
                 >
-                  Sign In
+                  {t('signIn')}
                 </Link>
                 <Link
                   href="/sign-up"
                   className="flex items-center justify-center rounded-xl bg-orange-500 px-4 py-3 text-base font-semibold text-white shadow-sm transition-all hover:bg-orange-600 active:scale-95"
                   onClick={() => setIsOpen(false)}
                 >
-                  Get Started
+                  {t('getStarted')}
                 </Link>
               </>
             )}

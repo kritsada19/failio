@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -15,6 +16,20 @@ export async function GET(request: NextRequest) {
 
         const top = request.nextUrl.searchParams.get("top") === "true";
         const limit = Number(request.nextUrl.searchParams.get("limit")) || 10;
+        const sortBy = request.nextUrl.searchParams.get("sortBy") || "newest";
+
+        let orderBy: any = { id: "desc" };
+        if (sortBy === "frequency") {
+            orderBy = {
+                failures: {
+                    _count: "desc",
+                },
+            };
+        } else if (sortBy === "alphabetical") {
+            orderBy = {
+                name: "asc",
+            };
+        }
 
         const categories = await prisma.category.findMany({
             include: {
@@ -30,9 +45,7 @@ export async function GET(request: NextRequest) {
                         _count: "desc",
                     },
                 }
-                : {
-                    id: "desc",
-                },
+                : orderBy,
             take: top ? limit : undefined,
         });
 
@@ -77,4 +90,5 @@ export async function POST(request: NextRequest) {
             { status: 500 }
         );
     }
-}
+}
+
