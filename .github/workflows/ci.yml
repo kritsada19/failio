@@ -161,12 +161,10 @@ jobs:
         run: |
           echo "--- .vercel directory ---"
           ls -la .vercel/
+          echo "--- env file line count ---"
+          wc -l .vercel/.env.production.local 2>/dev/null || echo "FILE NOT FOUND"
           echo "--- env file keys (no values) ---"
-          if [ -f .vercel/.env.production.local ]; then
-            cut -d'=' -f1 .vercel/.env.production.local
-          else
-            echo "FILE NOT FOUND"
-          fi
+          cut -d'=' -f1 .vercel/.env.production.local 2>/dev/null || echo "EMPTY OR MISSING"
           echo "--- linked project ---"
           cat .vercel/project.json
 
