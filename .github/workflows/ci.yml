@@ -136,13 +136,7 @@ jobs:
         run: npx prisma migrate deploy
         env:
           # ใช้ URL ของฐานข้อมูลจริงจาก GitHub Secret
-          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
-
-      - name: Seed Database
-        run: npx prisma db seed
-        env:
-          # ใช้ URL ของฐานข้อมูลจริงจาก GitHub Secret
-          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       # สร้าง Prisma Client อีกครั้งเพื่อเตรียมรองรับการ Build
       - name: Generate Prisma Client
@@ -153,8 +147,16 @@ jobs:
         run: npm install -g vercel
 
       # ดึงข้อมูลการตั้งค่าและ Environment จาก Vercel ลงมาเตรียมไว้
-      - name: Pull Vercel Environment Information
+      - name: Pull Vercel env
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      # รัน Seed Database
+      - name: Run seed
+        run: |
+          set -a
+          source .vercel/.env.production.local
+          set +a
+          npx prisma db seed
 
       # ทำการ Build แอปพลิเคชันด้วยคำสั่งของ Vercel (เพื่อให้ได้ไฟล์ที่ Optimize แล้ว)
       - name: Build Project Artifacts
