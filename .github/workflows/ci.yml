@@ -142,6 +142,13 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
+      # รัน Seed Database
+      - name: Run seed
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SKIP_ENV_VALIDATION: "true"
+        run: npx prisma db seed
+
       # ติดตั้งเครื่องมือ Vercel CLI แบบ Global
       - name: Install Vercel CLI
         run: npm install -g vercel
@@ -149,14 +156,6 @@ jobs:
       # ดึงข้อมูลการตั้งค่าและ Environment จาก Vercel ลงมาเตรียมไว้
       - name: Pull Vercel env
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
-      # รัน Seed Database
-      - name: Run seed
-        run: |
-          set -a
-          source .vercel/.env.production.local
-          set +a
-          npx prisma db seed
 
       # ทำการ Build แอปพลิเคชันด้วยคำสั่งของ Vercel (เพื่อให้ได้ไฟล์ที่ Optimize แล้ว)
       - name: Build Project Artifacts
