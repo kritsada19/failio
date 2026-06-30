@@ -157,6 +157,11 @@ jobs:
       - name: Pull Vercel env
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Debug - check env file
+        run: |
+          ls -la .vercel/
+          cat .vercel/.env.production.local | cut -d'=' -f1
+
       # ทำการ Build แอปพลิเคชันด้วยคำสั่งของ Vercel (เพื่อให้ได้ไฟล์ที่ Optimize แล้ว)
       - name: Build Project Artifacts
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
