@@ -159,8 +159,16 @@ jobs:
 
       - name: Debug - check env file
         run: |
+          echo "--- .vercel directory ---"
           ls -la .vercel/
-          cat .vercel/.env.production.local | cut -d'=' -f1
+          echo "--- env file keys (no values) ---"
+          if [ -f .vercel/.env.production.local ]; then
+            cut -d'=' -f1 .vercel/.env.production.local
+          else
+            echo "FILE NOT FOUND"
+          fi
+          echo "--- linked project ---"
+          cat .vercel/project.json
 
       # ทำการ Build แอปพลิเคชันด้วยคำสั่งของ Vercel (เพื่อให้ได้ไฟล์ที่ Optimize แล้ว)
       - name: Build Project Artifacts
