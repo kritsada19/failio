@@ -90,7 +90,10 @@ export async function GET(
     return NextResponse.json({
       ...failure,
       userPlan: user?.plan || "FREE",
-      aiUsage: Number(aiUsage || 0),
+      aiUsage: {
+        aiUsedToday: Number(aiUsage || 0),
+        resetAt: new Date(new Date().setHours(24, 0, 0, 0)).toISOString(),
+      },
     });
 
   } catch (error) {

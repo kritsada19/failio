@@ -113,6 +113,9 @@ export const initAIWorker = () => {
                     data: { aiStatus: "FAILED" },
                 });
 
+                await redis.del(`failure:${failureId}`);
+                await redis.incr(`failures_version:${userId}`);
+
                 const aiUsageKey = `ai_usage:${userId}`;
                 const usage = await redis.get(aiUsageKey);
                 if (Number(usage) > 0) {

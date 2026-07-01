@@ -251,7 +251,7 @@ function FailureDetail({
               <div className="flex flex-col items-end gap-2">
                 <button
                   onClick={handleAnalyzeClick}
-                  disabled={isProcessing || (limitInfo?.isFull && failure.aiStatus === "NOT_STARTED")}
+                  disabled={isProcessing || limitInfo?.isFull}
                   className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-100 px-5 py-2.5 text-sm font-semibold text-white dark:text-slate-900 shadow-sm transition-all duration-300 hover:scale-105 hover:bg-slate-800 dark:hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isProcessing && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}

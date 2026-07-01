@@ -119,6 +119,9 @@ export async function PUT(
             data: { aiStatus: "PROCESSING" },
         });
 
+        await redis.del(`failure:${failure.id}`);
+        await redis.incr(`failures_version:${session.user.id}`);
+
         // Enqueue background job
         await aiQueue.add("analyze", {
             failureId: failure.id,

@@ -12,7 +12,7 @@ export default async function Page() {
   }).then((res) => res.json());
   const emotionList = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/emotion`, {
     next: {
-      revalidate: 3600 
+      revalidate: 3600
     },
   }).then((res) => res.json());
 
