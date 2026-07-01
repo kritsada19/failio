@@ -30,6 +30,8 @@ export const env = createEnv({
 
         UPSTASH_REDIS_REST_URL: z.string().url(),
         UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
+
+        REDIS_URL: z.string().url(),
     },
     client: {
         NEXT_PUBLIC_APP_URL: z.string().url(),
@@ -54,6 +56,7 @@ export const env = createEnv({
         CONCURRENCY_LIMIT: process.env.CONCURRENCY_LIMIT,
         UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
         UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+        REDIS_URL: process.env.REDIS_URL,
     },
     skipValidation: !!process.env.SKIP_ENV_VALIDATION || process.env.NODE_ENV === 'test',
 });
