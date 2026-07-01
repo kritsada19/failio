@@ -68,7 +68,8 @@ describe('Failure API Route (GET /api/failure/[id])', () => {
         expect(res.status).toBe(200);
         expect(data.title).toBe('I am from Redis'); // ต้องได้ค่าตามที่เรา Mock ไว้ใน Redis
         expect(data.userPlan).toBe('PRO');
-        expect(data.aiUsage).toBe(5);
+        expect(data.aiUsage.aiUsedToday).toBe(5);
+        expect(data.aiUsage).toHaveProperty('resetAt');
 
         // ตรวจสอบหลักฐานว่าโค้ดมีการเรียกใช้ Redis จริงๆ ไม่ได้ข้ามไป DB
         expect(redis.get).toHaveBeenCalledWith(`failure:${targetId}`);
