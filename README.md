@@ -103,27 +103,35 @@ npm run test:db:setup # Reset and seed test database
 Your `.env.local` file must include the following keys to run successfully:
 ```env
 # Database & Redis
-DATABASE_URL=postgresql://user:pass@localhost:5432/failio
-REDIS_URL=redis://localhost:6379
+DATABASE_URL="postgresql://failio:failio123@localhost:9999/failio?schema=public"
+REDIS_URL="redis://localhost:6379"
 
 # Authentication (NextAuth)
 NEXTAUTH_SECRET=your_nextauth_secret
 NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+GOOGLE_CLIENT_ID="your_google_client_id"
+GOOGLE_CLIENT_SECRET="your_google_client_secret"
+FACEBOOK_CLIENT_ID="your_facebook_client_id"
+FACEBOOK_CLIENT_SECRET="your_facebook_client_secret"
+GITHUB_CLIENT_ID="your_github_client_id"
+GITHUB_CLIENT_SECRET="your_github_client_secret"
 
 # Stripe
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY="your_stripe_secret_key"
+STRIPE_WEBHOOK_SECRET="your_stripe_webhook_secret"
+STRIPE_PRO_PRICE_ID="your_stripe_pro_price_id"
 
 # AI Setup
 GOOGLE_AI_API_KEY=your_gemini_api_key
 
 # Email setup config for Nodemailer
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=your_email@example.com
-SMTP_PASS=your_email_password
+EMAIL_USER="your_email@example.com"
+EMAIL_PASS="your_email_password"
+
+# BullMQ
+CONCURRENCY_LIMIT=5
 ```
 
 ---
-<p align="center">Designed and Developed with ❤️</p>
+<p align="center">Designed and Developed with Kritsada</p>
