@@ -214,7 +214,7 @@ function NavBar() {
 
       {/* Mobile Menu Container */}
       <div
-        className={`fixed left-0 top-[61px] h-[calc(100vh-61px)] w-full overflow-y-auto bg-white dark:bg-slate-900 transition-all duration-300 ease-in-out md:hidden ${isOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
+        className={`fixed left-0 top-15.25 h-[calc(100vh-61px)] w-full overflow-y-auto bg-white dark:bg-slate-900 transition-all duration-300 ease-in-out md:hidden ${isOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
           }`}
       >
         <div className="flex flex-col gap-2 p-6">
